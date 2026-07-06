@@ -7,12 +7,16 @@ import { sortInbox } from "@/lib/ai/sort-inbox";
 import { inboxCategoryMeta, inboxCategoryOrder } from "@/lib/kairo/status";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { usePersistentState } from "@/lib/store/persist";
 import { cn, makeId } from "@/lib/utils";
 
 interface LiteItem { id: string; content: string; category: InboxCategory }
 
 export function InboxBoard({ initialItems }: { initialItems: InboxItem[] }) {
-  const [items, setItems] = React.useState<LiteItem[]>(initialItems.map((i) => ({ id: i.id, content: i.content, category: i.category })));
+  const [items, setItems] = usePersistentState<LiteItem[]>(
+    "kairo.inbox.v1",
+    initialItems.map((i) => ({ id: i.id, content: i.content, category: i.category }))
+  );
   const [input, setInput] = React.useState("");
   const [sorting, setSorting] = React.useState(false);
   const [sorted, setSorted] = React.useState(false);

@@ -6,6 +6,7 @@ import { ArrowUp, Check, Play, CalendarPlus, X, ChevronDown, Locate } from "luci
 import type { GoalWithNodes, GoalNode, NodeStatus } from "@/types";
 import { nodeStatusMeta } from "@/lib/kairo/status";
 import { parseDeadline } from "@/lib/kairo/deadline";
+import { usePersistentState } from "@/lib/store/persist";
 import { Chip } from "@/components/ui/Chip";
 import { cn, formatDuration, makeId, relativeDays } from "@/lib/utils";
 
@@ -38,7 +39,7 @@ function nextId(nodes: GoalNode[]): string | null {
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 export function LiveMap({ goals: initialGoals, initialGoalId }: { goals: GoalWithNodes[]; initialGoalId?: string }) {
-  const [goals, setGoals] = React.useState(initialGoals);
+  const [goals, setGoals] = usePersistentState<GoalWithNodes[]>("kairo.goals.v1", initialGoals);
   const [gi, setGi] = React.useState(() => {
     const idx = initialGoalId ? initialGoals.findIndex((g) => g.id === initialGoalId) : 0;
     return idx >= 0 ? idx : 0;

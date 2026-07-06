@@ -2,10 +2,21 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Check, LogOut, Zap } from "lucide-react";
+import { Check, LogOut, Zap, RotateCcw } from "lucide-react";
 import type { SessionUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "./PageHeader";
+
+function resetDemo() {
+  try {
+    Object.keys(window.localStorage)
+      .filter((k) => k.startsWith("kairo."))
+      .forEach((k) => window.localStorage.removeItem(k));
+  } catch {
+    /* ignore */
+  }
+  window.location.href = "/app/today";
+}
 
 function PillGroup<T extends string>({
   label,
@@ -93,7 +104,11 @@ export function SettingsForm({ user }: { user: SessionUser }) {
           <Link href="/" className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-5 text-sm text-muted transition-colors hover:text-ink hover:bg-white/5">
             <LogOut size={15} /> Sign out
           </Link>
+          <button onClick={resetDemo} className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-5 text-sm text-muted transition-colors hover:text-ink hover:bg-white/5">
+            <RotateCcw size={15} /> Reset demo data
+          </button>
         </div>
+        <p className="mt-3 text-[12px] text-faint">Demo edits are stored in this browser. Reset clears them.</p>
       </div>
     </div>
   );

@@ -1,15 +1,20 @@
-import { features } from "@/lib/config";
+import { generateJson, isObj, isClient, viaRoute } from "./provider";
 import { mockSortInbox } from "./mock";
 import type { SortInboxInput, SortInboxResult } from "./types";
 
-/**
- * Sort loose inbox items into must-do / high-impact / quick-win / can-wait /
- * not-worth-doing. Real LLM when configured; deterministic mock otherwise.
- */
+const SYSTEM = `You are Kairo, sorting loose inbox items.
+Return JSON: {"items":[{"id":string,"category":"must_do"|"high_impact"|"quick_win"|"can_wait"|"not_worth_doing","reason":string}],"reasoning":string}.
+Keep every input id; categorize by urgency and impact; "reason" is a short phrase. Concise.`;
+
+function valid(r: unknown): r is SortInboxResult {
+  return isObj(r) && Array.isArray(r.items);
+}
+
 export async function sortInbox(input: SortInboxInput): Promise<SortInboxResult> {
-  if (features.ai) {
-    // Integration point: classify each item with the model, require JSON
-    // matching SortInboxResult, validate, return.
+  if (isClient()) {
+    const j = await viaRoute<SortInboxResult>("/api/ai/sort-inbox", input);
+    return valid(j) ? j : mockSortInbox(input);
   }
-  return mockSortInbox(input);
+  const r = await generateJson<SortInboxResult>(SYSTEM, `Items: ${JSON.stringify(input.items)}`);
+  return valid(r) ? r : mockSortInbox(input);
 }

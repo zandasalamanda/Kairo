@@ -34,11 +34,11 @@ function PillGroup<T extends string>({
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition-all",
               o.value === value
-                ? "border-cyan/40 bg-cyan/10 text-ink"
+                ? "border-accent/40 bg-accent/10 text-ink"
                 : "border-line text-muted hover:text-ink hover:bg-white/[0.03]"
             )}
           >
-            {o.value === value && <Check size={12} className="mr-1 inline text-cyan" />}
+            {o.value === value && <Check size={12} className="mr-1 inline text-accent" />}
             {o.label}
           </button>
         ))}
@@ -56,10 +56,10 @@ export function SettingsForm({ user }: { user: SessionUser }) {
   return (
     <div className="space-y-5">
       {/* Profile */}
-      <div className="glass rounded-2xl p-6">
+      <div className="panel rounded-2xl p-6">
         <SectionLabel className="mb-4">Profile</SectionLabel>
         <div className="flex items-center gap-4">
-          <div className="grid h-14 w-14 place-items-center rounded-full bg-[linear-gradient(135deg,#2dd6e8,#9a7cff)] text-lg font-semibold text-[#04121c]">
+          <div className="grid h-14 w-14 place-items-center rounded-full border border-line bg-white/[0.06] text-lg font-semibold text-[#1b1206]">
             {user.initials}
           </div>
           <div className="min-w-0">
@@ -73,7 +73,7 @@ export function SettingsForm({ user }: { user: SessionUser }) {
       </div>
 
       {/* Preferences */}
-      <div className="glass rounded-2xl px-6 py-2">
+      <div className="panel rounded-2xl px-6 py-2">
         <div className="py-3">
           <SectionLabel>Kairo's behavior</SectionLabel>
         </div>
@@ -84,10 +84,10 @@ export function SettingsForm({ user }: { user: SessionUser }) {
       </div>
 
       {/* Account */}
-      <div className="glass rounded-2xl p-6">
+      <div className="panel rounded-2xl p-6">
         <SectionLabel className="mb-4">Account</SectionLabel>
         <div className="flex flex-wrap gap-2.5">
-          <Link href="/app/billing" className="inline-flex h-10 items-center gap-2 rounded-full border border-violet/25 bg-violet/5 px-5 text-sm font-medium text-violet transition-colors hover:bg-violet/10">
+          <Link href="/app/billing" className="inline-flex h-10 items-center gap-2 rounded-full border border-accent/25 bg-accent/5 px-5 text-sm font-medium text-accent transition-colors hover:bg-accent/10">
             <Zap size={15} /> Manage plan
           </Link>
           <Link href="/" className="inline-flex h-10 items-center gap-2 rounded-full border border-line px-5 text-sm text-muted transition-colors hover:text-ink hover:bg-white/5">

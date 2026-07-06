@@ -9,7 +9,7 @@ import type {
 
 export interface StatusMeta {
   label: string;
-  /** raw accent for SVG strokes, glows, halos */
+  /** raw value for SVG strokes, halos, dots on the map */
   hex: string;
   /** tailwind bg class for a solid status dot */
   dot: string;
@@ -19,32 +19,42 @@ export interface StatusMeta {
   chip: string;
 }
 
-// NOTE: class strings are written as literals (not built from template
-// strings) so Tailwind's scanner generates each utility.
+// Near-monochrome: only three hues carry meaning — accent (live/next),
+// sage (done / on track), warn (at risk / blocked). Everything else is grey.
+const ACCENT = "#e6b877";
+const SAGE = "#8fae9f";
+const WARN = "#d5896f";
+const GREY = "#595e69";
+
+const accent: Omit<StatusMeta, "label"> = { hex: ACCENT, dot: "bg-accent", text: "text-accent", chip: "bg-accent/12 text-accent border border-accent/25" };
+const sage: Omit<StatusMeta, "label"> = { hex: SAGE, dot: "bg-sage", text: "text-sage", chip: "bg-sage/12 text-sage border border-sage/25" };
+const warn: Omit<StatusMeta, "label"> = { hex: WARN, dot: "bg-warn", text: "text-warn", chip: "bg-warn/12 text-warn border border-warn/25" };
+const grey: Omit<StatusMeta, "label"> = { hex: GREY, dot: "bg-faint", text: "text-muted", chip: "bg-white/[0.04] text-muted border border-line" };
+const dim: Omit<StatusMeta, "label"> = { hex: GREY, dot: "bg-faint", text: "text-faint", chip: "bg-white/[0.04] text-faint border border-line" };
 
 export const nodeStatusMeta: Record<NodeStatus, StatusMeta> = {
-  not_started: { label: "Not Started", hex: "#5a6885", dot: "bg-faint", text: "text-faint", chip: "bg-white/5 text-muted border border-line" },
-  in_motion: { label: "In Motion", hex: "#35d6a4", dot: "bg-green", text: "text-green", chip: "bg-green/10 text-green border border-green/25" },
-  blocked: { label: "Blocked", hex: "#fb6b7c", dot: "bg-rose", text: "text-rose", chip: "bg-rose/10 text-rose border border-rose/25" },
-  at_risk: { label: "At Risk", hex: "#f2b44a", dot: "bg-amber", text: "text-amber", chip: "bg-amber/10 text-amber border border-amber/25" },
-  done: { label: "Done", hex: "#4c8dff", dot: "bg-blue", text: "text-blue", chip: "bg-blue/10 text-blue border border-blue/25" },
+  not_started: { label: "Not Started", ...grey },
+  in_motion: { label: "In Motion", ...accent },
+  blocked: { label: "Blocked", ...warn },
+  at_risk: { label: "At Risk", ...warn },
+  done: { label: "Done", ...sage },
 };
 
 export const blockStatusMeta: Record<BlockStatus, StatusMeta> = {
-  planned: { label: "Planned", hex: "#5a6885", dot: "bg-faint", text: "text-muted", chip: "bg-white/5 text-muted border border-line" },
-  in_progress: { label: "In Progress", hex: "#2dd6e8", dot: "bg-cyan", text: "text-cyan", chip: "bg-cyan/10 text-cyan border border-cyan/25" },
-  completed: { label: "Completed", hex: "#35d6a4", dot: "bg-green", text: "text-green", chip: "bg-green/10 text-green border border-green/25" },
-  pushed: { label: "Pushed", hex: "#f2b44a", dot: "bg-amber", text: "text-amber", chip: "bg-amber/10 text-amber border border-amber/25" },
-  skipped: { label: "Skipped", hex: "#5a6885", dot: "bg-faint", text: "text-faint", chip: "bg-white/5 text-faint border border-line" },
+  planned: { label: "Planned", ...grey },
+  in_progress: { label: "In Progress", ...accent },
+  completed: { label: "Completed", ...sage },
+  pushed: { label: "Pushed", ...warn },
+  skipped: { label: "Skipped", ...dim },
 };
 
 export const inboxCategoryMeta: Record<InboxCategory, StatusMeta> = {
-  unsorted: { label: "Unsorted", hex: "#5a6885", dot: "bg-faint", text: "text-muted", chip: "bg-white/5 text-muted border border-line" },
-  must_do: { label: "Must Do", hex: "#fb6b7c", dot: "bg-rose", text: "text-rose", chip: "bg-rose/10 text-rose border border-rose/25" },
-  high_impact: { label: "High Impact", hex: "#9a7cff", dot: "bg-violet", text: "text-violet", chip: "bg-violet/10 text-violet border border-violet/25" },
-  quick_win: { label: "Quick Win", hex: "#2dd6e8", dot: "bg-cyan", text: "text-cyan", chip: "bg-cyan/10 text-cyan border border-cyan/25" },
-  can_wait: { label: "Can Wait", hex: "#4c8dff", dot: "bg-blue", text: "text-blue", chip: "bg-blue/10 text-blue border border-blue/25" },
-  not_worth_doing: { label: "Not Worth Doing", hex: "#5a6885", dot: "bg-faint", text: "text-faint", chip: "bg-white/5 text-faint border border-line" },
+  unsorted: { label: "Unsorted", ...grey },
+  must_do: { label: "Must Do", ...warn },
+  high_impact: { label: "High Impact", ...accent },
+  quick_win: { label: "Quick Win", ...sage },
+  can_wait: { label: "Can Wait", ...grey },
+  not_worth_doing: { label: "Not Worth Doing", ...dim },
 };
 
 export const inboxCategoryOrder: InboxCategory[] = [
@@ -56,20 +66,20 @@ export const inboxCategoryOrder: InboxCategory[] = [
 ];
 
 export const energyMeta: Record<EnergyLevel, StatusMeta> = {
-  low: { label: "Low", hex: "#f2b44a", dot: "bg-amber", text: "text-amber", chip: "bg-amber/10 text-amber border border-amber/25" },
-  normal: { label: "Normal", hex: "#2dd6e8", dot: "bg-cyan", text: "text-cyan", chip: "bg-cyan/10 text-cyan border border-cyan/25" },
-  high: { label: "High", hex: "#35d6a4", dot: "bg-green", text: "text-green", chip: "bg-green/10 text-green border border-green/25" },
+  low: { label: "Low", ...warn },
+  normal: { label: "Normal", ...sage },
+  high: { label: "High", ...accent },
 };
 
 export const difficultyMeta: Record<Difficulty, StatusMeta> = {
-  light: { label: "Light", hex: "#35d6a4", dot: "bg-green", text: "text-green", chip: "bg-green/10 text-green border border-green/25" },
-  moderate: { label: "Moderate", hex: "#2dd6e8", dot: "bg-cyan", text: "text-cyan", chip: "bg-cyan/10 text-cyan border border-cyan/25" },
-  deep: { label: "Deep", hex: "#9a7cff", dot: "bg-violet", text: "text-violet", chip: "bg-violet/10 text-violet border border-violet/25" },
+  light: { label: "Light", ...sage },
+  moderate: { label: "Moderate", ...grey },
+  deep: { label: "Deep", ...accent },
 };
 
 export const goalStatusMeta: Record<GoalStatus, StatusMeta> = {
-  active: { label: "In motion", hex: "#2dd6e8", dot: "bg-cyan", text: "text-cyan", chip: "bg-cyan/10 text-cyan border border-cyan/25" },
-  paused: { label: "Paused", hex: "#f2b44a", dot: "bg-amber", text: "text-amber", chip: "bg-amber/10 text-amber border border-amber/25" },
-  done: { label: "Done", hex: "#4c8dff", dot: "bg-blue", text: "text-blue", chip: "bg-blue/10 text-blue border border-blue/25" },
-  archived: { label: "Archived", hex: "#5a6885", dot: "bg-faint", text: "text-faint", chip: "bg-white/5 text-faint border border-line" },
+  active: { label: "In motion", ...accent },
+  paused: { label: "Paused", ...warn },
+  done: { label: "Done", ...sage },
+  archived: { label: "Archived", ...dim },
 };

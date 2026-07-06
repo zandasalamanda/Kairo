@@ -16,7 +16,7 @@ export function AuthCard({ mode }: { mode: "sign-in" | "sign-up" }) {
         <Link href="/"><Logo size={30} /></Link>
       </div>
 
-      <div className="glass-strong rounded-3xl p-7">
+      <div className="panel-2 rounded-3xl p-7">
         <h1 className="text-center font-display text-2xl font-semibold text-ink">{title}</h1>
         <p className="mt-1.5 text-center text-sm text-muted">{subtitle}</p>
 
@@ -38,7 +38,7 @@ export function AuthCard({ mode }: { mode: "sign-in" | "sign-up" }) {
           <Input type="password" placeholder="Password" autoComplete={signIn ? "current-password" : "new-password"} />
           <Link
             href={dest}
-            className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(100deg,#7ce8ee,#4c8dff)] text-sm font-semibold text-[#04121c] shadow-[0_0_30px_-8px_rgba(45,214,232,0.7)] transition-all hover:brightness-105"
+            className="flex h-11 items-center justify-center gap-2 rounded-xl bg-accent text-sm font-semibold text-[#1b1206] transition-all hover:brightness-105"
           >
             {signIn ? "Sign in" : "Create account"} <ArrowRight size={16} />
           </Link>
@@ -46,7 +46,7 @@ export function AuthCard({ mode }: { mode: "sign-in" | "sign-up" }) {
 
         <p className="mt-5 text-center text-[13px] text-muted">
           {signIn ? "New to Kairo? " : "Already have an account? "}
-          <Link href={signIn ? "/sign-up" : "/sign-in"} className="text-cyan hover:underline">
+          <Link href={signIn ? "/sign-up" : "/sign-in"} className="text-accent hover:underline">
             {signIn ? "Create an account" : "Sign in"}
           </Link>
         </p>

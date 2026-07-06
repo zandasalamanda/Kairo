@@ -2,21 +2,17 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 interface SoftGlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** adds a subtle top glow accent */
-  glow?: "none" | "blue" | "cyan" | "violet";
+  /** raise contrast slightly for a more prominent surface */
+  tone?: "flat" | "raised";
+  /** the one focal treatment — a restrained accent lift. Use sparingly. */
+  focal?: boolean;
   as?: "div" | "section" | "article";
 }
 
-const glowMap = {
-  none: "",
-  blue: "before:bg-blue/60",
-  cyan: "before:bg-cyan/60",
-  violet: "before:bg-violet/60",
-} as const;
-
 export function SoftGlassCard({
   className,
-  glow = "none",
+  tone = "flat",
+  focal = false,
   as: Tag = "div",
   children,
   ...props
@@ -24,10 +20,9 @@ export function SoftGlassCard({
   return (
     <Tag
       className={cn(
-        "glass relative overflow-hidden rounded-2xl",
-        glow !== "none" &&
-          "before:absolute before:inset-x-8 before:-top-px before:h-px before:blur-[1px] before:content-['']",
-        glow !== "none" && glowMap[glow],
+        "relative overflow-hidden rounded-2xl",
+        tone === "raised" ? "panel-2" : "panel",
+        focal && "focus-accent",
         className
       )}
       {...props}

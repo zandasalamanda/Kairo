@@ -61,7 +61,7 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* Free */}
-        <div className="glass rounded-3xl p-6">
+        <div className="panel rounded-3xl p-6">
           <div className="text-sm font-semibold text-muted">Free</div>
           <div className="mt-2 font-display text-3xl font-semibold text-ink">$0</div>
           <p className="mt-1 text-[13px] text-muted">Everything you need to start.</p>
@@ -82,9 +82,9 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
         </div>
 
         {/* Pro */}
-        <div className="relative overflow-hidden rounded-3xl border border-violet/30 bg-[linear-gradient(180deg,rgba(154,124,255,0.12),rgba(76,141,255,0.05))] p-6">
-          <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-violet/20 blur-3xl" />
-          <div className="flex items-center gap-2 text-sm font-semibold text-violet">
+        <div className="relative overflow-hidden rounded-3xl border border-accent/30 bg-accent/[0.06] p-6">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
+          <div className="flex items-center gap-2 text-sm font-semibold text-accent">
             <Zap size={15} /> Pro
           </div>
           <div className="mt-2 flex items-end gap-1">
@@ -95,7 +95,7 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
           <ul className="mt-5 space-y-2.5">
             {PRO.map((f) => (
               <li key={f} className="flex items-center gap-2.5 text-[14px] text-ink">
-                <Check size={15} className="text-cyan" /> {f}
+                <Check size={15} className="text-accent" /> {f}
               </li>
             ))}
           </ul>
@@ -105,7 +105,7 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
             </Button>
           </div>
           {message && (
-            <p className={cn("mt-3 text-center text-[12px]", "text-amber")}>{message}</p>
+            <p className={cn("mt-3 text-center text-[12px]", "text-warn")}>{message}</p>
           )}
           <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-wide text-faint">Stripe · test mode</p>
         </div>

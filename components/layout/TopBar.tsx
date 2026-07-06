@@ -11,7 +11,7 @@ export function TopBar({ user, className }: { user: SessionUser; className?: str
       </Link>
       <Link
         href="/app/settings"
-        className="grid h-9 w-9 place-items-center rounded-full bg-[linear-gradient(135deg,#2dd6e8,#9a7cff)] text-[13px] font-semibold text-[#04121c]"
+        className="grid h-9 w-9 place-items-center rounded-full border border-line bg-white/[0.06] text-[13px] font-semibold text-ink"
         aria-label="Settings"
       >
         {user.initials}

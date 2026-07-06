@@ -94,7 +94,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
   return (
     <div className="space-y-6">
       {/* Builder inputs */}
-      <div className="glass rounded-2xl p-5 md:p-6">
+      <div className="panel rounded-2xl p-5 md:p-6">
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <SectionLabel className="mb-2.5">Available time</SectionLabel>
@@ -108,7 +108,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
                   step={5}
                   value={customMin}
                   onChange={(e) => setCustomMin(Number(e.target.value))}
-                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-white/10 accent-cyan"
+                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-white/10 accent-accent"
                 />
                 <span className="w-16 text-right font-mono text-sm text-ink">{formatDuration(customMin)}</span>
               </div>
@@ -157,7 +157,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
         {building ? (
           <BuildingState />
         ) : blocks.length === 0 ? (
-          <div className="glass rounded-2xl p-8 text-center text-sm text-muted">
+          <div className="panel rounded-2xl p-8 text-center text-sm text-muted">
             No blocks fit today. Add more time, raise your energy, or make a task smaller.
           </div>
         ) : (
@@ -171,11 +171,11 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
         {!building && plan && (
           <div className="mt-4 space-y-3">
             <div className="flex items-start gap-2.5 rounded-xl border border-line bg-white/[0.02] px-4 py-3 text-[13px] text-muted">
-              <RefreshCw size={14} className="mt-0.5 shrink-0 text-cyan" />
+              <RefreshCw size={14} className="mt-0.5 shrink-0 text-accent" />
               <span>{plan.explanation}</span>
             </div>
             {plan.recoveryNote && (
-              <div className="rounded-xl border border-amber/20 bg-amber/5 px-4 py-3 text-[13px] text-amber">
+              <div className="rounded-xl border border-warn/20 bg-warn/5 px-4 py-3 text-[13px] text-warn">
                 {plan.recoveryNote}
               </div>
             )}
@@ -190,7 +190,7 @@ function BuildingState() {
   return (
     <div className="space-y-3">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="glass flex items-center gap-4 rounded-2xl p-4">
+        <div key={i} className="panel flex items-center gap-4 rounded-2xl p-4">
           <div className="h-10 w-10 animate-pulse rounded-full bg-white/5" />
           <div className="flex-1 space-y-2">
             <div className="h-3 w-1/3 animate-pulse rounded bg-white/5" />

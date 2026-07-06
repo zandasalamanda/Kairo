@@ -47,7 +47,7 @@ export function OnboardingFlow() {
             Tell Kairo your goal. It will map the path and help build your day.
           </p>
 
-          <div className="glass-strong mt-8 flex items-center gap-2 rounded-2xl p-2 pl-4 text-left">
+          <div className="panel-2 mt-8 flex items-center gap-2 rounded-2xl p-2 pl-4 text-left">
             <input
               autoFocus
               value={prompt}
@@ -66,7 +66,7 @@ export function OnboardingFlow() {
               <button
                 key={c}
                 onClick={() => setPrompt(c)}
-                className="rounded-full border border-line px-3.5 py-1.5 text-[13px] text-muted transition-colors hover:border-cyan/40 hover:text-ink"
+                className="rounded-full border border-line px-3.5 py-1.5 text-[13px] text-muted transition-colors hover:border-accent/40 hover:text-ink"
               >
                 {c}
               </button>
@@ -77,9 +77,9 @@ export function OnboardingFlow() {
 
       {step === "mapping" && (
         <div className="my-auto flex flex-col items-center text-center">
-          <GoalCore size={150} className="mb-8 animate-pulse-glow" />
+          <GoalCore size={150} className="mb-8 animate-pulse-soft" />
           <p className="font-display text-xl font-medium text-ink">Mapping your goal…</p>
-          <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.2em] text-cyan/70">Kairo is drawing the path</p>
+          <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.2em] text-accent/70">Kairo is drawing the path</p>
         </div>
       )}
 
@@ -97,7 +97,7 @@ export function OnboardingFlow() {
 
           <p className="mb-5 text-[15px] leading-relaxed text-muted">{result.description}</p>
 
-          <div className="glass rounded-2xl p-4">
+          <div className="panel rounded-2xl p-4">
             <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-faint">The path · {result.nodes.length} steps</div>
             <ol className="space-y-1">
               {result.nodes.map((n, i) => {
@@ -114,8 +114,8 @@ export function OnboardingFlow() {
             </ol>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-cyan/20 bg-cyan/5 px-4 py-3">
-            <span className="font-mono text-[10px] uppercase tracking-wide text-cyan/80">First next action</span>
+          <div className="mt-4 rounded-2xl border border-accent/20 bg-accent/5 px-4 py-3">
+            <span className="font-mono text-[10px] uppercase tracking-wide text-accent/80">First next action</span>
             <p className="mt-0.5 text-[14px] text-ink">{result.firstNextAction}</p>
           </div>
 

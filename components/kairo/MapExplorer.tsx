@@ -91,7 +91,7 @@ export function MapExplorer({ initialGoals, initialGoalId }: { initialGoals: Goa
               }}
               className={cn(
                 "rounded-full border px-4 py-1.5 text-[13px] font-medium transition-all",
-                g.id === goalId ? "border-cyan/40 bg-cyan/10 text-ink" : "border-line text-muted hover:text-ink hover:bg-white/[0.03]"
+                g.id === goalId ? "border-accent/40 bg-accent/10 text-ink" : "border-line text-muted hover:text-ink hover:bg-white/[0.03]"
               )}
             >
               {g.title}
@@ -102,13 +102,13 @@ export function MapExplorer({ initialGoals, initialGoalId }: { initialGoals: Goa
 
       <div className="grid gap-5 lg:grid-cols-[1fr_330px]">
         {/* map */}
-        <div className="glass relative overflow-hidden rounded-3xl p-2 sm:p-4">
+        <div className="panel relative overflow-hidden rounded-3xl p-2 sm:p-4">
           <div className="pointer-events-none absolute inset-0 grid-veil opacity-40" />
           <LivingGoalMap goal={goal} selectedId={selectedId} onSelect={(n) => { setSelectedId(n.id); setSentToToday(null); }} className="relative max-h-[62vh]" />
         </div>
 
         {/* detail panel */}
-        <div className="glass h-fit rounded-3xl p-5">
+        <div className="panel h-fit rounded-3xl p-5">
           {selected && meta ? (
             <>
               <div className="mb-1 flex items-center justify-between gap-2">
@@ -121,32 +121,32 @@ export function MapExplorer({ initialGoals, initialGoalId }: { initialGoals: Goa
               <div className="mt-4 rounded-xl border border-line bg-white/[0.02] p-3">
                 <div className="font-mono text-[10px] uppercase tracking-wide text-faint">Next action</div>
                 <p className="mt-1 text-[13px] text-ink/90">Spend 25 min to {selected.title.toLowerCase()}.</p>
-                {selected.dueDate && <p className="mt-1.5 text-[12px] text-amber">Due {relativeDays(selected.dueDate)}</p>}
+                {selected.dueDate && <p className="mt-1.5 text-[12px] text-warn">Due {relativeDays(selected.dueDate)}</p>}
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <Button size="sm" variant="glass" onClick={() => setStatus(selected.id, "done")} className="justify-start">
-                  <Check size={14} className="text-green" /> Mark done
+                  <Check size={14} className="text-sage" /> Mark done
                 </Button>
                 <Button size="sm" variant="glass" onClick={() => setStatus(selected.id, "in_motion")} className="justify-start">
-                  <Play size={14} className="text-cyan" /> In motion
+                  <Play size={14} className="text-accent" /> In motion
                 </Button>
                 <Button size="sm" variant="glass" onClick={() => setStatus(selected.id, "blocked")} className="justify-start">
-                  <Ban size={14} className="text-rose" /> Blocked
+                  <Ban size={14} className="text-warn" /> Blocked
                 </Button>
                 <Button size="sm" variant="glass" onClick={() => patchNode(selected.id, { aiReason: "Generated next action" })} className="justify-start">
-                  <Wand2 size={14} className="text-violet" /> Next step
+                  <Wand2 size={14} className="text-accent" /> Next step
                 </Button>
               </div>
 
               <button
                 onClick={() => setSentToToday(selected.id)}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-cyan/25 bg-cyan/5 px-3 py-2.5 text-[13px] font-medium text-cyan transition-colors hover:bg-cyan/10"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/5 px-3 py-2.5 text-[13px] font-medium text-accent transition-colors hover:bg-accent/10"
               >
                 <CalendarPlus size={14} /> Send to Today
               </button>
               {sentToToday === selected.id && (
-                <p className="mt-2 text-center text-[12px] text-green">
+                <p className="mt-2 text-center text-[12px] text-sage">
                   Added to Today ·{" "}
                   <Link href="/app/today" className="underline underline-offset-2">open</Link>
                 </p>

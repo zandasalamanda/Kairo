@@ -54,7 +54,7 @@ export function InboxBoard({ initialItems }: { initialItems: InboxItem[] }) {
   return (
     <div className="space-y-6">
       {/* composer */}
-      <div className="glass rounded-2xl p-3 sm:p-4">
+      <div className="panel rounded-2xl p-3 sm:p-4">
         <div className="flex flex-col gap-2.5 sm:flex-row">
           <Input
             value={input}
@@ -72,17 +72,17 @@ export function InboxBoard({ initialItems }: { initialItems: InboxItem[] }) {
             </Button>
           </div>
         </div>
-        {reasoning && <p className="mt-3 px-1 text-[13px] text-cyan/90">{reasoning}</p>}
+        {reasoning && <p className="mt-3 px-1 text-[13px] text-accent/90">{reasoning}</p>}
       </div>
 
       {flash && (
-        <div className="animate-fade-in rounded-xl border border-green/20 bg-green/5 px-4 py-2.5 text-center text-[13px] text-green">
+        <div className="animate-fade-in rounded-xl border border-sage/20 bg-sage/5 px-4 py-2.5 text-center text-[13px] text-sage">
           {flash}
         </div>
       )}
 
       {items.length === 0 ? (
-        <div className="glass rounded-2xl">
+        <div className="panel rounded-2xl">
           <EmptyState icon={<Archive size={22} />} title="Inbox zero" description="Everything's sorted. Drop new thoughts above whenever they land." />
         </div>
       ) : (
@@ -122,7 +122,7 @@ function CategorySection({
       </div>
       <div className="space-y-2">
         {items.map((item) => (
-          <div key={item.id} className="glass group flex items-center gap-3 rounded-xl px-4 py-3">
+          <div key={item.id} className="panel group flex items-center gap-3 rounded-xl px-4 py-3">
             <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", meta.dot)} />
             <span className="min-w-0 flex-1 truncate text-[14px] text-ink/90">{item.content}</span>
             <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">

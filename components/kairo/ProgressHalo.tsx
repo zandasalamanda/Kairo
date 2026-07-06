@@ -6,7 +6,7 @@ export function ProgressHalo({
   progress,
   size = 44,
   stroke = 3,
-  hex = "#2dd6e8",
+  hex = "#e6b877",
   track = true,
   className,
   children,

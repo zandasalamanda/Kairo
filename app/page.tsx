@@ -44,7 +44,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/onboarding"
-              className="rounded-full bg-[linear-gradient(100deg,#7ce8ee,#4c8dff)] px-4 py-2 text-sm font-semibold text-[#04121c] shadow-[0_0_30px_-8px_rgba(45,214,232,0.7)] transition-all hover:brightness-105"
+              className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#1b1206] transition-all hover:brightness-105"
             >
               Start
             </Link>
@@ -55,11 +55,11 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:py-24 lg:grid-cols-2">
         <div className="animate-fade-up">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cyan/80">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan animate-pulse-glow" /> A calmer way to move forward
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-accent/80">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-soft" /> A calmer way to move forward
           </div>
           <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl">
-            <span className="text-gradient">Map the way.</span>
+            <span className="text-ink">Map the way.</span>
             <br />
             Build the day.
           </h1>
@@ -69,7 +69,7 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href="/onboarding"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-[linear-gradient(100deg,#7ce8ee,#4c8dff)] px-6 text-[15px] font-semibold text-[#04121c] shadow-[0_0_36px_-6px_rgba(45,214,232,0.7)] transition-all hover:brightness-105"
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-6 text-[15px] font-semibold text-[#1b1206] transition-all hover:brightness-105"
             >
               Start building your day <ArrowRight size={18} />
             </Link>
@@ -81,8 +81,8 @@ export default function LandingPage() {
 
         {/* Hero living map */}
         <div className="relative animate-fade-in">
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-cyan/10 blur-[100px]" />
-          <div className="glass relative overflow-hidden rounded-[28px] p-3">
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-accent/10 blur-[100px]" />
+          <div className="panel relative overflow-hidden rounded-[28px] p-3">
             <div className="pointer-events-none absolute inset-0 grid-veil opacity-40" />
             <div className="pointer-events-none relative">
               <LivingGoalMap goal={goal} />
@@ -98,14 +98,14 @@ export default function LandingPage() {
       {/* Problem / Solution */}
       <section className="mx-auto max-w-6xl px-5 py-16">
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="glass rounded-3xl p-8">
-            <SectionLabel className="mb-3 text-rose/70">The problem</SectionLabel>
+          <div className="panel rounded-3xl p-8">
+            <SectionLabel className="mb-3 text-warn/70">The problem</SectionLabel>
             <p className="font-display text-2xl font-medium leading-snug text-ink">
               Your goals are scattered. Your day is busy. Your planner doesn't know what actually matters.
             </p>
           </div>
-          <div className="glass rounded-3xl p-8">
-            <SectionLabel className="mb-3 text-cyan/70">The solution</SectionLabel>
+          <div className="panel rounded-3xl p-8">
+            <SectionLabel className="mb-3 text-accent/70">The solution</SectionLabel>
             <p className="font-display text-2xl font-medium leading-snug text-ink">
               Kairo turns goals into maps, maps into next steps, and next steps into today's plan.
             </p>
@@ -121,8 +121,8 @@ export default function LandingPage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s) => (
-            <div key={s.n} className="glass rounded-2xl p-6">
-              <div className="font-mono text-2xl font-semibold text-cyan/50">{s.n}</div>
+            <div key={s.n} className="panel rounded-2xl p-6">
+              <div className="font-mono text-2xl font-semibold text-accent/50">{s.n}</div>
               <h3 className="mt-3 font-display text-lg font-semibold text-ink">{s.title}</h3>
               <p className="mt-1.5 text-sm text-muted">{s.desc}</p>
             </div>
@@ -142,8 +142,8 @@ export default function LandingPage() {
           {FEATURES.map((f) => {
             const Icon = f.icon;
             return (
-              <div key={f.title} className="glass group rounded-2xl p-6 transition-all hover:border-line-strong">
-                <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan/20 bg-cyan/5 text-cyan transition-all group-hover:shadow-[0_0_24px_-8px_rgba(45,214,232,0.9)]">
+              <div key={f.title} className="panel group rounded-2xl p-6 transition-all hover:border-line-strong">
+                <div className="grid h-11 w-11 place-items-center rounded-xl border border-accent/20 bg-accent/5 text-accent transition-all">
                   <Icon size={20} />
                 </div>
                 <h3 className="mt-4 font-display text-lg font-semibold text-ink">{f.title}</h3>
@@ -161,17 +161,17 @@ export default function LandingPage() {
           <h2 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Start free. Upgrade when it's moving.</h2>
         </div>
         <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
-          <div className="glass rounded-3xl p-8">
+          <div className="panel rounded-3xl p-8">
             <div className="text-sm font-semibold text-muted">Free</div>
             <div className="mt-2 font-display text-4xl font-semibold text-ink">$0</div>
             <p className="mt-2 text-sm text-muted">2 active goals, daily planning, inbox, and simple review.</p>
-            <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-cyan hover:underline">
+            <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">
               Get started <ArrowRight size={15} />
             </Link>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-violet/30 bg-[linear-gradient(180deg,rgba(154,124,255,0.12),rgba(76,141,255,0.05))] p-8">
-            <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-violet/20 blur-3xl" />
-            <div className="text-sm font-semibold text-violet">Pro</div>
+          <div className="relative overflow-hidden rounded-3xl border border-accent/30 bg-accent/[0.06] p-8">
+            <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
+            <div className="text-sm font-semibold text-accent">Pro</div>
             <div className="mt-2 flex items-end gap-1">
               <span className="font-display text-4xl font-semibold text-ink">$8</span>
               <span className="mb-1.5 text-sm text-muted">/mo</span>
@@ -186,9 +186,9 @@ export default function LandingPage() {
 
       {/* Final CTA */}
       <section className="mx-auto max-w-6xl px-5 py-20">
-        <div className="glass-strong relative overflow-hidden rounded-[32px] px-8 py-16 text-center">
+        <div className="panel-2 relative overflow-hidden rounded-[32px] px-8 py-16 text-center">
           <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan/20 blur-[90px]" />
+            <div className="absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-accent/20 blur-[90px]" />
           </div>
           <h2 className="mx-auto max-w-2xl font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
             What's the best thing you can do with the time you have today?
@@ -196,7 +196,7 @@ export default function LandingPage() {
           <p className="mx-auto mt-4 max-w-md text-[15px] text-muted">Kairo answers that every morning. Map the way. Build the day.</p>
           <Link
             href="/onboarding"
-            className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-[linear-gradient(100deg,#7ce8ee,#4c8dff)] px-7 text-[15px] font-semibold text-[#04121c] shadow-[0_0_36px_-6px_rgba(45,214,232,0.7)] transition-all hover:brightness-105"
+            className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-accent px-7 text-[15px] font-semibold text-[#1b1206] transition-all hover:brightness-105"
           >
             Start building your day <ArrowRight size={18} />
           </Link>

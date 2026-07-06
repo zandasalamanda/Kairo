@@ -24,7 +24,7 @@ export function GoalCard({ goal, href }: { goal: GoalWithNodes; href?: string })
   return (
     <Link
       href={href ?? `/app/map?goal=${goal.id}`}
-      className="glass group block rounded-2xl p-5 transition-all duration-200 hover:border-line-strong hover:shadow-[0_0_50px_-24px_rgba(45,214,232,0.6)]"
+      className="panel group block rounded-2xl p-5 transition-all duration-200 hover:border-line-strong "
     >
       <div className="flex items-start gap-4">
         <ProgressHalo progress={goal.progress} size={52} hex={gMeta.hex}>
@@ -33,7 +33,7 @@ export function GoalCard({ goal, href }: { goal: GoalWithNodes; href?: string })
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <h3 className="truncate font-display text-[17px] font-semibold text-ink">{goal.title}</h3>
-            <ArrowUpRight size={18} className="mt-0.5 shrink-0 text-faint transition-colors group-hover:text-cyan" />
+            <ArrowUpRight size={18} className="mt-0.5 shrink-0 text-faint transition-colors group-hover:text-accent" />
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <StatusBadge meta={gMeta} />

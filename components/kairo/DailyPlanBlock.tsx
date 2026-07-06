@@ -37,7 +37,7 @@ function ActionButton({
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
-  tone?: "muted" | "green" | "amber";
+  tone?: "muted" | "sage" | "warn";
 }) {
   return (
     <button
@@ -45,8 +45,8 @@ function ActionButton({
       onClick={onClick}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-lg border border-line bg-white/[0.02] px-2.5 py-1.5 text-[12px] font-medium transition-colors",
-        tone === "green" && "hover:border-green/40 hover:text-green",
-        tone === "amber" && "hover:border-amber/40 hover:text-amber",
+        tone === "sage" && "hover:border-sage/40 hover:text-sage",
+        tone === "warn" && "hover:border-warn/40 hover:text-warn",
         tone === "muted" && "text-muted hover:border-line-strong hover:text-ink"
       )}
     >
@@ -66,7 +66,7 @@ export function DailyPlanBlock({ block, actions }: { block: LivePlanBlock; actio
     <div
       className={cn(
         "glass relative rounded-2xl p-4 transition-all duration-300",
-        active && "ring-1 ring-cyan/40 shadow-[0_0_44px_-18px_rgba(45,214,232,0.9)]",
+        active && "ring-1 ring-accent/40",
         (done || pushed) && "opacity-70"
       )}
     >
@@ -75,13 +75,13 @@ export function DailyPlanBlock({ block, actions }: { block: LivePlanBlock; actio
         <div className="flex w-14 shrink-0 flex-col items-center pt-0.5 text-center">
           <span className="font-mono text-[13px] font-semibold text-ink">{formatClock(block.startTime) || "—"}</span>
           <span className="mt-0.5 font-mono text-[11px] text-faint">{formatDuration(block.durationMinutes)}</span>
-          <span className={cn("mt-2 h-full w-px", active ? "bg-cyan/50" : "bg-line")} />
+          <span className={cn("mt-2 h-full w-px", active ? "bg-accent/50" : "bg-line")} />
         </div>
 
         {/* body */}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
-            <h3 className={cn("font-display text-[15px] font-semibold text-ink", done && "line-through decoration-green/60")}>
+            <h3 className={cn("font-display text-[15px] font-semibold text-ink", done && "line-through decoration-sage/60")}>
               {block.title}
             </h3>
             <StatusBadge meta={blockStatusMeta[block.status]} showDot={block.status !== "planned"} />
@@ -96,19 +96,19 @@ export function DailyPlanBlock({ block, actions }: { block: LivePlanBlock; actio
           </div>
 
           {pushed ? (
-            <p className="mt-3 rounded-lg border border-amber/20 bg-amber/5 px-3 py-2 text-[12px] text-amber">
+            <p className="mt-3 rounded-lg border border-warn/20 bg-warn/5 px-3 py-2 text-[12px] text-warn">
               Moved to later. Your timeline may slip by ~1 day unless recovered.
             </p>
           ) : done ? (
-            <p className="mt-3 text-[12px] text-green">Done — goal progress updated.</p>
+            <p className="mt-3 text-[12px] text-sage">Done — goal progress updated.</p>
           ) : (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {active ? (
-                <ActionButton tone="green" icon={<Check size={13} />} label="Complete" onClick={() => actions.onComplete(block.id)} />
+                <ActionButton tone="sage" icon={<Check size={13} />} label="Complete" onClick={() => actions.onComplete(block.id)} />
               ) : (
-                <ActionButton tone="green" icon={<Play size={13} />} label="Start" onClick={() => actions.onStart(block.id)} />
+                <ActionButton tone="sage" icon={<Play size={13} />} label="Start" onClick={() => actions.onStart(block.id)} />
               )}
-              <ActionButton tone="amber" icon={<ArrowRight size={13} />} label="Push" onClick={() => actions.onPush(block.id)} />
+              <ActionButton tone="warn" icon={<ArrowRight size={13} />} label="Push" onClick={() => actions.onPush(block.id)} />
               <ActionButton icon={<Minimize2 size={13} />} label="Smaller" onClick={() => actions.onSmaller(block.id)} />
               <ActionButton icon={<Split size={13} />} label="Split" onClick={() => actions.onSplit(block.id)} />
               <ActionButton icon={<Repeat size={13} />} label="Replace" onClick={() => actions.onReplace(block.id)} />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, Zap } from "lucide-react";
+import { Settings, ArrowUpRight } from "lucide-react";
 import { NAV } from "./nav";
 import { Logo } from "@/components/kairo/Logo";
 import { cn } from "@/lib/utils";
@@ -13,15 +13,15 @@ export function Sidebar({ user, className }: { user: SessionUser; className?: st
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-30 w-[248px] flex-col justify-between border-r border-line bg-canvas-2/60 px-4 py-6 backdrop-blur-xl",
+        "fixed inset-y-0 left-0 z-30 w-[248px] flex-col justify-between border-r border-line bg-canvas-2/70 px-4 py-6 backdrop-blur-xl",
         className
       )}
     >
       <div>
-        <Link href="/app/today" className="mb-8 flex px-2">
+        <Link href="/app/today" className="mb-9 flex px-2">
           <Logo />
         </Link>
-        <nav className="space-y-1">
+        <nav className="space-y-0.5">
           {NAV.map((item) => {
             const active = pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -30,20 +30,11 @@ export function Sidebar({ user, className }: { user: SessionUser; className?: st
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                  active ? "text-ink" : "text-muted hover:text-ink hover:bg-white/[0.03]"
+                  "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  active ? "bg-white/[0.05] text-ink" : "text-muted hover:text-ink hover:bg-white/[0.03]"
                 )}
               >
-                <span
-                  className={cn(
-                    "grid h-8 w-8 place-items-center rounded-lg border transition-all",
-                    active
-                      ? "border-cyan/40 bg-cyan/10 text-cyan shadow-[0_0_20px_-6px_rgba(45,214,232,0.8)]"
-                      : "border-line bg-white/[0.02] text-muted group-hover:text-ink"
-                  )}
-                >
-                  <Icon size={16} strokeWidth={2} />
-                </span>
+                <Icon size={17} strokeWidth={2} className={cn("shrink-0 transition-colors", active ? "text-accent" : "text-faint group-hover:text-muted")} />
                 {item.label}
               </Link>
             );
@@ -55,23 +46,23 @@ export function Sidebar({ user, className }: { user: SessionUser; className?: st
         {user.plan === "free" && (
           <Link
             href="/app/billing"
-            className="block rounded-2xl border border-violet/25 bg-[linear-gradient(180deg,rgba(154,124,255,0.14),rgba(76,141,255,0.06))] p-4 transition-all hover:border-violet/45"
+            className="group block rounded-xl border border-line bg-white/[0.02] p-4 transition-colors hover:border-line-strong"
           >
-            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Zap size={15} className="text-violet" /> Upgrade to Pro
+            <div className="flex items-center gap-1.5 text-sm font-semibold text-accent">
+              Upgrade to Pro <ArrowUpRight size={14} className="opacity-70" />
             </div>
-            <p className="mt-1 text-xs text-muted">Unlimited goals, deeper AI planning, and forecasting.</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">Unlimited goals, deeper AI planning, and forecasting.</p>
           </Link>
         )}
-        <div className="flex items-center gap-3 rounded-xl border border-line px-3 py-2.5">
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-[linear-gradient(135deg,#2dd6e8,#9a7cff)] text-[13px] font-semibold text-[#04121c]">
+        <div className="flex items-center gap-3 rounded-lg px-2 py-1.5">
+          <div className="grid h-9 w-9 place-items-center rounded-full border border-line bg-white/[0.06] text-[13px] font-semibold text-ink">
             {user.initials}
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium text-ink">{user.name}</div>
-            <div className="font-mono text-[10px] uppercase tracking-wide text-faint">{user.plan} plan</div>
+            <div className="text-[11px] capitalize text-faint">{user.plan} plan</div>
           </div>
-          <Link href="/app/settings" className="text-muted transition-colors hover:text-ink" aria-label="Settings">
+          <Link href="/app/settings" className="text-faint transition-colors hover:text-ink" aria-label="Settings">
             <Settings size={16} />
           </Link>
         </div>

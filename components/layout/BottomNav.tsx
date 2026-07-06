@@ -9,7 +9,7 @@ export function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   return (
     <nav className={cn("fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2", className)}>
-      <div className="mx-auto flex max-w-md items-center justify-around rounded-2xl border border-line bg-canvas-2/80 p-1.5 backdrop-blur-xl shadow-[0_-8px_40px_-16px_rgba(0,0,0,0.9)]">
+      <div className="mx-auto flex max-w-md items-center justify-around rounded-2xl border border-line bg-canvas-2/85 p-1.5 backdrop-blur-xl">
         {NAV.map((item) => {
           const active = pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -19,18 +19,11 @@ export function BottomNav({ className }: { className?: string }) {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-colors",
-                active ? "text-cyan" : "text-muted"
+                "flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-colors",
+                active ? "text-ink" : "text-muted"
               )}
             >
-              <span
-                className={cn(
-                  "grid h-9 w-9 place-items-center rounded-xl transition-all",
-                  active && "bg-cyan/10 shadow-[0_0_22px_-8px_rgba(45,214,232,0.9)]"
-                )}
-              >
-                <Icon size={19} strokeWidth={2} />
-              </span>
+              <Icon size={19} strokeWidth={2} className={active ? "text-accent" : ""} />
               {item.label}
             </Link>
           );

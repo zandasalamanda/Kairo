@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cn("flex gap-1.5 rounded-2xl border border-line bg-white/[0.02] p-1.5", className)}>
+    <div className={cn("flex gap-1 rounded-xl border border-line bg-white/[0.02] p-1", className)}>
       {options.map((opt) => {
         const active = opt.value === value;
         return (
@@ -30,14 +30,16 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(opt.value)}
             aria-pressed={active}
             className={cn(
-              "flex-1 rounded-xl px-3 py-2.5 text-center transition-all duration-200",
-              active
-                ? "bg-[linear-gradient(180deg,rgba(45,214,232,0.16),rgba(76,141,255,0.10))] text-ink shadow-[0_0_28px_-10px_rgba(45,214,232,0.7)] ring-1 ring-cyan/40"
-                : "text-muted hover:text-ink hover:bg-white/[0.04]"
+              "flex-1 rounded-lg px-3 py-2.5 text-center transition-colors duration-150",
+              active ? "bg-white/[0.07] text-ink" : "text-muted hover:text-ink hover:bg-white/[0.03]"
             )}
           >
             <span className="block text-sm font-medium">{opt.label}</span>
-            {opt.hint && <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-wide text-faint">{opt.hint}</span>}
+            {opt.hint && (
+              <span className={cn("mt-0.5 block font-mono text-[10px] tracking-wide", active ? "text-accent" : "text-faint")}>
+                {opt.hint}
+              </span>
+            )}
           </button>
         );
       })}

@@ -13,7 +13,7 @@ export default async function ReviewPage() {
   const review = await generateReview({ goals, recentPlan: plan });
   return (
     <PageContainer user={user}>
-      <PageHeader eyebrow="What changed" title="Where things stand" description="Kairo keeps your plan honest — what moved, what's slipping, and the one best move next." />
+      <PageHeader eyebrow="What changed" title="Where things stand" description="Kairo keeps your plan honest — what moved and what's slipping. Your next move is always in the dock." />
       <ReviewPanel review={review} />
     </PageContainer>
   );

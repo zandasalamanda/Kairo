@@ -1,11 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Check, ArrowRight, Minimize2, Split, Repeat, Play, ChevronDown } from "lucide-react";
+import { Check, ArrowRight, Minimize2, Split, Repeat, Play, ChevronDown, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
 import type { GoalWithNodes, EnergyLevel, BlockStatus, Difficulty } from "@/types";
 import { buildDailyPlan } from "@/lib/ai/build-daily-plan";
 import type { DailyPlanResult } from "@/lib/ai/types";
-import { blockStatusMeta } from "@/lib/kairo/status";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SoftGlassCard } from "@/components/ui/SoftGlassCard";
 import { Chip } from "@/components/ui/Chip";
@@ -35,6 +47,12 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
   const [plan, setPlan] = React.useState<DailyPlanResult | null>(null);
   const [blocks, setBlocks] = React.useState<LiveBlock[]>([]);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
   const build = React.useCallback(async (m: number, e: EnergyLevel) => {
     setThinking(true);
     await new Promise((r) => setTimeout(r, 520));
@@ -45,6 +63,17 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
   }, [goals]);
 
   React.useEffect(() => { void build(Number(minutes), energy); }, [minutes, energy, build]);
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (over && active.id !== over.id) {
+      setBlocks((p) => {
+        const oi = p.findIndex((b) => b.id === active.id);
+        const ni = p.findIndex((b) => b.id === over.id);
+        return oi < 0 || ni < 0 ? p : arrayMove(p, oi, ni);
+      });
+    }
+  };
 
   const update = (id: string, fn: (b: LiveBlock) => LiveBlock) => setBlocks((p) => p.map((b) => (b.id === id ? fn(b) : b)));
   const act = {
@@ -76,9 +105,9 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
 
       {/* path */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <SectionLabel>Today&apos;s path</SectionLabel>
-          <span className="text-[12px] text-muted">{thinking ? "Building…" : plan?.summary}</span>
+          <span className="truncate text-[12px] text-muted">{thinking ? "Building…" : plan?.summary}</span>
         </div>
 
         {thinking ? (
@@ -86,9 +115,17 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
         ) : blocks.length === 0 ? (
           <SoftGlassCard className="rounded-xl px-4 py-10 text-center text-sm text-muted">No blocks fit today. Add time or raise your energy.</SoftGlassCard>
         ) : (
-          <div className="space-y-2.5">
-            {blocks.map((b, i) => <PlanBlock key={b.id} order={i + 1} block={b} act={act} />)}
-          </div>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} modifiers={[restrictToVerticalAxis]}>
+            <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2.5">
+                {blocks.map((b, i) => <PlanBlock key={b.id} order={i + 1} block={b} act={act} />)}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+
+        {!thinking && blocks.length > 1 && (
+          <p className="px-1 text-[11px] text-faint">Drag the handle to reorder. Kairo sorts by momentum; you have the final say.</p>
         )}
 
         {!thinking && plan?.recoveryNote && (
@@ -100,53 +137,76 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
 }
 
 function PlanBlock({ block: b, order, act }: { block: LiveBlock; order: number; act: Record<string, (id: string) => void> }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: b.id });
   const [open, setOpen] = React.useState(false);
   const done = b.status === "completed";
   const pushed = b.status === "pushed";
-  const meta = blockStatusMeta[b.status];
+  const inProgress = b.status === "in_progress";
+  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition };
+
   return (
-    <SoftGlassCard className="rounded-xl">
-      <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-4 px-4 py-3.5 text-left">
-        <span className="flex w-9 shrink-0 flex-col items-center leading-tight">
-          <span className={cn("font-mono text-[13px]", done ? "text-faint" : "text-ink")}>{order}</span>
-          <span className="font-mono text-[11px] text-faint">{formatDuration(b.durationMinutes)}</span>
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className={cn("block truncate text-[15px]", done ? "text-faint line-through" : "text-ink")}>{b.title}</span>
-          <span className="truncate text-[12px] text-muted">{b.reason}</span>
-        </span>
-        {b.status !== "planned" && !done && <span className={cn("hidden rounded-md px-2 py-0.5 text-[11px] sm:inline", meta.chip)}>{meta.label}</span>}
-        {done ? (
-          <span className="grid h-5 w-5 shrink-0 animate-pop place-items-center rounded-full bg-sage" style={{ boxShadow: "0 0 10px #8fae9f88" }}>
-            <Check size={12} className="text-[#0d1a14]" strokeWidth={3} />
-          </span>
-        ) : (
-          <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", meta.dot)} />
+    <div ref={setNodeRef} style={style} className={cn("relative", isDragging && "z-20")}>
+      <SoftGlassCard
+        className={cn(
+          "overflow-hidden rounded-xl transition-shadow",
+          pushed && "opacity-55",
+          isDragging && "border-line-strong bg-surface-2 shadow-[0_18px_44px_-14px_rgba(0,0,0,0.85)]"
         )}
-        <ChevronDown size={16} className={cn("shrink-0 text-faint transition-transform", open && "rotate-180")} />
-      </button>
-      {open && (
-        <div className="border-t border-line px-4 py-3">
-          {pushed ? (
-            <p className="text-[12px] text-warn">Moved to later. Timeline may slip ~1 day unless recovered.</p>
-          ) : done ? (
-            <p className="text-[12px] text-sage">Done — goal progress updated.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {b.status === "in_progress" ? (
-                <Chip tone="sage" icon={<Check size={14} />} onClick={() => act.complete(b.id)}>Complete</Chip>
-              ) : (
-                <Chip tone="accent" icon={<Play size={14} />} onClick={() => act.start(b.id)}>Start</Chip>
-              )}
-              <Chip tone="sage" icon={<Check size={14} />} onClick={() => act.complete(b.id)}>Done</Chip>
-              <Chip tone="warn" icon={<ArrowRight size={14} />} onClick={() => act.push(b.id)}>Push</Chip>
-              <Chip icon={<Minimize2 size={14} />} onClick={() => act.smaller(b.id)}>Smaller</Chip>
-              <Chip icon={<Split size={14} />} onClick={() => act.split(b.id)}>Split</Chip>
-              <Chip icon={<Repeat size={14} />} onClick={() => act.replace(b.id)}>Replace</Chip>
-            </div>
-          )}
+      >
+        <div className="flex items-stretch">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label="Drag to reorder"
+            className="flex shrink-0 touch-none cursor-grab items-center px-2 text-faint transition-colors hover:text-muted active:cursor-grabbing"
+          >
+            <GripVertical size={16} />
+          </button>
+          <button onClick={() => setOpen((o) => !o)} className="flex min-w-0 flex-1 items-center gap-3 py-3.5 pr-4 text-left">
+            <span className="flex w-8 shrink-0 flex-col items-center leading-tight">
+              <span className={cn("font-mono text-[13px]", done || pushed ? "text-faint" : "text-ink")}>{order}</span>
+              <span className="font-mono text-[11px] text-faint">{formatDuration(b.durationMinutes)}</span>
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className={cn("block truncate text-[15px]", done ? "text-faint line-through" : pushed ? "text-muted" : "text-ink")}>{b.title}</span>
+              <span className="truncate text-[12px] text-muted">{b.reason}</span>
+            </span>
+            {done ? (
+              <span className="grid h-5 w-5 shrink-0 animate-pop place-items-center rounded-full bg-sage" style={{ boxShadow: "0 0 10px #8fae9f88" }}>
+                <Check size={12} className="text-[#0d1a14]" strokeWidth={3} />
+              </span>
+            ) : pushed ? (
+              <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-faint">Pushed</span>
+            ) : (
+              <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", inProgress ? "bg-accent" : "bg-faint")} />
+            )}
+            <ChevronDown size={16} className={cn("shrink-0 text-faint transition-transform", open && "rotate-180")} />
+          </button>
         </div>
-      )}
-    </SoftGlassCard>
+        {open && (
+          <div className="border-t border-line px-4 py-3">
+            {pushed ? (
+              <p className="text-[12px] text-muted">Moved to later — may slip ~1 day unless recovered.</p>
+            ) : done ? (
+              <p className="text-[12px] text-sage">Done — goal progress updated.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {inProgress ? (
+                  <Chip tone="sage" icon={<Check size={14} />} onClick={() => act.complete(b.id)}>Complete</Chip>
+                ) : (
+                  <Chip tone="accent" icon={<Play size={14} />} onClick={() => act.start(b.id)}>Start</Chip>
+                )}
+                <Chip tone="sage" icon={<Check size={14} />} onClick={() => act.complete(b.id)}>Done</Chip>
+                <Chip tone="warn" icon={<ArrowRight size={14} />} onClick={() => act.push(b.id)}>Push</Chip>
+                <Chip icon={<Minimize2 size={14} />} onClick={() => act.smaller(b.id)}>Smaller</Chip>
+                <Chip icon={<Split size={14} />} onClick={() => act.split(b.id)}>Split</Chip>
+                <Chip icon={<Repeat size={14} />} onClick={() => act.replace(b.id)}>Replace</Chip>
+              </div>
+            )}
+          </div>
+        )}
+      </SoftGlassCard>
+    </div>
   );
 }

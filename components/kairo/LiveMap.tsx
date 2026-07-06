@@ -8,9 +8,10 @@ import { nodeStatusMeta } from "@/lib/kairo/status";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { usePersistentState } from "@/lib/store/persist";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
+import { addNode, setNodeStatus, setGoalDeadline } from "@/lib/data/actions";
 import { Chip } from "@/components/ui/Chip";
 import { MicButton } from "@/components/ui/MicButton";
-import { cn, formatDuration, makeId, relativeDays } from "@/lib/utils";
+import { cn, formatDuration, newId, relativeDays } from "@/lib/utils";
 
 interface Placed {
   node: GoalNode;
@@ -40,8 +41,8 @@ function nextId(nodes: GoalNode[]): string | null {
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-export function LiveMap({ goals: initialGoals, initialGoalId }: { goals: GoalWithNodes[]; initialGoalId?: string }) {
-  const [goals, setGoals] = usePersistentState<GoalWithNodes[]>("kairo.goals.v1", initialGoals);
+export function LiveMap({ goals: initialGoals, initialGoalId, remote = false }: { goals: GoalWithNodes[]; initialGoalId?: string; remote?: boolean }) {
+  const [goals, setGoals] = usePersistentState<GoalWithNodes[]>("kairo.goals.v1", initialGoals, !remote);
   const [gi, setGi] = React.useState(() => {
     const idx = initialGoalId ? initialGoals.findIndex((g) => g.id === initialGoalId) : 0;
     return idx >= 0 ? idx : 0;
@@ -123,18 +124,23 @@ export function LiveMap({ goals: initialGoals, initialGoalId }: { goals: GoalWit
   };
 
   // ---- mutate ----
-  const patch = (id: string, p: Partial<GoalNode>) =>
-    setGoals((prev) =>
-      prev.map((g, i) => (i === gi ? { ...g, nodes: g.nodes.map((n) => (n.id === id ? { ...n, ...p } : n)) } : g))
-    );
   const setStatus = (id: string, status: NodeStatus) => {
-    const p: Partial<GoalNode> = { status };
+    setGoals((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const nodes = g.nodes.map((n) =>
+          n.id === id ? { ...n, status, ...(status === "done" ? { progress: 100 } : {}) } : n
+        );
+        const done = nodes.filter((n) => n.status === "done").length;
+        const progress = nodes.length ? Math.round((done / nodes.length) * 100) : g.progress;
+        return { ...g, nodes, progress };
+      })
+    );
     if (status === "done") {
-      p.progress = 100;
       setPoppedId(id);
       window.setTimeout(() => setPoppedId((c) => (c === id ? null : c)), 650);
     }
-    patch(id, p);
+    if (remote) void setNodeStatus({ goalId: goal.id, nodeId: id, status });
   };
 
   const showToast = (msg: string) => {
@@ -154,15 +160,17 @@ export function LiveMap({ goals: initialGoals, initialGoalId }: { goals: GoalWit
         setPrompt("");
         setGoals((prev) => prev.map((g, i) => (i === gi ? { ...g, targetDate: parsed.iso } : g)));
         showToast(`Deadline set · ${parsed.label}`);
+        if (remote) void setGoalDeadline({ goalId: goal.id, iso: parsed.iso });
         return;
       }
     }
 
     setPrompt("");
     setThinking(true);
+    const sortOrder = goal.nodes.length;
     await new Promise((r) => setTimeout(r, 780));
     const node: GoalNode = {
-      id: makeId("node"),
+      id: newId(),
       goalId: goal.id,
       parentId: null,
       title: text.replace(/\s+/g, " ").replace(/[.?!]+$/, ""),
@@ -181,6 +189,7 @@ export function LiveMap({ goals: initialGoals, initialGoalId }: { goals: GoalWit
     setGoals((prev) => prev.map((g, i) => (i === gi ? { ...g, nodes: [...g.nodes, node] } : g)));
     setNewIds((s) => new Set(s).add(node.id));
     setThinking(false);
+    if (remote) void addNode({ id: node.id, goalId: goal.id, title: node.title, estimatedMinutes: node.estimatedMinutes, sortOrder });
     // focus the freshly grown node next tick (after layout recompute)
     setTimeout(() => {
       const np = layout([...goal.nodes, node]).at(-1);

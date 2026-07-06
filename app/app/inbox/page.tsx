@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getInbox } from "@/lib/data";
+import { getInbox, isRemote } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/kairo/PageHeader";
@@ -12,7 +12,7 @@ export default async function InboxPage() {
   return (
     <PageContainer user={user}>
       <PageHeader title="Inbox" description="Capture now. Let Aether organize later." />
-      <InboxBoard initialItems={items} />
+      <InboxBoard initialItems={items} remote={isRemote} />
     </PageContainer>
   );
 }

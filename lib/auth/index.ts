@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { Plan } from "@/types";
 import { buildSeed } from "@/lib/mock/seed";
 import { features } from "@/lib/config";
+import { ensureProfile } from "@/lib/data/profile";
 
 export interface SessionUser {
   id: string;
@@ -33,11 +34,13 @@ export async function getSessionUser(): Promise<SessionUser> {
     if (!userId) redirect("/sign-in");
     const u = await currentUser();
     const name = u?.fullName || u?.firstName || u?.username || "You";
+    // Provision the Supabase profile on first sign-in and read the real plan.
+    const profile = features.supabase ? await ensureProfile() : null;
     return {
       id: userId,
       name,
       email: u?.primaryEmailAddress?.emailAddress ?? "",
-      plan: "free", // upgraded from the Supabase profile once wired
+      plan: profile?.plan ?? "free",
       initials: initialsOf(name),
     };
   }

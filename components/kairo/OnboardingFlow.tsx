@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, RotateCcw } from "lucide-react";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
+import { persistGoalFromMap } from "@/lib/data/actions";
 import type { GoalMapResult } from "@/lib/ai/types";
 import { GoalCore } from "./GoalCore";
 import { Logo } from "./Logo";
@@ -17,10 +18,11 @@ const CHIPS = ["Launch a project", "Study better", "Get organized", "Save money"
 
 type Step = "input" | "mapping" | "result";
 
-export function OnboardingFlow() {
+export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
   const [step, setStep] = React.useState<Step>("input");
   const [prompt, setPrompt] = React.useState("");
   const [result, setResult] = React.useState<GoalMapResult | null>(null);
+  const [goalId, setGoalId] = React.useState<string | null>(null);
   const speech = useSpeechInput(setPrompt);
 
   const submit = async () => {
@@ -30,12 +32,17 @@ export function OnboardingFlow() {
     await new Promise((r) => setTimeout(r, 1200));
     const res = await generateGoalMap({ prompt: p });
     setResult(res);
+    if (remote) {
+      const saved = await persistGoalFromMap({ result: res });
+      if (saved.ok && saved.id) setGoalId(saved.id);
+    }
     setStep("result");
   };
 
   const reset = () => {
     setStep("input");
     setResult(null);
+    setGoalId(null);
   };
 
   return (
@@ -124,7 +131,7 @@ export function OnboardingFlow() {
           </div>
 
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-            <Link href="/app/map" className="flex-1">
+            <Link href={goalId ? `/app/map?goal=${goalId}` : "/app/map"} className="flex-1">
               <Button variant="primary" size="lg" className="w-full">
                 Open my living map <ArrowRight size={16} />
               </Button>

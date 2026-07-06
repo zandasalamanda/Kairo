@@ -56,6 +56,19 @@ export function makeId(prefix = "id"): string {
   return `${prefix}_${time}${rand}`;
 }
 
+/**
+ * A real UUID for new persisted rows — client-generated so the optimistic id
+ * matches the Supabase primary key exactly (no reconciliation on reload).
+ */
+export function newId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  // Fallback for very old runtimes (RFC-4122-ish, non-cryptographic).
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
 /** "in 12 days" / "in 3 weeks" / "today" relative to now. */
 export function relativeDays(target?: string | null): string {
   if (!target) return "";

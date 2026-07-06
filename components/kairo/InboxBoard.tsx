@@ -10,14 +10,16 @@ import { Chip } from "@/components/ui/Chip";
 import { MicButton } from "@/components/ui/MicButton";
 import { usePersistentState } from "@/lib/store/persist";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
-import { cn, makeId } from "@/lib/utils";
+import { addInboxItem, applyInboxSort, archiveInboxItem } from "@/lib/data/actions";
+import { cn, newId } from "@/lib/utils";
 
 interface LiteItem { id: string; content: string; category: InboxCategory }
 
-export function InboxBoard({ initialItems }: { initialItems: InboxItem[] }) {
+export function InboxBoard({ initialItems, remote = false }: { initialItems: InboxItem[]; remote?: boolean }) {
   const [items, setItems] = usePersistentState<LiteItem[]>(
     "kairo.inbox.v1",
-    initialItems.map((i) => ({ id: i.id, content: i.content, category: i.category }))
+    initialItems.map((i) => ({ id: i.id, content: i.content, category: i.category })),
+    !remote
   );
   const [input, setInput] = React.useState("");
   const [sorting, setSorting] = React.useState(false);
@@ -28,8 +30,10 @@ export function InboxBoard({ initialItems }: { initialItems: InboxItem[] }) {
 
   const add = () => {
     const c = input.trim(); if (!c) return;
-    setItems((p) => [{ id: makeId("inbox"), content: c, category: "unsorted" }, ...p]);
+    const id = newId();
+    setItems((p) => [{ id, content: c, category: "unsorted" }, ...p]);
     setInput("");
+    if (remote) void addInboxItem({ id, content: c });
   };
   const sortAll = async () => {
     setSorting(true); setReasoning(null);
@@ -38,10 +42,12 @@ export function InboxBoard({ initialItems }: { initialItems: InboxItem[] }) {
     const by = new Map(res.items.map((r) => [r.id, r.category]));
     setItems((p) => p.map((i) => ({ ...i, category: by.get(i.id) ?? i.category })));
     setReasoning(res.reasoning); setSorted(true); setSorting(false);
+    if (remote) void applyInboxSort(res.items.map((r) => ({ id: r.id, category: r.category })));
   };
   const remove = (id: string, msg: string) => {
     setItems((p) => p.filter((i) => i.id !== id));
     setFlash(msg); window.setTimeout(() => setFlash((f) => (f === msg ? null : f)), 2200);
+    if (remote) void archiveInboxItem({ id });
   };
 
   const groups: { category: InboxCategory; list: LiteItem[] }[] = [

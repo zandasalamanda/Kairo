@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle } from "lucide-react";
+import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind, ResolvedResource } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
@@ -10,7 +10,8 @@ import { expandNode, askNode } from "@/lib/ai/node-assist";
 import { unblock } from "@/lib/ai/work-session";
 import { replanGoal } from "@/lib/ai/replan";
 import { viaRoute } from "@/lib/ai/provider";
-import type { Clarifier, ReplanProposal, ReplanKind } from "@/lib/ai/types";
+import type { Clarifier, ReplanProposal, ReplanKind, GoalMapResult } from "@/lib/ai/types";
+import { TEMPLATES, templateToMap, type GoalTemplate } from "@/lib/kairo/templates";
 import { clarifyGoal } from "@/lib/ai/clarify";
 import { GOAL_PALETTE, goalColorHex, goalColorIndex } from "@/lib/kairo/goal-color";
 import { goalIcon } from "@/lib/kairo/goal-icon";
@@ -216,6 +217,7 @@ export function GalaxyMap({
   const [focusNode, setFocusNode] = React.useState<GoalNode | null>(null);
   const [breakdownFor, setBreakdownFor] = React.useState<GoalNode | null>(null);
   const [breakdownText, setBreakdownText] = React.useState("");
+  const [browsingTemplates, setBrowsingTemplates] = React.useState(false);
   const [replanForId, setReplanForId] = React.useState<string | null>(null);
   const [replanLoading, setReplanLoading] = React.useState(false);
   const [proposals, setProposals] = React.useState<(ReplanProposal & { pid: string })[]>([]);
@@ -433,18 +435,19 @@ export function GalaxyMap({
     void createGoal(parts.length ? `${pend.prompt} — ${parts.join("; ")}` : pend.prompt);
   };
 
-  const createGoal = async (text: string) => {
-    const p = text.trim();
-    if (!p || mapping) return;
-    // Fly to the spot the new planet will occupy and coalesce it there.
+  // Fly to the spot the new planet will occupy and coalesce it there.
+  const beginForming = () => {
     const pos = defaultPos(goals.length);
     const scale = 0.82;
     setFormingPos(pos);
     setMapping(true);
     setAnimating(true);
     setView({ tx: -pos.x * scale, ty: -pos.y * scale, scale });
+    return pos;
+  };
 
-    const res = await generateGoalMap({ prompt: p });
+  // Persist a finished map (from generation OR a template) and drop it on the map.
+  const commitMap = async (res: GoalMapResult, pos: { x: number; y: number }) => {
     let goalId = newId();
     let nodeIds: string[] | undefined;
     if (remote) {
@@ -458,6 +461,23 @@ export function GalaxyMap({
     setFormingPos(null);
     setExpandedId(goalId);
     setSelectedNodeId(null);
+  };
+
+  const createGoal = async (text: string) => {
+    const p = text.trim();
+    if (!p || mapping) return;
+    const pos = beginForming();
+    const res = await generateGoalMap({ prompt: p });
+    await commitMap(res, pos);
+  };
+
+  // Adopt a starter template — a pre-built map, so NO AI call (instant + free).
+  const adoptTemplate = async (t: GoalTemplate) => {
+    if (mapping) return;
+    setComposing(false);
+    setBrowsingTemplates(false);
+    const pos = beginForming();
+    await commitMap(templateToMap(t, Date.now()), pos);
   };
 
   // Add several AI-generated sub-steps as branches under a node.
@@ -695,6 +715,7 @@ export function GalaxyMap({
               onSubmit={() => void startCreate(prompt)}
               speech={speech}
               empty={empty}
+              onBrowse={() => setBrowsingTemplates(true)}
               onCancel={empty ? undefined : () => { setComposing(false); setPrompt(""); }}
             />
           ) : branchFor && expanded ? (
@@ -777,6 +798,13 @@ export function GalaxyMap({
           )}
         </div>
       </div>
+
+      {browsingTemplates && (
+        <TemplateGallery
+          onPick={(t) => void adoptTemplate(t)}
+          onClose={() => setBrowsingTemplates(false)}
+        />
+      )}
 
       {focusNode && expanded && (
         <FocusOverlay
@@ -1022,14 +1050,59 @@ function NodeOrb({
 
 type Speech = ReturnType<typeof useSpeechInput>;
 
+/** Full-screen gallery of proven starter goals — one tap adopts a whole plan. */
+function TemplateGallery({ onPick, onClose }: { onPick: (t: GoalTemplate) => void; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-canvas/95 backdrop-blur-xl">
+      <button
+        onClick={onClose}
+        className="fixed right-5 top-[calc(env(safe-area-inset-top)+16px)] z-10 grid h-10 w-10 place-items-center rounded-full text-faint transition-colors hover:text-ink"
+        aria-label="Close templates"
+      >
+        <X size={18} />
+      </button>
+      <div className="mx-auto w-full max-w-3xl px-5 py-16">
+        <div className="text-center">
+          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-faint">Starter goals</span>
+          <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Pick a proven path</h2>
+          <p className="mt-1.5 text-[14px] text-muted">A full plan in one tap — steps, resources, and a finish line. Tweak anything after.</p>
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+          {TEMPLATES.map((t) => {
+            const Icon = goalIcon(t.icon);
+            return (
+              <button key={t.id} onClick={() => onPick(t)} className="panel rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: "rgba(230,184,119,0.12)" }}>
+                    <Icon size={19} className="text-accent" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate font-display text-[15px] font-semibold text-ink">{t.title}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wide text-faint">{t.category} · {t.milestones.length} milestones · ~{t.targetWeeks}w</span>
+                  </div>
+                </div>
+                <p className="mt-2.5 text-[13px] leading-relaxed text-muted">{t.blurb}</p>
+                <span className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-accent">
+                  <Plus size={13} /> Add to my map
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function NewGoalBar({
-  value, onChange, onSubmit, speech, empty, onCancel,
+  value, onChange, onSubmit, speech, empty, onBrowse, onCancel,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   speech: Speech;
   empty: boolean;
+  onBrowse: () => void;
   onCancel?: () => void;
 }) {
   return (
@@ -1062,6 +1135,11 @@ function NewGoalBar({
           <Sparkles size={16} />
         </button>
       </form>
+      <div className="mt-2.5 text-center">
+        <button onClick={onBrowse} className="inline-flex items-center gap-1.5 text-[12.5px] text-faint transition-colors hover:text-ink">
+          <LayoutGrid size={13} /> or start from a template
+        </button>
+      </div>
     </div>
   );
 }

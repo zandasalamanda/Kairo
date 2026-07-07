@@ -43,8 +43,10 @@ function resourceUrl(r: NodeResource): string {
 
 /** Deterministic galaxy slot for a goal by its index (used until dragged). */
 function defaultPos(i: number): { x: number; y: number } {
-  // Wide spacing so one goal's expanded tree never crowds another's.
-  const r = 560 + 340 * Math.sqrt(i);
+  // A tighter galaxy: only one path opens at a time, so trees may cross — the
+  // spacing just needs to keep cores well clear of each other (golden-angle
+  // placement spreads them so they never collide).
+  const r = 340 + 190 * Math.sqrt(i);
   const a = i * GOLDEN - Math.PI / 2;
   return { x: Math.cos(a) * (i === 0 ? 0 : r), y: Math.sin(a) * (i === 0 ? 0 : r) };
 }
@@ -791,7 +793,7 @@ function GoalCluster({
           <PlanetSurface hex={hex} seed={goal.id} />
           {/* the goal's icon, embossed into the planet's shine */}
           {React.createElement(goalIcon(goal.icon), {
-            size: expanded ? 54 : 46,
+            size: expanded ? 50 : 42,
             strokeWidth: 1.5,
             className: "relative",
             style: { color: "#ffffff", opacity: 0.72, filter: "drop-shadow(0 1px 2px rgba(50,34,8,0.4))" },

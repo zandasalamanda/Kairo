@@ -78,6 +78,25 @@ export interface SortInboxResult {
   reasoning: string;
 }
 
+// ---------- node assist (ask / go deeper) ----------
+export interface ExpandNodeInput {
+  goalTitle: string;
+  nodeTitle: string;
+  nodeDescription: string;
+}
+export interface ExpandNodeResult {
+  steps: { title: string; estimatedMinutes: number; aiReason: string }[];
+}
+
+export interface AskNodeInput {
+  goalTitle: string;
+  nodeTitle: string;
+  question: string;
+}
+export interface AskNodeResult {
+  answer: string;
+}
+
 // ---------- Review ----------
 export interface ReviewInput {
   goals: GoalWithNodes[];

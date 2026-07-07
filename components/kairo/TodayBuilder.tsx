@@ -21,12 +21,13 @@ import type { DailyPlanResult } from "@/lib/ai/types";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SoftGlassCard } from "@/components/ui/SoftGlassCard";
 import { Chip } from "@/components/ui/Chip";
+import { useGoalColors } from "@/lib/kairo/use-goal-colors";
 import { SectionLabel } from "./PageHeader";
 import { cn, makeId, formatDuration } from "@/lib/utils";
 
 interface LiveBlock {
   id: string; title: string; reason: string; startTime: string | null;
-  durationMinutes: number; difficulty: Difficulty; status: BlockStatus;
+  durationMinutes: number; difficulty: Difficulty; status: BlockStatus; goalId: string | null;
 }
 
 const TIME = [
@@ -46,6 +47,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
   const [thinking, setThinking] = React.useState(true);
   const [plan, setPlan] = React.useState<DailyPlanResult | null>(null);
   const [blocks, setBlocks] = React.useState<LiveBlock[]>([]);
+  const goalColor = useGoalColors();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -58,7 +60,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
     await new Promise((r) => setTimeout(r, 520));
     const res = await buildDailyPlan({ availableMinutes: m, energy: e, context: "", goals });
     setPlan(res);
-    setBlocks(res.blocks.map((b) => ({ id: makeId("blk"), status: "planned", title: b.title, reason: b.reason, startTime: b.startTime, durationMinutes: b.durationMinutes, difficulty: b.difficulty })));
+    setBlocks(res.blocks.map((b) => ({ id: makeId("blk"), status: "planned", title: b.title, reason: b.reason, startTime: b.startTime, durationMinutes: b.durationMinutes, difficulty: b.difficulty, goalId: b.goalId })));
     setThinking(false);
   }, [goals]);
 
@@ -122,7 +124,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} modifiers={[restrictToVerticalAxis]}>
             <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-2.5">
-                {blocks.map((b, i) => <PlanBlock key={b.id} order={i + 1} block={b} act={act} />)}
+                {blocks.map((b, i) => <PlanBlock key={b.id} order={i + 1} block={b} act={act} hex={b.goalId ? goalColor(b.goalId) : "#595e69"} />)}
               </div>
             </SortableContext>
           </DndContext>
@@ -140,7 +142,7 @@ export function TodayBuilder({ goals }: { goals: GoalWithNodes[] }) {
   );
 }
 
-function PlanBlock({ block: b, order, act }: { block: LiveBlock; order: number; act: Record<string, (id: string) => void> }) {
+function PlanBlock({ block: b, order, act, hex }: { block: LiveBlock; order: number; act: Record<string, (id: string) => void>; hex: string }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: b.id });
   const [open, setOpen] = React.useState(false);
   const done = b.status === "completed";
@@ -150,6 +152,8 @@ function PlanBlock({ block: b, order, act }: { block: LiveBlock; order: number; 
 
   return (
     <div ref={setNodeRef} style={style} className={cn("relative", isDragging && "z-20")}>
+      {/* goal color spine — ties this block to its goal on the map */}
+      <span aria-hidden className="pointer-events-none absolute left-0 top-2 bottom-2 z-10 w-[3px] rounded-full" style={{ background: hex, opacity: pushed || done ? 0.4 : 1 }} />
       <SoftGlassCard
         className={cn(
           "overflow-hidden rounded-xl transition-shadow",

@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Play, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus } from "lucide-react";
+import { ArrowUp, Check, Play, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, Layers, MessageCircle, Loader2 } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
+import { expandNode, askNode } from "@/lib/ai/node-assist";
+import { GOAL_PALETTE, goalColorHex, goalColorIndex } from "@/lib/kairo/goal-color";
 import { usePersistentState } from "@/lib/store/persist";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
 import {
@@ -17,30 +19,11 @@ import {
 } from "@/lib/data/actions";
 import { MicButton } from "@/components/ui/MicButton";
 import { Chip } from "@/components/ui/Chip";
-import { cn, formatDuration, newId, relativeDays } from "@/lib/utils";
-
-// One quiet, premium color per goal — a small galaxy palette. Distinct but
-// desaturated so the canvas stays calm rather than rainbow.
-const PALETTE = [
-  { name: "Gold", hex: "#e6b877" },
-  { name: "Sage", hex: "#8fae9f" },
-  { name: "Coral", hex: "#d5896f" },
-  { name: "Periwinkle", hex: "#9aa6d4" },
-  { name: "Lilac", hex: "#c39bd0" },
-  { name: "Teal", hex: "#7fb0ad" },
-  { name: "Amber", hex: "#d9a86c" },
-  { name: "Rose", hex: "#cf9ba6" },
-];
+import { cn, formatDuration, newId, relativeDays, truncate } from "@/lib/utils";
 
 const GOLDEN = 2.399963229;
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const nowISO = () => new Date().toISOString();
-
-function hashIndex(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return h % PALETTE.length;
-}
 
 /** Deterministic galaxy slot for a goal by its index (used until dragged). */
 function defaultPos(i: number): { x: number; y: number } {
@@ -170,6 +153,7 @@ export function GalaxyMap({
   const [branchFor, setBranchFor] = React.useState<string | null>(null); // node id to branch from
   const [branchText, setBranchText] = React.useState("");
   const [stepText, setStepText] = React.useState("");
+  const [assisting, setAssisting] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
 
   const speech = useSpeechInput(setPrompt);
@@ -183,7 +167,7 @@ export function GalaxyMap({
     [positions]
   );
   const hexOf = React.useCallback(
-    (id: string) => PALETTE[colorIdx[id] ?? hashIndex(id)].hex,
+    (id: string) => goalColorHex(id, colorIdx[id]),
     [colorIdx]
   );
 
@@ -326,7 +310,7 @@ export function GalaxyMap({
   };
 
   const cycleColor = (id: string) => {
-    setColorIdx((c) => ({ ...c, [id]: ((c[id] ?? hashIndex(id)) + 1) % PALETTE.length }));
+    setColorIdx((c) => ({ ...c, [id]: ((c[id] ?? goalColorIndex(id)) + 1) % GOAL_PALETTE.length }));
   };
 
   const removeGoal = (id: string) => {
@@ -358,6 +342,32 @@ export function GalaxyMap({
     setExpandedId(goalId);
     setSelectedNodeId(null);
     setTimeout(() => flyTo(goalId), 20);
+  };
+
+  // Add several AI-generated sub-steps as branches under a node.
+  const addSteps = (goalId: string, parentId: string, steps: { title: string; estimatedMinutes: number }[]) => {
+    const g = goals.find((x) => x.id === goalId);
+    if (!g) return;
+    let order = g.nodes.length;
+    const created: GoalNode[] = steps.map((s) => {
+      const id = newId();
+      if (remote) void addNode({ id, goalId, title: s.title, estimatedMinutes: s.estimatedMinutes, sortOrder: order++, parentId });
+      return {
+        id, goalId, parentId, title: s.title, description: "", status: "not_started", progress: 0,
+        priority: 3, estimatedMinutes: s.estimatedMinutes, dueDate: null, positionX: null, positionY: null,
+        aiReason: "Aether broke this down", createdAt: nowISO(), updatedAt: nowISO(),
+      };
+    });
+    setGoals((prev) => prev.map((x) => (x.id === goalId ? { ...x, nodes: [...x.nodes, ...created] } : x)));
+  };
+
+  const breakDown = async (node: GoalNode) => {
+    if (!expanded || assisting) return;
+    setAssisting(true);
+    const res = await expandNode({ goalTitle: expanded.title, nodeTitle: node.title, nodeDescription: node.description });
+    if (res.steps.length) addSteps(expanded.id, node.id, res.steps);
+    setAssisting(false);
+    showToast(`Added ${res.steps.length} step${res.steps.length === 1 ? "" : "s"} under "${truncate(node.title, 20)}"`);
   };
 
   const transform = `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`;
@@ -404,17 +414,24 @@ export function GalaxyMap({
         </div>
 
         {mapping && (
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-            <span className="block h-24 w-24 animate-ping rounded-full border border-accent/40" />
-            <p className="mt-6 font-display text-lg text-ink">Mapping your goal…</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-accent/70">Aether is drawing the path</p>
+          <div className="pointer-events-none absolute inset-0 grid place-items-center">
+            <div className="relative grid place-items-center">
+              <span className="h-24 w-24 animate-ping rounded-full border border-accent/40" />
+              <span className="absolute h-10 w-10 rounded-full" style={{ background: "radial-gradient(circle at 36% 28%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: "0 0 30px rgba(230,184,119,0.5)" }} />
+              <div className="absolute top-[calc(100%+18px)] whitespace-nowrap text-center">
+                <p className="font-display text-lg text-ink">Mapping your goal…</p>
+                <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-accent/70">Aether is drawing the path</p>
+              </div>
+            </div>
           </div>
         )}
 
         {empty && !mapping && (
-          <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 text-center">
-            <span className="mx-auto block rounded-full" style={{ width: 96, height: 96, background: "radial-gradient(circle at 36% 28%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: "0 0 60px rgba(230,184,119,0.28)", animation: "breathe 6s ease-in-out infinite" }} />
-            <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-faint">Your galaxy is empty</p>
+          <div className="pointer-events-none absolute inset-0 grid place-items-center pb-40">
+            <div className="grid place-items-center text-center">
+              <span className="rounded-full" style={{ width: 96, height: 96, background: "radial-gradient(circle at 36% 28%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: "0 0 60px rgba(230,184,119,0.28)", animation: "breathe 6s ease-in-out infinite" }} />
+              <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-faint">Your map is empty</p>
+            </div>
           </div>
         )}
       </div>
@@ -427,7 +444,7 @@ export function GalaxyMap({
             disabled={empty}
             className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-line bg-canvas/70 px-4 py-1.5 text-sm font-medium text-ink backdrop-blur-md disabled:opacity-40"
           >
-            {expanded ? expanded.title : empty ? "No goals yet" : "Your galaxy"}
+            {expanded ? truncate(expanded.title, 32) : empty ? "No goals yet" : "All goals"}
             {!empty && <ChevronDown size={14} className="text-faint" />}
           </button>
           {menu && !empty && (
@@ -499,10 +516,13 @@ export function GalaxyMap({
             <NodeSheet
               node={selectedNode}
               hex={hexOf(expanded.id)}
+              goalTitle={expanded.title}
+              breaking={assisting}
               onClose={() => setSelectedNodeId(null)}
               onDone={() => { setStatus(expanded.id, selectedNode.id, "done"); setSelectedNodeId(null); }}
               onStart={() => setStatus(expanded.id, selectedNode.id, "in_motion")}
               onBranch={() => setBranchFor(selectedNode.id)}
+              onBreakDown={() => breakDown(selectedNode)}
             />
           ) : expanded ? (
             <GoalBar
@@ -637,15 +657,15 @@ function GoalCluster({
             <span className="block text-[17px] font-bold">{Math.round(goal.progress)}%</span>
           </span>
         </span>
-        {/* label: title when expanded, or on hover */}
+        {/* label: title when expanded, or on hover — glowing text, no box */}
         {(expanded || hovered) && (
-          <span className="pointer-events-none absolute left-1/2 top-full mt-3 -translate-x-1/2 whitespace-nowrap">
-            <span className="rounded-lg border border-line bg-canvas-2/90 px-3 py-1.5 text-center backdrop-blur-md">
-              <span className="block max-w-[220px] truncate text-[13px] font-medium text-ink">{goal.title}</span>
-              <span className="mt-0.5 block font-mono text-[10px] text-faint">
-                {goal.nodes.length} step{goal.nodes.length === 1 ? "" : "s"}
-                {goal.targetDate ? ` · due ${relativeDays(goal.targetDate)}` : ""}
-              </span>
+          <span className="pointer-events-none absolute left-1/2 top-full mt-3 -translate-x-1/2 whitespace-nowrap text-center">
+            <span className="block text-[13.5px] font-semibold text-ink" style={{ textShadow: "0 1px 14px rgba(8,9,11,0.96), 0 0 5px rgba(8,9,11,0.9)" }}>
+              {truncate(goal.title, 34)}
+            </span>
+            <span className="mt-0.5 block font-mono text-[10px] text-faint" style={{ textShadow: "0 1px 12px rgba(8,9,11,0.96)" }}>
+              {goal.nodes.length} step{goal.nodes.length === 1 ? "" : "s"}
+              {goal.targetDate ? ` · due ${relativeDays(goal.targetDate)}` : ""}
             </span>
           </span>
         )}
@@ -815,15 +835,33 @@ function MiniInput({
 }
 
 function NodeSheet({
-  node, hex, onClose, onDone, onStart, onBranch,
+  node, hex, goalTitle, breaking, onClose, onDone, onStart, onBranch, onBreakDown,
 }: {
   node: GoalNode;
   hex: string;
+  goalTitle: string;
+  breaking: boolean;
   onClose: () => void;
   onDone: () => void;
   onStart: () => void;
   onBranch: () => void;
+  onBreakDown: () => void;
 }) {
+  const [asking, setAsking] = React.useState(false);
+  const [question, setQuestion] = React.useState("");
+  const [answer, setAnswer] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const ask = async () => {
+    const q = question.trim();
+    if (!q || loading) return;
+    setLoading(true);
+    setAnswer(null);
+    const res = await askNode({ goalTitle, nodeTitle: node.title, question: q });
+    setAnswer(res.answer);
+    setLoading(false);
+  };
+
   return (
     <div className="animate-sheet-up rounded-2xl border border-line bg-canvas-2/90 p-4 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-3">
@@ -832,19 +870,42 @@ function NodeSheet({
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: hex }} />
             <span className="font-mono text-[11px] text-faint">{formatDuration(node.estimatedMinutes)}</span>
           </div>
-          <h2 className="mt-1 truncate font-display text-lg font-semibold text-ink">{node.title}</h2>
+          <h2 className="mt-1 font-display text-lg font-semibold leading-snug text-ink">{node.title}</h2>
         </div>
         <button onClick={onClose} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={16} /></button>
       </div>
       {node.description && <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{node.description}</p>}
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Chip tone="sage" icon={<Check size={14} />} onClick={onDone}>Done</Chip>
         <Chip tone="accent" icon={<Play size={14} />} onClick={onStart}>Start</Chip>
+        <Chip icon={breaking ? <Loader2 size={14} className="animate-spin" /> : <Layers size={14} />} onClick={breaking ? undefined : onBreakDown}>
+          {breaking ? "Breaking down…" : "Go deeper"}
+        </Chip>
         <Chip icon={<GitBranch size={14} />} onClick={onBranch}>Add branch</Chip>
+        <Chip icon={<MessageCircle size={14} />} onClick={() => setAsking((a) => !a)}>Ask</Chip>
         <Link href="/app/today" className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink">
           <CalendarPlus size={14} /> Today
         </Link>
       </div>
+
+      {asking && (
+        <div className="mt-3 border-t border-line pt-3">
+          <form onSubmit={(e) => { e.preventDefault(); void ask(); }} className="flex items-center gap-2 rounded-xl border border-line bg-white/[0.02] p-1 pl-3.5">
+            <input
+              autoFocus
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder={`Ask about "${truncate(node.title, 24)}"…`}
+              className="h-9 flex-1 bg-transparent text-[14px] text-ink placeholder:text-faint focus:outline-none"
+            />
+            <button type="submit" disabled={!question.trim() || loading} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent text-[#1b1206] transition-opacity disabled:opacity-30" aria-label="Ask">
+              {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowUp size={16} />}
+            </button>
+          </form>
+          {answer && <p className="mt-2.5 whitespace-pre-line text-[13px] leading-relaxed text-muted">{answer}</p>}
+        </div>
+      )}
     </div>
   );
 }

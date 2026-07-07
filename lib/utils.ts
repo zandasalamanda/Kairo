@@ -69,6 +69,15 @@ export function newId(): string {
   });
 }
 
+/** Shorten to `max` chars on a word boundary, adding an ellipsis. */
+export function truncate(text: string, max = 32): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max - 1);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).trimEnd() + "…";
+}
+
 /** "in 12 days" / "in 3 weeks" / "today" relative to now. */
 export function relativeDays(target?: string | null): string {
   if (!target) return "";

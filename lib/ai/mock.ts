@@ -161,13 +161,16 @@ export function mockGoalMap(input: GoalMapInput): GoalMapResult {
   const title = cleanTitle(input.prompt);
   const tpl = pickTemplate(input.prompt);
 
-  // Flatten the phase/sub-step tree depth-first, recording each node's parent
-  // index so the map can draw the branches.
+  // Flatten depth-first into a chronological SPINE: each milestone chains off
+  // the previous one (parentIndex = previous milestone), and its sub-steps hang
+  // off it. Depth = time, so nothing sequential ends up as a sibling at the root.
   const flat: { title: string; est: number; reason: string; parentIndex: number | null }[] = [];
+  let prevPhase: number | null = null;
   tpl.nodes.forEach((phase) => {
-    const parentIndex = flat.length;
-    flat.push({ title: phase.title, est: phase.est, reason: phase.reason, parentIndex: null });
-    (phase.sub ?? []).forEach((c) => flat.push({ title: c.title, est: c.est, reason: c.reason, parentIndex }));
+    const phaseIndex = flat.length;
+    flat.push({ title: phase.title, est: phase.est, reason: phase.reason, parentIndex: prevPhase });
+    (phase.sub ?? []).forEach((c) => flat.push({ title: c.title, est: c.est, reason: c.reason, parentIndex: phaseIndex }));
+    prevPhase = phaseIndex;
   });
 
   const nodes: GeneratedNode[] = flat.map((n, i) => ({

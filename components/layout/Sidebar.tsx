@@ -8,11 +8,14 @@ import { NAV } from "./nav";
 import { Logo } from "@/components/kairo/Logo";
 import { cn } from "@/lib/utils";
 import { clerkPublic } from "@/lib/config";
+import { useGoalColors } from "@/lib/kairo/use-goal-colors";
 import type { SessionUser } from "@/lib/auth";
 import type { NextMove } from "@/lib/kairo/next-move";
 
 export function Sidebar({ user, nextMove, className }: { user: SessionUser; nextMove: NextMove | null; className?: string }) {
   const pathname = usePathname();
+  const goalColor = useGoalColors();
+  const moveHex = nextMove ? goalColor(nextMove.goalId) : "#e6b877";
   return (
     <aside
       className={cn(
@@ -47,11 +50,12 @@ export function Sidebar({ user, nextMove, className }: { user: SessionUser; next
         {nextMove && (
           <Link
             href={`/app/map?goal=${nextMove.goalId}`}
-            className="mt-7 block rounded-xl border border-accent/25 bg-accent/[0.06] px-3.5 py-3 transition-colors hover:border-accent/40 hover:bg-accent/10"
+            className="mt-7 block rounded-xl border px-3.5 py-3 transition-colors"
+            style={{ borderColor: `${moveHex}40`, background: `${moveHex}12` }}
           >
             <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ boxShadow: "0 0 8px #e6b877" }} />
-              <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-accent/80">Next move</span>
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: moveHex, boxShadow: `0 0 8px ${moveHex}` }} />
+              <span className="text-[10px] font-medium uppercase tracking-[0.16em]" style={{ color: moveHex }}>Next move</span>
             </div>
             <p className="mt-1.5 truncate text-[13.5px] font-medium text-ink">{nextMove.title}</p>
           </Link>

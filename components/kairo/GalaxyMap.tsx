@@ -19,6 +19,7 @@ import {
   setNodeStatus,
   setGoalDeadline,
   setGoalNotes,
+  logFocusSession,
   deleteGoal,
 } from "@/lib/data/actions";
 import { MicButton } from "@/components/ui/MicButton";
@@ -728,8 +729,9 @@ export function GalaxyMap({
           nodeDescription={focusNode.description}
           context={expanded.notes.trim() || undefined}
           hex={hexOf(expanded.id)}
-          onComplete={() => {
+          onComplete={(mins) => {
             setStatus(expanded.id, focusNode.id, "done");
+            if (remote) void logFocusSession({ goalId: expanded.id, nodeId: focusNode.id, minutes: mins });
             setFocusNode(null);
             setSelectedNodeId(null);
             showToast("Nice — step complete");

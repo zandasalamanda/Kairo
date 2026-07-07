@@ -180,6 +180,27 @@ export async function setGoalNotes(input: { goalId: string; notes: string }): Pr
   return { ok: true, id: input.goalId };
 }
 
+/** Log a completed focus session on a step (powers momentum + focus stats). */
+export async function logFocusSession(input: {
+  goalId: string;
+  nodeId: string;
+  minutes: number;
+}): Promise<Result> {
+  if (!isRemote) return NO_OP;
+  const scoped = await getScopedClient();
+  const profile = await ensureProfile();
+  if (!scoped || !profile) return NO_OP;
+  const { error } = await scoped.supabase.from("focus_sessions").insert({
+    user_id: profile.id,
+    goal_id: input.goalId,
+    node_id: input.nodeId,
+    minutes: Math.min(600, Math.max(1, Math.round(input.minutes || 1))),
+  });
+  if (error) return NO_OP;
+  revalidatePath("/app/review");
+  return { ok: true };
+}
+
 /** Set a goal's target date (from a plain-English deadline). */
 export async function setGoalDeadline(input: { goalId: string; iso: string }): Promise<Result> {
   if (!isRemote) return NO_OP;

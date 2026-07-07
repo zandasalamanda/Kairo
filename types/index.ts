@@ -169,6 +169,18 @@ export interface AiEvent {
   createdAt: string;
 }
 
+/** Momentum + focus-time rollup shown in Review (computed from focus_sessions). */
+export interface FocusStats {
+  /** consecutive days (up to today) with at least one focus session */
+  streakDays: number;
+  weekSessions: number;
+  weekMinutes: number;
+  totalSessions: number;
+  totalMinutes: number;
+  /** focus time per goal, most-focused first */
+  perGoal: { goalId: string; minutes: number; sessions: number }[];
+}
+
 // ---- Derived view models used by the UI ----
 
 export interface GoalWithNodes extends Goal {

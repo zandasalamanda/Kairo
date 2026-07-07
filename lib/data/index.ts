@@ -4,7 +4,8 @@ import { features } from "@/lib/config";
 import { getScopedClient } from "@/lib/supabase/scoped";
 import { ensureProfile } from "./profile";
 import { rowToGoal, rowToNode, rowToInbox, type GoalRow, type NodeRow, type InboxRow } from "./mappers";
-import type { GoalWithNodes, GoalNode, InboxItem, UserProfile, DailyPlanWithBlocks } from "@/types";
+import { computeFocusStats, type FocusSessionRow } from "./focus-stats";
+import type { GoalWithNodes, GoalNode, InboxItem, UserProfile, DailyPlanWithBlocks, FocusStats } from "@/types";
 
 // Data-access seam. In demo mode (no Supabase + Clerk) these serve seeded data
 // so the app is fully explorable with zero keys. When both are configured,
@@ -87,3 +88,20 @@ export async function getTodayPlan(): Promise<DailyPlanWithBlocks | null> {
   // TodayBuilder), so there's nothing persisted to read.
   return null;
 }
+
+/** Momentum + focus-time rollup for Review, computed from the user's focus sessions. */
+export const getFocusStats = cache(async (): Promise<FocusStats> => {
+  const empty: FocusStats = { streakDays: 0, weekSessions: 0, weekMinutes: 0, totalSessions: 0, totalMinutes: 0, perGoal: [] };
+  if (!isRemote) return empty;
+  const scoped = await getScopedClient();
+  const profile = await ensureProfile();
+  if (!scoped || !profile) return empty;
+
+  const res = await scoped.supabase
+    .from("focus_sessions")
+    .select("goal_id, minutes, created_at")
+    .eq("user_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(2000);
+  return computeFocusStats((res.data ?? []) as FocusSessionRow[], Date.now());
+});

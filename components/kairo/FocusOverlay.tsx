@@ -30,7 +30,8 @@ export function FocusOverlay({
   nodeDescription: string;
   context?: string;
   hex: string;
-  onComplete: () => void;
+  /** called with the minutes actually spent in focus */
+  onComplete: (minutes: number) => void;
   onClose: () => void;
   onSaveArtifact: (title: string, content: string) => void;
 }) {
@@ -109,6 +110,7 @@ export function FocusOverlay({
   const saveDraft = () => { if (draft) { onSaveArtifact(draft.title, draftBody); setSaved(true); } };
 
   const total = minutes * 60;
+  const complete = () => onComplete(Math.max(1, Math.round((total - left) / 60)));
   const pct = total ? 1 - left / total : 0;
   const mm = String(Math.floor(left / 60)).padStart(2, "0");
   const ss = String(left % 60).padStart(2, "0");
@@ -171,7 +173,7 @@ export function FocusOverlay({
 
           <div className="flex items-center gap-3">
             {done ? (
-              <button onClick={onComplete} className="raised-gold inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[15px] font-medium">
+              <button onClick={complete} className="raised-gold inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[15px] font-medium">
                 <Check size={18} /> Mark complete
               </button>
             ) : (
@@ -179,7 +181,7 @@ export function FocusOverlay({
                 <button onClick={() => setRunning((r) => !r)} className="raised-gold inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[15px] font-medium">
                   {running ? <><Pause size={18} /> Pause</> : <><Play size={18} /> {left < total ? "Resume" : "Start"}</>}
                 </button>
-                <button onClick={onComplete} className="raised-btn inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[14px] text-sage">
+                <button onClick={complete} className="raised-btn inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[14px] text-sage">
                   <Check size={16} /> Done
                 </button>
               </>

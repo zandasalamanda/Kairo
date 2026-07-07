@@ -16,7 +16,7 @@ STEP TITLES are a concrete FIRST ACTION they can start now — "Draft the 3 core
 
 RESOURCES — for each SUB-STEP where a specific piece of external content would genuinely help them DO it (learning something, a technique, a drill, a workout), add "resource": {"kind","label","query"}. "kind": "watch" for a video/tutorial, "practice" for a drill/workout/exercise routine, "read" for an article/guide. "label" is a short human name (≤5 words). "query" is the exact phrase someone would search (specific to the goal, e.g. "winger agility ladder drills soccer"). Set "resource": null for steps where no external content helps (e.g. "email the designer"). Never invent URLs — only a search query.
 
-CLARIFIERS — return 1-2 SHORT questions whose answers would most sharpen THIS plan, each with 2-4 quick options. E.g. {"question":"Deadline?","options":["2 weeks","1 month","3 months","No rush"]} and {"question":"Your level?","options":["Beginner","Some","Advanced"]}. Make them specific to the goal; question ≤4 words, each option ≤3 words.
+CLARIFIERS — return AT MOST 2 short questions, and ONLY ones whose answer would MEANINGFULLY change the plan. Skip anything already implied by the goal; one great question beats two weak ones; if the goal is already specific, return an empty array. Each has 2-4 quick options. E.g. {"question":"Deadline?","options":["2 weeks","1 month","3 months","No rush"]} and {"question":"Your level?","options":["Beginner","Some","Advanced"]}. Question ≤4 words, each option ≤3 words.
 
 nodes[0] is the first milestone with status "in_motion"; all others "not_started". priority ascends along the spine. suggestedTargetDate is after today; resolve any named deadline. Be detailed and direct — no motivation-speak.`;
 

@@ -364,7 +364,7 @@ export function GalaxyMap({
     showToast("Goal removed");
   };
 
-  const createGoal = async (text: string) => {
+  const createGoal = async (text: string, isRefinement = false) => {
     const p = text.trim();
     if (!p || mapping) return;
     setMapping(true);
@@ -390,19 +390,24 @@ export function GalaxyMap({
     const scale = 0.82;
     setAnimating(true);
     setView({ tx: -pos.x * scale, ty: -pos.y * scale, scale });
-    if (res.clarifiers && res.clarifiers.length > 0) {
+    // Only offer clarifiers on the FIRST plan for a goal — a refined plan must
+    // not spawn a new round of questions (that's an endless, token-burning loop).
+    if (!isRefinement && res.clarifiers && res.clarifiers.length > 0) {
       setRefine({ goalId, prompt: p, clarifiers: res.clarifiers });
     }
   };
 
-  // Answer a clarifier → replace the just-made goal with a sharpened one.
-  const refineGoal = (question: string, answer: string) => {
+  // Apply the staged clarifier answers (+ optional free text) in ONE regen.
+  const applyRefinements = (answers: Record<string, string>, extra: string) => {
     const r = refine;
     if (!r) return;
+    const parts = Object.entries(answers).map(([q, a]) => `${q.replace(/\?$/, "")}: ${a}`);
+    if (extra.trim()) parts.push(extra.trim());
     setRefine(null);
+    if (parts.length === 0) return;
     setGoals((prev) => prev.filter((g) => g.id !== r.goalId));
     if (remote) void deleteGoal({ goalId: r.goalId });
-    void createGoal(`${r.prompt} — ${question}: ${answer}`);
+    void createGoal(`${r.prompt} — ${parts.join("; ")}`, true);
   };
 
   // Add several AI-generated sub-steps as branches under a node.
@@ -555,7 +560,7 @@ export function GalaxyMap({
           )}
 
           {refine && expandedId === refine.goalId && !mapping && !composing && !selectedNode && !branchFor && (
-            <ClarifierBar clarifiers={refine.clarifiers} onPick={refineGoal} onClose={() => setRefine(null)} />
+            <ClarifierBar clarifiers={refine.clarifiers} onApply={applyRefinements} onClose={() => setRefine(null)} />
           )}
 
           {/* new-goal composer (also the empty-state entry) */}
@@ -919,30 +924,57 @@ function MiniInput({
   );
 }
 
-function ClarifierBar({ clarifiers, onPick, onClose }: { clarifiers: Clarifier[]; onPick: (q: string, a: string) => void; onClose: () => void }) {
-  const [open, setOpen] = React.useState<number | null>(clarifiers.length === 1 ? 0 : null);
+function ClarifierBar({ clarifiers, onApply, onClose }: { clarifiers: Clarifier[]; onApply: (answers: Record<string, string>, extra: string) => void; onClose: () => void }) {
+  // Answers are staged locally — nothing regenerates until "Update plan", so a
+  // whole round of questions costs at most ONE extra AI call.
+  const [answers, setAnswers] = React.useState<Record<string, string>>({});
+  const [showMore, setShowMore] = React.useState(false);
+  const [extra, setExtra] = React.useState("");
+  const pick = (q: string, o: string) => setAnswers((a) => ({ ...a, [q]: a[q] === o ? "" : o }));
+  const dirty = Object.values(answers).some(Boolean) || extra.trim().length > 0;
+
   return (
-    <div className="chrome mb-2 animate-sheet-up rounded-2xl p-2.5">
-      <div className="mb-0.5 flex items-center gap-2 px-1">
+    <div className="chrome mb-2 animate-sheet-up rounded-2xl p-3">
+      <div className="mb-2 flex items-center gap-2">
         <Sparkles size={13} className="text-accent" />
-        <span className="flex-1 text-[12px] text-muted">Answer to sharpen this plan</span>
+        <span className="flex-1 text-[12px] text-muted">Sharpen this plan <span className="text-faint">· optional</span></span>
         <button onClick={onClose} className="grid h-6 w-6 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Dismiss"><X size={13} /></button>
       </div>
-      {clarifiers.map((c, qi) => (
-        <div key={qi} className="px-1">
-          <button onClick={() => setOpen((o) => (o === qi ? null : qi))} className="flex w-full items-center gap-1.5 py-1.5 text-left text-[13px] text-ink">
-            <ChevronDown size={13} className={cn("shrink-0 text-faint transition-transform", open === qi && "rotate-180")} />
-            {c.question}
-          </button>
-          {open === qi && (
-            <div className="flex flex-wrap gap-1.5 pb-1.5 pl-5">
+
+      <div className="space-y-2.5">
+        {clarifiers.map((c, qi) => (
+          <div key={qi}>
+            <div className="mb-1.5 text-[12px] text-ink/80">{c.question}</div>
+            <div className="flex flex-wrap gap-1.5">
               {c.options.map((o) => (
-                <Chip key={o} tone="accent" onClick={() => onPick(c.question, o)}>{o}</Chip>
+                <Chip key={o} tone="accent" active={answers[c.question] === o} onClick={() => pick(c.question, o)}>{o}</Chip>
               ))}
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        ))}
+
+        {/* Tell me more — free-text refinement (a future Pro capability). */}
+        {showMore ? (
+          <textarea
+            autoFocus
+            value={extra}
+            onChange={(e) => setExtra(e.target.value)}
+            placeholder="Anything else? Your level, constraints, what you already have…"
+            className="inset-well min-h-[62px] w-full resize-none rounded-xl px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint focus-visible:outline-none"
+          />
+        ) : (
+          <button onClick={() => setShowMore(true)} className="inline-flex items-center gap-1.5 text-[12px] text-muted transition-colors hover:text-ink">
+            <Plus size={13} /> Tell me more
+          </button>
+        )}
+      </div>
+
+      <div className="mt-3 flex items-center justify-end gap-2">
+        <button onClick={onClose} className="raised-btn rounded-lg px-3.5 py-1.5 text-[13px] text-muted hover:text-ink">Keep as is</button>
+        <button onClick={() => onApply(answers, extra)} disabled={!dirty} className="raised-gold inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] disabled:opacity-40">
+          <Sparkles size={13} /> Update plan
+        </button>
+      </div>
     </div>
   );
 }

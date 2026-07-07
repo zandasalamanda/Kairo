@@ -3,8 +3,7 @@ import { LegalPage, LegalSection } from "@/components/kairo/LegalPage";
 
 export const metadata: Metadata = { title: "Privacy · Aether" };
 
-// TODO(before launch): set this to your real support address.
-const CONTACT = "hello@aether.app";
+const CONTACT = "zander.leon@gmail.com";
 
 export default function PrivacyPage() {
   return (

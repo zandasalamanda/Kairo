@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { expandNode } from "@/lib/ai/node-assist";
-import { requireUser, clampText } from "@/lib/ai/guard";
+import { guardAi, clampText } from "@/lib/ai/guard";
 
 export async function POST(req: Request) {
-  const denied = await requireUser();
+  const denied = await guardAi();
   if (denied) return denied;
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const result = await expandNode({

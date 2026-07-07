@@ -74,6 +74,8 @@ export interface Goal {
   targetDate: string | null;
   /** AI-chosen icon key from GOAL_ICON_KEYS (null → default). */
   icon: string | null;
+  /** freeform notebook context the user writes on this goal. */
+  notes: string;
   createdAt: string;
   updatedAt: string;
   archivedAt: string | null;

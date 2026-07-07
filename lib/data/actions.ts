@@ -167,6 +167,19 @@ export async function deleteGoal(input: { goalId: string }): Promise<Result> {
   return { ok: true, id: input.goalId };
 }
 
+/** Save a goal's notebook text. */
+export async function setGoalNotes(input: { goalId: string; notes: string }): Promise<Result> {
+  if (!isRemote) return NO_OP;
+  const scoped = await getScopedClient();
+  if (!scoped) return NO_OP;
+  const { error } = await scoped.supabase
+    .from("goals")
+    .update({ notes: input.notes.slice(0, 20000) })
+    .eq("id", input.goalId);
+  if (error) return NO_OP;
+  return { ok: true, id: input.goalId };
+}
+
 /** Set a goal's target date (from a plain-English deadline). */
 export async function setGoalDeadline(input: { goalId: string; iso: string }): Promise<Result> {
   if (!isRemote) return NO_OP;

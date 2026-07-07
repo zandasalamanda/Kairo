@@ -1,4 +1,4 @@
-import { Sunrise, Waypoints, Inbox, Activity, type LucideIcon } from "lucide-react";
+import { Waypoints, Sunrise, NotebookText, Activity, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -7,8 +7,8 @@ export interface NavItem {
 }
 
 export const NAV: NavItem[] = [
-  { href: "/app/today", label: "Today", icon: Sunrise },
   { href: "/app/map", label: "Map", icon: Waypoints },
-  { href: "/app/inbox", label: "Inbox", icon: Inbox },
+  { href: "/app/today", label: "Today", icon: Sunrise },
+  { href: "/app/notebook", label: "Notebook", icon: NotebookText },
   { href: "/app/review", label: "Review", icon: Activity },
 ];

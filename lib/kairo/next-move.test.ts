@@ -10,7 +10,7 @@ const nd = (over: Partial<GoalNode>): GoalNode => ({
 
 const gl = (over: Partial<GoalWithNodes>): GoalWithNodes => ({
   id: "g", userId: "u", title: "Goal", description: "", status: "active", progress: 0,
-  targetDate: null, icon: null, createdAt: "", updatedAt: "", archivedAt: null, nodes: [], ...over,
+  targetDate: null, icon: null, notes: "", createdAt: "", updatedAt: "", archivedAt: null, nodes: [], ...over,
 });
 
 describe("computeNextMove", () => {

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink } from "lucide-react";
+import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
@@ -161,6 +161,7 @@ function toLocalGoal(goalId: string, res: Awaited<ReturnType<typeof generateGoal
     progress: 0,
     targetDate: res.suggestedTargetDate ?? null,
     icon: res.icon ?? null,
+    notes: "",
     createdAt: nowISO(),
     updatedAt: nowISO(),
     archivedAt: null,
@@ -470,11 +471,12 @@ export function GalaxyMap({
     setBreakdownFor(null);
     setBreakdownText("");
     setAssisting(true);
+    const ctx = [context.trim(), expanded.notes.trim()].filter(Boolean).join(" · ").slice(0, 600) || undefined;
     const res = await expandNode({
       goalTitle: expanded.title,
       nodeTitle: node.title,
       nodeDescription: node.description,
-      context: context.trim() || undefined,
+      context: ctx,
     });
     if (res.steps.length) addSteps(expanded.id, node.id, res.steps);
     setAssisting(false);
@@ -660,6 +662,7 @@ export function GalaxyMap({
               node={selectedNode}
               hex={hexOf(expanded.id)}
               goalTitle={expanded.title}
+              goalNotes={expanded.notes}
               breaking={assisting}
               onClose={() => setSelectedNodeId(null)}
               onDone={() => { setStatus(expanded.id, selectedNode.id, "done"); setSelectedNodeId(null); }}
@@ -1012,6 +1015,7 @@ function GoalBar({
           <div className="mb-2 flex items-center gap-2 px-1.5">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: hex, boxShadow: `0 0 8px ${hex}` }} />
             <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{goal.title}</span>
+            <Link href={`/app/notebook?goal=${goal.id}`} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Notes"><NotebookPen size={15} /></Link>
             <button onClick={onColor} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Change color"><Palette size={15} /></button>
             <button onClick={() => setArmed(true)} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-warn" aria-label="Delete goal"><Trash2 size={15} /></button>
             <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={15} /></button>
@@ -1106,11 +1110,12 @@ function PreGenClarifier({ clarifiers, onCreate, onCancel }: { clarifiers: Clari
 }
 
 function NodeSheet({
-  node, hex, goalTitle, breaking, onClose, onDone, onFocus, onBranch, onBreakDown,
+  node, hex, goalTitle, goalNotes, breaking, onClose, onDone, onFocus, onBranch, onBreakDown,
 }: {
   node: GoalNode;
   hex: string;
   goalTitle: string;
+  goalNotes: string;
   breaking: boolean;
   onClose: () => void;
   onDone: () => void;
@@ -1129,7 +1134,7 @@ function NodeSheet({
     if (!q || loading) return;
     setLoading(true);
     setAnswer(null);
-    const res = await askNode({ goalTitle, nodeTitle: node.title, question: q });
+    const res = await askNode({ goalTitle, nodeTitle: node.title, question: q, context: goalNotes.trim() || undefined });
     setAnswer(res.answer);
     setLoading(false);
   };

@@ -60,7 +60,7 @@ export async function askNode(input: AskNodeInput): Promise<AskNodeResult> {
   }
   const r = await generateJson<AskNodeResult>(
     ASK_SYSTEM,
-    `Goal: ${input.goalTitle}\nStep: ${input.nodeTitle}\nQuestion: ${input.question}`
+    `Goal: ${input.goalTitle}\nStep: ${input.nodeTitle}${input.context ? `\nWhat they've told you: ${input.context}` : ""}\nQuestion: ${input.question}`
   );
   return validAsk(r) ? r : { answer: ASK_FALLBACK };
 }

@@ -106,6 +106,8 @@ export interface AskNodeInput {
   goalTitle: string;
   nodeTitle: string;
   question: string;
+  /** the goal's notebook context, so answers use what the user has told Aether */
+  context?: string;
 }
 export interface AskNodeResult {
   answer: string;

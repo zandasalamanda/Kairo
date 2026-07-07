@@ -135,7 +135,7 @@ export default function LandingPage() {
         <div className="mb-10">
           <SectionLabel className="mb-3">Everything in one calm surface</SectionLabel>
           <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-            A command center for getting locked in — without the overwhelm.
+            Everything you need to move forward, and nothing you don't.
           </h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -208,10 +208,12 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row">
           <Logo size={22} />
           <p className="font-mono text-[12px] text-faint">Map the way. Build the day.</p>
-          <div className="flex gap-5 text-sm text-muted">
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted">
             <Link href="/sign-in" className="hover:text-ink">Sign in</Link>
             <a href="#features" className="hover:text-ink">Features</a>
             <a href="#pricing" className="hover:text-ink">Pricing</a>
+            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/terms" className="hover:text-ink">Terms</Link>
           </div>
         </div>
       </footer>

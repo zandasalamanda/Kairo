@@ -195,7 +195,7 @@ function PlanBlock({ block: b, order, act, hex }: { block: LiveBlock; order: num
         {open && (
           <div className="border-t border-line px-4 py-3">
             {pushed ? (
-              <p className="text-[12px] text-muted">Moved to later — may slip ~1 day unless recovered.</p>
+              <p className="text-[12px] text-muted">Moved to later. Rebuild today's plan to keep this goal on track.</p>
             ) : done ? (
               <p className="text-[12px] text-sage">Done — goal progress updated.</p>
             ) : (

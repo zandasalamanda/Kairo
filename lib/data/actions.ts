@@ -132,6 +132,26 @@ export async function setNodeStatus(input: {
   return { ok: true, id: input.nodeId };
 }
 
+/** Permanently delete the user's data (Supabase rows cascade) and Clerk account. */
+export async function deleteAccount(): Promise<Result> {
+  if (!isRemote) return NO_OP;
+  const scoped = await getScopedClient();
+  const profile = await ensureProfile();
+  if (!scoped || !profile) return NO_OP;
+  await scoped.supabase.from("users_profile").delete().eq("id", profile.id);
+  const { auth, clerkClient } = await import("@clerk/nextjs/server");
+  const { userId } = await auth();
+  if (userId) {
+    try {
+      const client = await clerkClient();
+      await client.users.deleteUser(userId);
+    } catch {
+      /* best effort — the data rows are already gone */
+    }
+  }
+  return { ok: true };
+}
+
 /** Delete a goal and everything under it (nodes cascade via FK). */
 export async function deleteGoal(input: { goalId: string }): Promise<Result> {
   if (!isRemote) return NO_OP;

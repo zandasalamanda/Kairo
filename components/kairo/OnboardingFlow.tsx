@@ -68,7 +68,7 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
             />
             {speech.supported && <MicButton listening={speech.listening} onClick={() => speech.toggle(prompt)} />}
             <Button variant="primary" onClick={submit} disabled={!prompt.trim()}>
-              Map My Goal <ArrowRight size={16} />
+              Map my goal <ArrowRight size={16} />
             </Button>
           </div>
 
@@ -133,7 +133,7 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
             <Link href={goalId ? `/app/map?goal=${goalId}` : "/app/map"} className="flex-1">
               <Button variant="primary" size="lg" className="w-full">
-                Open my living map <ArrowRight size={16} />
+                Open my map <ArrowRight size={16} />
               </Button>
             </Link>
             <Button variant="glass" size="lg" onClick={reset}>

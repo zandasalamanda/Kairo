@@ -14,7 +14,7 @@ export function IconButton({ label, className, children, ...props }: IconButtonP
       aria-label={label}
       title={label}
       className={cn(
-        "grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-muted transition-colors hover:bg-white/[0.05] hover:text-ink",
+        "raised-btn grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted hover:text-ink",
         className
       )}
       {...props}

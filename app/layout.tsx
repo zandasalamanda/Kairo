@@ -17,8 +17,10 @@ const title = "Aether — Map the way. Build the day.";
 const description =
   "Tell Aether what you want done. It turns your goals, ideas, and available time into a clear plan for today.";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kairo-zeta-five.vercel.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kairo-zeta-five.vercel.app"),
+  metadataBase: new URL(siteUrl),
   title,
   description,
   applicationName: "Aether",
@@ -31,6 +33,7 @@ export const viewport: Viewport = {
   themeColor: "#0a0b0d",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

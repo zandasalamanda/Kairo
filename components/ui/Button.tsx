@@ -7,16 +7,16 @@ type Variant = "primary" | "solid" | "glass" | "ghost" | "outline" | "danger";
 type Size = "sm" | "md" | "lg" | "icon";
 
 const base =
-  "relative inline-flex items-center justify-center gap-2 rounded-xl font-medium tracking-tight transition-colors duration-150 select-none disabled:opacity-40 disabled:pointer-events-none active:translate-y-px focus-visible:outline-none";
+  "relative inline-flex items-center justify-center gap-2 rounded-xl font-medium tracking-tight select-none disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none";
 
 const variants: Record<Variant, string> = {
   // The one accent action — "your next move". Used once per view at most.
-  primary: "bg-accent text-[#1b1206] hover:bg-[#efc78a]",
-  solid: "bg-white/[0.06] text-ink border border-line-strong hover:bg-white/[0.09]",
-  glass: "bg-white/[0.02] text-ink border border-line hover:border-line-strong hover:bg-white/[0.04]",
-  ghost: "text-muted hover:text-ink hover:bg-white/5",
-  outline: "text-ink border border-line-strong hover:bg-white/5",
-  danger: "text-warn border border-warn/30 bg-warn/10 hover:bg-warn/15",
+  primary: "raised-gold",
+  solid: "raised-btn text-ink",
+  glass: "raised-btn text-ink",
+  ghost: "text-muted transition-colors hover:text-ink hover:bg-white/5",
+  outline: "raised-btn text-ink",
+  danger: "raised-btn text-warn",
 };
 
 const sizes: Record<Size, string> = {

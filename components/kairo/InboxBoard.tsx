@@ -58,7 +58,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
   return (
     <div>
       {/* composer — matches the map's prompt bar */}
-      <div className="flex items-center gap-2 rounded-2xl border border-line bg-white/[0.02] p-1.5 pl-4">
+      <div className="inset-well flex items-center gap-2 rounded-2xl p-1.5 pl-4">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -71,7 +71,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
           onClick={add}
           disabled={!input.trim()}
           aria-label="Add"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent text-[#1b1206] transition-opacity disabled:opacity-30"
+          className="raised-gold grid h-9 w-9 shrink-0 place-items-center rounded-xl disabled:opacity-30"
         >
           <Plus size={17} />
         </button>
@@ -79,7 +79,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
       <div className="mt-3 flex items-center justify-between px-1">
         <p className="text-[13px] text-muted">{reasoning ?? `${items.length} item${items.length === 1 ? "" : "s"}`}</p>
         <Button variant="glass" size="sm" onClick={sortAll} disabled={sorting || items.length === 0}>
-          <Sparkle size={14} className={sorting ? "animate-pulse-soft" : ""} /> {sorting ? "Sorting…" : sorted ? "Re-sort" : "Sort with AI"}
+          <Sparkle size={14} className={sorting ? "animate-pulse-soft" : ""} /> {sorting ? "Sorting…" : sorted ? "Re-sort" : "Sort with Aether"}
         </Button>
       </div>
 

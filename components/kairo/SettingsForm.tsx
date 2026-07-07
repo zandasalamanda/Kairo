@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Check, LogOut, Zap, RotateCcw } from "lucide-react";
+import { LogOut, Zap, RotateCcw, Trash2, Loader2 } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
 import type { SessionUser } from "@/lib/auth";
-import { cn } from "@/lib/utils";
 import { clerkPublic } from "@/lib/config";
+import { deleteAccount } from "@/lib/data/actions";
 import { SectionLabel } from "./PageHeader";
 
 function resetDemo() {
@@ -17,54 +17,18 @@ function resetDemo() {
   } catch {
     /* ignore */
   }
-  window.location.href = "/app/today";
-}
-
-function PillGroup<T extends string>({
-  label,
-  hint,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint?: string;
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-2 border-b border-line py-4 last:border-0 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <div className="text-sm font-medium text-ink">{label}</div>
-        {hint && <div className="text-[12px] text-muted">{hint}</div>}
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((o) => (
-          <button
-            key={o.value}
-            onClick={() => onChange(o.value)}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition-all",
-              o.value === value
-                ? "border-accent/40 bg-accent/10 text-ink"
-                : "border-line text-muted hover:text-ink hover:bg-white/[0.03]"
-            )}
-          >
-            {o.value === value && <Check size={12} className="mr-1 inline text-accent" />}
-            {o.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+  window.location.href = "/app/map";
 }
 
 export function SettingsForm({ user }: { user: SessionUser }) {
-  const [tone, setTone] = React.useState("calm");
-  const [planning, setPlanning] = React.useState("balanced");
-  const [energy, setEnergy] = React.useState("normal");
-  const [notify, setNotify] = React.useState("daily");
+  const [armed, setArmed] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+
+  const remove = async () => {
+    setDeleting(true);
+    await deleteAccount();
+    window.location.href = "/";
+  };
 
   return (
     <div className="space-y-5">
@@ -72,7 +36,7 @@ export function SettingsForm({ user }: { user: SessionUser }) {
       <div className="panel rounded-2xl p-6">
         <SectionLabel className="mb-4">Profile</SectionLabel>
         <div className="flex items-center gap-4">
-          <div className="grid h-14 w-14 place-items-center rounded-full border border-line bg-white/[0.06] text-lg font-semibold text-[#1b1206]">
+          <div className="raised-btn grid h-14 w-14 place-items-center rounded-full text-lg font-semibold text-ink">
             {user.initials}
           </div>
           <div className="min-w-0">
@@ -85,40 +49,50 @@ export function SettingsForm({ user }: { user: SessionUser }) {
         </div>
       </div>
 
-      {/* Preferences */}
-      <div className="panel rounded-2xl px-6 py-2">
-        <div className="py-3">
-          <SectionLabel>Aether's behavior</SectionLabel>
-        </div>
-        <PillGroup label="AI tone" hint="How Aether talks to you" value={tone} onChange={setTone} options={[{ value: "calm", label: "Calm" }, { value: "direct", label: "Direct" }, { value: "strict", label: "Strict" }, { value: "encouraging", label: "Encouraging" }]} />
-        <PillGroup label="Planning style" hint="How it shapes your day" value={planning} onChange={setPlanning} options={[{ value: "balanced", label: "Balanced" }, { value: "ambitious", label: "Ambitious" }, { value: "light", label: "Light" }, { value: "deep_work", label: "Deep Work" }]} />
-        <PillGroup label="Default energy" value={energy} onChange={setEnergy} options={[{ value: "low", label: "Low" }, { value: "normal", label: "Normal" }, { value: "high", label: "High" }]} />
-        <PillGroup label="Notifications" hint="Placeholder — not sending yet" value={notify} onChange={setNotify} options={[{ value: "off", label: "Off" }, { value: "daily", label: "Daily nudge" }]} />
-      </div>
-
       {/* Account */}
       <div className="panel rounded-2xl p-6">
         <SectionLabel className="mb-4">Account</SectionLabel>
         <div className="flex flex-wrap gap-2.5">
-          <Link href="/app/billing" className="inline-flex h-10 items-center gap-2 rounded-xl border border-accent/25 bg-accent/5 px-5 text-sm font-medium text-accent transition-colors hover:bg-accent/10">
+          <Link href="/app/billing" className="raised-btn inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-medium text-accent">
             <Zap size={15} /> Manage plan
           </Link>
           {clerkPublic ? (
             <SignOutButton redirectUrl="/">
-              <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-5 text-sm text-muted transition-colors hover:text-ink hover:bg-white/5">
+              <button className="raised-btn inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm text-muted hover:text-ink">
                 <LogOut size={15} /> Sign out
               </button>
             </SignOutButton>
           ) : (
-            <Link href="/" className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-5 text-sm text-muted transition-colors hover:text-ink hover:bg-white/5">
+            <Link href="/" className="raised-btn inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm text-muted hover:text-ink">
               <LogOut size={15} /> Sign out
             </Link>
           )}
-          <button onClick={resetDemo} className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-5 text-sm text-muted transition-colors hover:text-ink hover:bg-white/5">
-            <RotateCcw size={15} /> Reset demo data
-          </button>
+          {!clerkPublic && (
+            <button onClick={resetDemo} className="raised-btn inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm text-muted hover:text-ink">
+              <RotateCcw size={15} /> Reset demo data
+            </button>
+          )}
         </div>
-        <p className="mt-3 text-[12px] text-faint">Demo edits are stored in this browser. Reset clears them.</p>
+
+        {clerkPublic && (
+          <div className="mt-6 border-t border-line pt-5">
+            <SectionLabel className="mb-2">Danger zone</SectionLabel>
+            {armed ? (
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="text-[13px] text-warn">This permanently deletes your account, goals, and all data. This can&rsquo;t be undone.</span>
+                <button onClick={() => setArmed(false)} disabled={deleting} className="raised-btn inline-flex h-9 items-center rounded-xl px-4 text-[13px] text-muted hover:text-ink">Cancel</button>
+                <button onClick={remove} disabled={deleting} className="raised-btn inline-flex h-9 items-center gap-1.5 rounded-xl px-4 text-[13px] text-warn">
+                  {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Delete everything
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setArmed(true)} className="raised-btn inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm text-warn">
+                <Trash2 size={15} /> Delete my account and data
+              </button>
+            )}
+          </div>
+        )}
+        {!clerkPublic && <p className="mt-3 text-[12px] text-faint">Demo edits are stored in this browser. Reset clears them.</p>}
       </div>
     </div>
   );

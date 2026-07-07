@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cn("flex gap-1 rounded-xl border border-line bg-white/[0.02] p-1", className)}>
+    <div className={cn("inset-well flex gap-1 rounded-xl p-1", className)}>
       {options.map((opt) => {
         const active = opt.value === value;
         return (
@@ -31,7 +31,7 @@ export function SegmentedControl<T extends string>({
             aria-pressed={active}
             className={cn(
               "flex-1 rounded-lg px-3 py-2.5 text-center transition-colors duration-150",
-              active ? "bg-white/[0.07] text-ink" : "text-muted hover:text-ink hover:bg-white/[0.03]"
+              active ? "raised-btn text-ink" : "text-muted hover:text-ink"
             )}
           >
             <span className="block text-sm font-medium">{opt.label}</span>

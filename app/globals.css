@@ -133,31 +133,112 @@ body::before {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); background-clip: content-box; }
 
-/* ---------- Surfaces ---------- */
+/* ============================================================
+   Raised / glossy language — surfaces and controls feel physical:
+   lit from above (top sheen), a fine inner highlight, a lower inset
+   shadow, and a soft drop shadow that lifts them off the canvas.
+   ============================================================ */
 
-/* The default raised panel — flat, one hairline, no blur, no glow.
-   This is ~90% of surfaces. Calm by default. */
+/* Default card/panel — a gently raised surface. ~90% of containers. */
 .panel {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--color-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.008) 60%),
+    rgba(20, 22, 27, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 1px 1px rgba(0, 0, 0, 0.3),
+    0 10px 26px -16px rgba(0, 0, 0, 0.75);
 }
+/* A more prominent, clearly-lifted card. */
 .panel-2 {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid var(--color-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.012) 52%, rgba(0, 0, 0, 0.05)),
+    rgba(24, 26, 32, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 3px rgba(0, 0, 0, 0.35),
+    0 16px 40px -18px rgba(0, 0, 0, 0.8);
 }
 
-/* Frosted chrome — only for floating navigation over content */
+/* Frosted chrome — floating navigation/sheets over content. */
 .chrome {
-  background: color-mix(in srgb, var(--color-canvas) 78%, transparent);
-  border: 1px solid var(--color-line);
-  backdrop-filter: blur(16px) saturate(115%);
-  -webkit-backdrop-filter: blur(16px) saturate(115%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01) 55%),
+    color-mix(in srgb, var(--color-canvas) 74%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 30px -12px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+/* Interactive raised control — buttons, chips, nav, icon buttons. */
+.raised-btn {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 55%, rgba(0, 0, 0, 0.06)),
+    rgba(26, 28, 34, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1.5px 1px rgba(0, 0, 0, 0.4),
+    0 1px 1px rgba(0, 0, 0, 0.35),
+    0 6px 14px -8px rgba(0, 0, 0, 0.6);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease, color 0.15s ease;
+}
+.raised-btn:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 55%, rgba(0, 0, 0, 0.05)),
+    rgba(32, 34, 41, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1.5px 1px rgba(0, 0, 0, 0.4),
+    0 2px 3px rgba(0, 0, 0, 0.35),
+    0 10px 22px -8px rgba(0, 0, 0, 0.6);
+}
+.raised-btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* The gold primary — glossy, lit, the single hero CTA per view. */
+.raised-gold {
+  background: linear-gradient(180deg, #f5d29c 0%, #ecc084 44%, #d9a860 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #241809;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -2px 3px rgba(120, 80, 20, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 8px 20px -8px rgba(230, 184, 119, 0.5);
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
+}
+.raised-gold:hover {
+  filter: brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -2px 3px rgba(120, 80, 20, 0.4),
+    0 2px 3px rgba(0, 0, 0, 0.35),
+    0 12px 28px -8px rgba(230, 184, 119, 0.62);
+}
+.raised-gold:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(120, 80, 20, 0.55); }
+
+/* Recessed well — segmented tracks, input fields (pressed-in look). */
+.inset-well {
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.03);
 }
 
 /* The one focal treatment — a soft, restrained accent lift. Use sparingly. */
 .focus-accent {
   border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 22%, transparent),
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 22%, transparent),
     0 18px 60px -34px rgba(230, 184, 119, 0.5);
 }
 

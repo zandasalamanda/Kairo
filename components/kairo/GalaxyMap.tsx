@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Play, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, Layers, MessageCircle, Loader2 } from "lucide-react";
+import { ArrowUp, Check, Play, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, MessageCircle, Loader2 } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
@@ -361,12 +361,17 @@ export function GalaxyMap({
       if (saved.ok && saved.id) { goalId = saved.id; nodeIds = saved.nodeIds; }
     }
     const goal = toLocalGoal(goalId, res, nodeIds);
-    setPositions((pp) => ({ ...pp, [goalId]: defaultPos(goals.length) }));
+    const pos = defaultPos(goals.length);
+    setPositions((pp) => ({ ...pp, [goalId]: pos }));
     setGoals((prev) => [...prev, goal]);
     setMapping(false);
     setExpandedId(goalId);
     setSelectedNodeId(null);
-    setTimeout(() => flyTo(goalId), 20);
+    // Fly straight to the known position — don't rely on flyTo's findIndex over
+    // the goals array, which hasn't updated yet inside this closure.
+    const scale = 0.82;
+    setAnimating(true);
+    setView({ tx: -pos.x * scale, ty: -pos.y * scale, scale });
   };
 
   // Add several AI-generated sub-steps as branches under a node.
@@ -462,24 +467,24 @@ export function GalaxyMap({
       </div>
 
       {/* top chrome: goal switcher (fly-to) + new goal */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 md:p-5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 px-3 pb-3 pt-[max(12px,env(safe-area-inset-top))] md:px-5 md:pt-5">
         <div className="relative">
           <button
             onClick={() => setMenu((m) => !m)}
             disabled={empty}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-line bg-canvas/70 px-4 py-1.5 text-sm font-medium text-ink backdrop-blur-md disabled:opacity-40"
+            className="chrome pointer-events-auto inline-flex max-w-[64vw] items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-ink disabled:opacity-40"
           >
-            {expanded ? truncate(expanded.title, 32) : empty ? "No goals yet" : "All goals"}
-            {!empty && <ChevronDown size={14} className="text-faint" />}
+            <span className="truncate">{expanded ? truncate(expanded.title, 30) : empty ? "No goals yet" : "All goals"}</span>
+            {!empty && <ChevronDown size={14} className="shrink-0 text-faint" />}
           </button>
           {menu && !empty && (
-            <div className="pointer-events-auto absolute top-11 z-20 w-64 animate-fade-in rounded-2xl border border-line bg-canvas-2/90 p-1.5 backdrop-blur-xl">
+            <div className="chrome pointer-events-auto absolute top-12 z-20 w-64 animate-fade-in rounded-2xl p-1.5">
               <p className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">Jump to</p>
               {goals.map((g) => (
                 <button
                   key={g.id}
                   onClick={() => { setExpandedId(g.id); setSelectedNodeId(null); setMenu(false); flyTo(g.id); }}
-                  className={cn("flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm", expandedId === g.id ? "bg-white/[0.06] text-ink" : "text-muted hover:bg-white/[0.03] hover:text-ink")}
+                  className={cn("flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm", expandedId === g.id ? "raised-btn text-ink" : "text-muted hover:text-ink")}
                 >
                   <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: hexOf(g.id), boxShadow: `0 0 8px ${hexOf(g.id)}` }} />
                   <span className="min-w-0 flex-1 truncate">{g.title}</span>
@@ -492,7 +497,7 @@ export function GalaxyMap({
 
         <button
           onClick={() => { setComposing(true); setExpandedId(null); setSelectedNodeId(null); }}
-          className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-sm font-medium text-accent backdrop-blur-md transition-colors hover:bg-accent/15"
+          className="raised-gold pointer-events-auto inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium"
         >
           <Plus size={15} /> New goal
         </button>
@@ -502,7 +507,7 @@ export function GalaxyMap({
       {dirty && !empty && (
         <button
           onClick={overview}
-          className="absolute right-4 top-16 z-10 grid h-10 w-10 place-items-center rounded-full border border-line bg-canvas/70 text-muted backdrop-blur-md transition-colors hover:text-ink md:top-20"
+          className="chrome absolute right-4 top-[calc(env(safe-area-inset-top)+56px)] z-10 grid h-10 w-10 place-items-center rounded-full text-muted transition-colors hover:text-ink md:top-20"
           aria-label="Recenter"
         >
           <Locate size={16} />
@@ -513,7 +518,7 @@ export function GalaxyMap({
       <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-[calc(88px+env(safe-area-inset-bottom))] md:pb-6">
         <div className="mx-auto max-w-md">
           {toast && (
-            <div className="mb-2 animate-fade-in rounded-xl border border-accent/25 bg-canvas-2/90 px-4 py-2 text-center text-[13px] text-accent backdrop-blur-xl">
+            <div className="chrome mb-2 animate-fade-in rounded-xl px-4 py-2 text-center text-[13px] text-accent">
               {toast}
             </div>
           )}
@@ -570,7 +575,7 @@ export function GalaxyMap({
           ) : (
             <button
               onClick={() => setComposing(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-canvas-2/80 py-3.5 text-[14px] text-muted backdrop-blur-xl transition-colors hover:text-ink"
+              className="chrome flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[14px] text-muted transition-colors hover:text-ink"
             >
               <Plus size={16} className="text-accent" /> New goal
               <span className="mx-1 text-faint">·</span>
@@ -682,18 +687,21 @@ function GoalCluster({
             <span className="block text-[17px] font-bold">{Math.round(goal.progress)}%</span>
           </span>
         </span>
-        {/* label: title when expanded, or on hover — glowing text, no box */}
-        {(expanded || hovered) && (
-          <span className="pointer-events-none absolute left-1/2 top-full mt-3 -translate-x-1/2 whitespace-nowrap text-center">
-            <span className="block text-[13.5px] font-semibold text-ink" style={{ textShadow: "0 1px 14px rgba(8,9,11,0.96), 0 0 5px rgba(8,9,11,0.9)" }}>
-              {truncate(goal.title, 34)}
-            </span>
-            <span className="mt-0.5 block font-mono text-[10px] text-faint" style={{ textShadow: "0 1px 12px rgba(8,9,11,0.96)" }}>
-              {goal.nodes.length} step{goal.nodes.length === 1 ? "" : "s"}
-              {goal.targetDate ? ` · due ${relativeDays(goal.targetDate)}` : ""}
-            </span>
+        {/* label: always visible on touch; hover-reveal on desktop; always when open */}
+        <span
+          className={cn(
+            "pointer-events-none absolute left-1/2 top-full mt-3 -translate-x-1/2 whitespace-nowrap text-center transition-opacity duration-200",
+            expanded || hovered ? "opacity-100" : "opacity-100 [@media(hover:hover)]:opacity-0"
+          )}
+        >
+          <span className="block text-[13.5px] font-semibold text-ink" style={{ textShadow: "0 1px 14px rgba(8,9,11,0.96), 0 0 5px rgba(8,9,11,0.9)" }}>
+            {truncate(goal.title, 34)}
           </span>
-        )}
+          <span className="mt-0.5 block font-mono text-[10px] text-faint" style={{ textShadow: "0 1px 12px rgba(8,9,11,0.96)" }}>
+            {goal.nodes.length} step{goal.nodes.length === 1 ? "" : "s"}
+            {goal.targetDate ? ` · due ${relativeDays(goal.targetDate)}` : ""}
+          </span>
+        </span>
       </button>
     </div>
   );
@@ -730,7 +738,7 @@ function NodeOrb({
       <button
         onClick={(e) => { e.stopPropagation(); onSelect(); }}
         onPointerDown={(e) => e.stopPropagation()}
-        className="flex flex-col items-center gap-1.5"
+        className="flex flex-col items-center gap-1.5 p-1.5"
         style={{ animation: "breathe 6s ease-in-out infinite" }}
       >
         <span className="relative grid place-items-center" style={{ width: size, height: size }}>
@@ -782,7 +790,7 @@ function NewGoalBar({
       )}
       <form
         onSubmit={(e) => { e.preventDefault(); onSubmit(); }}
-        className="flex items-center gap-2 rounded-2xl border border-accent/25 bg-canvas-2/90 p-1.5 pl-4 backdrop-blur-xl"
+        className="chrome flex items-center gap-2 rounded-2xl p-1.5 pl-4"
       >
         <input
           autoFocus
@@ -797,7 +805,7 @@ function NewGoalBar({
             <X size={16} />
           </button>
         )}
-        <button type="submit" disabled={!value.trim()} className="grid h-9 shrink-0 place-items-center gap-1 rounded-xl bg-accent px-3 text-[#1b1206] transition-opacity disabled:opacity-30" aria-label="Map goal">
+        <button type="submit" disabled={!value.trim()} className="raised-gold grid h-9 shrink-0 place-items-center gap-1 rounded-xl px-3.5 disabled:opacity-30" aria-label="Map goal">
           <Sparkles size={16} />
         </button>
       </form>
@@ -817,24 +825,41 @@ function GoalBar({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const [armed, setArmed] = React.useState(false);
+  React.useEffect(() => {
+    if (!armed) return;
+    const t = window.setTimeout(() => setArmed(false), 3500);
+    return () => window.clearTimeout(t);
+  }, [armed]);
+
   return (
-    <div className="animate-sheet-up rounded-2xl border border-line bg-canvas-2/90 p-2.5 backdrop-blur-xl">
-      <div className="mb-2 flex items-center gap-2 px-1.5">
-        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: hex, boxShadow: `0 0 8px ${hex}` }} />
-        <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{goal.title}</span>
-        <button onClick={onColor} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Change color"><Palette size={15} /></button>
-        <button onClick={onDelete} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-warn" aria-label="Delete goal"><Trash2 size={15} /></button>
-        <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={15} /></button>
-      </div>
-      <form onSubmit={(e) => { e.preventDefault(); onAddStep(); }} className="flex items-center gap-2 rounded-xl border border-line bg-white/[0.02] p-1 pl-3.5">
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Add a step, or set a deadline…"
-          className="h-9 flex-1 bg-transparent text-[14px] text-ink placeholder:text-faint focus:outline-none"
-        />
-        <button type="submit" disabled={!value.trim()} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent text-[#1b1206] transition-opacity disabled:opacity-30" aria-label="Add"><ArrowUp size={16} /></button>
-      </form>
+    <div className="chrome animate-sheet-up rounded-2xl p-2.5">
+      {armed ? (
+        <div className="flex items-center gap-2 px-1.5 py-1">
+          <span className="min-w-0 flex-1 text-[13px] text-warn">Delete &ldquo;{truncate(goal.title, 20)}&rdquo; and all its steps?</span>
+          <Chip onClick={() => setArmed(false)}>Cancel</Chip>
+          <Chip tone="warn" icon={<Trash2 size={14} />} onClick={() => { setArmed(false); onDelete(); }}>Delete</Chip>
+        </div>
+      ) : (
+        <>
+          <div className="mb-2 flex items-center gap-2 px-1.5">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: hex, boxShadow: `0 0 8px ${hex}` }} />
+            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{goal.title}</span>
+            <button onClick={onColor} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Change color"><Palette size={15} /></button>
+            <button onClick={() => setArmed(true)} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-warn" aria-label="Delete goal"><Trash2 size={15} /></button>
+            <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={15} /></button>
+          </div>
+          <form onSubmit={(e) => { e.preventDefault(); onAddStep(); }} className="inset-well flex items-center gap-2 rounded-xl p-1 pl-3.5">
+            <input
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Add a step, or set a deadline…"
+              className="h-9 flex-1 bg-transparent text-[14px] text-ink placeholder:text-faint focus:outline-none"
+            />
+            <button type="submit" disabled={!value.trim()} className="raised-gold grid h-8 w-8 shrink-0 place-items-center rounded-lg disabled:opacity-30" aria-label="Add"><ArrowUp size={16} /></button>
+          </form>
+        </>
+      )}
     </div>
   );
 }
@@ -850,11 +875,11 @@ function MiniInput({
   icon: React.ReactNode;
 }) {
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="animate-sheet-up flex items-center gap-2 rounded-2xl border border-line bg-canvas-2/90 p-1.5 pl-4 backdrop-blur-xl">
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="chrome animate-sheet-up flex items-center gap-2 rounded-2xl p-1.5 pl-4">
       <span className="text-accent">{icon}</span>
       <input autoFocus value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="h-10 flex-1 bg-transparent text-[15px] text-ink placeholder:text-faint focus:outline-none" />
       <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-xl text-faint hover:text-ink" aria-label="Cancel"><X size={16} /></button>
-      <button type="submit" disabled={!value.trim()} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent text-[#1b1206] transition-opacity disabled:opacity-30" aria-label="Add"><ArrowUp size={17} /></button>
+      <button type="submit" disabled={!value.trim()} className="raised-gold grid h-9 w-9 shrink-0 place-items-center rounded-xl disabled:opacity-30" aria-label="Add"><ArrowUp size={17} /></button>
     </form>
   );
 }
@@ -888,11 +913,11 @@ function NodeSheet({
   };
 
   return (
-    <div className="animate-sheet-up rounded-2xl border border-line bg-canvas-2/90 p-4 backdrop-blur-xl">
+    <div className="chrome animate-sheet-up rounded-2xl p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: hex }} />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: hex, boxShadow: `0 0 6px ${hex}` }} />
             <span className="font-mono text-[11px] text-faint">{formatDuration(node.estimatedMinutes)}</span>
           </div>
           <h2 className="mt-1 font-display text-lg font-semibold leading-snug text-ink">{node.title}</h2>
@@ -904,19 +929,19 @@ function NodeSheet({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Chip tone="sage" icon={<Check size={14} />} onClick={onDone}>Done</Chip>
         <Chip tone="accent" icon={<Play size={14} />} onClick={onStart}>Start</Chip>
-        <Chip icon={breaking ? <Loader2 size={14} className="animate-spin" /> : <Layers size={14} />} onClick={breaking ? undefined : onBreakDown}>
+        <Chip tone="accent" icon={breaking ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} onClick={breaking ? undefined : onBreakDown}>
           {breaking ? "Breaking down…" : "Go deeper"}
         </Chip>
         <Chip icon={<GitBranch size={14} />} onClick={onBranch}>Add branch</Chip>
-        <Chip icon={<MessageCircle size={14} />} onClick={() => setAsking((a) => !a)}>Ask</Chip>
-        <Link href="/app/today" className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink">
+        <Chip tone="accent" icon={<MessageCircle size={14} />} onClick={() => setAsking((a) => !a)}>Ask</Chip>
+        <Link href="/app/today" className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink">
           <CalendarPlus size={14} /> Today
         </Link>
       </div>
 
       {asking && (
         <div className="mt-3 border-t border-line pt-3">
-          <form onSubmit={(e) => { e.preventDefault(); void ask(); }} className="flex items-center gap-2 rounded-xl border border-line bg-white/[0.02] p-1 pl-3.5">
+          <form onSubmit={(e) => { e.preventDefault(); void ask(); }} className="inset-well flex items-center gap-2 rounded-xl p-1 pl-3.5">
             <input
               autoFocus
               value={question}
@@ -924,7 +949,7 @@ function NodeSheet({
               placeholder={`Ask about "${truncate(node.title, 24)}"…`}
               className="h-9 flex-1 bg-transparent text-[14px] text-ink placeholder:text-faint focus:outline-none"
             />
-            <button type="submit" disabled={!question.trim() || loading} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent text-[#1b1206] transition-opacity disabled:opacity-30" aria-label="Ask">
+            <button type="submit" disabled={!question.trim() || loading} className="raised-gold grid h-8 w-8 shrink-0 place-items-center rounded-lg disabled:opacity-30" aria-label="Ask">
               {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowUp size={16} />}
             </button>
           </form>

@@ -37,7 +37,7 @@ export function Sidebar({ user, nextMove, className }: { user: SessionUser; next
                 href={item.href}
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  active ? "bg-white/[0.05] text-ink" : "text-muted hover:text-ink hover:bg-white/[0.03]"
+                  active ? "raised-btn text-ink" : "text-muted hover:text-ink hover:bg-white/[0.03]"
                 )}
               >
                 <Icon size={17} strokeWidth={2} className={cn("shrink-0 transition-colors", active ? "text-accent" : "text-faint group-hover:text-muted")} />

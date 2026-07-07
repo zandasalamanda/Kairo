@@ -18,6 +18,7 @@ import {
   addNode,
   setNodeStatus,
   setGoalDeadline,
+  setGoalNotes,
   deleteGoal,
 } from "@/lib/data/actions";
 import { MicButton } from "@/components/ui/MicButton";
@@ -493,6 +494,20 @@ export function GalaxyMap({
     setFocusNode(node);
   };
 
+  // Append a co-produced draft to the goal's notebook (keeps map + Notebook in sync).
+  const appendGoalNote = (goalId: string, label: string, body: string) => {
+    setGoals((prev) =>
+      prev.map((g) => {
+        if (g.id !== goalId) return g;
+        const stamp = `--- ${label} ---\n${body.trim()}\n`;
+        const notes = (g.notes ? `${g.notes.trim()}\n\n` : "") + stamp;
+        if (remote) void setGoalNotes({ goalId, notes });
+        return { ...g, notes };
+      })
+    );
+    showToast("Saved to notebook");
+  };
+
   const transform = `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`;
   const empty = goals.length === 0;
 
@@ -707,7 +722,11 @@ export function GalaxyMap({
 
       {focusNode && expanded && (
         <FocusOverlay
+          key={focusNode.id}
           title={focusNode.title}
+          goalTitle={expanded.title}
+          nodeDescription={focusNode.description}
+          context={expanded.notes.trim() || undefined}
           hex={hexOf(expanded.id)}
           onComplete={() => {
             setStatus(expanded.id, focusNode.id, "done");
@@ -716,6 +735,7 @@ export function GalaxyMap({
             showToast("Nice — step complete");
           }}
           onClose={() => setFocusNode(null)}
+          onSaveArtifact={(label, body) => appendGoalNote(expanded.id, `${label} · ${focusNode.title}`, body)}
         />
       )}
     </div>

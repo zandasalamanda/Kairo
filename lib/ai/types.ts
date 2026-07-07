@@ -113,6 +113,50 @@ export interface AskNodeResult {
   answer: string;
 }
 
+// ---------- work session (co-work on one step) ----------
+export interface WorkSessionInput {
+  goalTitle: string;
+  nodeTitle: string;
+  nodeDescription: string;
+  /** how long the session is, so the checklist fits the time */
+  minutes: number;
+  /** the goal's notebook context, so the session is personal */
+  context?: string;
+}
+export interface WorkSessionResult {
+  /** "desk" = screen/paper work Aether can co-produce; "coach" = physical work it can only brief. */
+  kind: "desk" | "coach";
+  /** the single smallest action to begin right now */
+  firstMove: string;
+  /** an ordered checklist of 2-4 micro-actions sized to the session */
+  steps: string[];
+}
+
+export interface UnblockInput {
+  goalTitle: string;
+  nodeTitle: string;
+  context?: string;
+}
+export interface UnblockResult {
+  answer: string;
+}
+
+// ---------- draft (a co-produced artifact for a desk step) ----------
+export interface DraftInput {
+  goalTitle: string;
+  nodeTitle: string;
+  nodeDescription: string;
+  context?: string;
+  /** optional steer from the user, e.g. "make it more formal" */
+  instruction?: string;
+}
+export interface DraftResult {
+  /** a 2-4 word label, e.g. "Cover letter draft" */
+  title: string;
+  /** the actual draft, plain text with line breaks */
+  content: string;
+}
+
 // ---------- Review ----------
 export interface ReviewInput {
   goals: GoalWithNodes[];

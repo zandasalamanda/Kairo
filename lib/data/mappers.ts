@@ -12,6 +12,7 @@ import type {
   NodeStatus,
   InboxCategory,
   ResourceKind,
+  ResolvedResource,
 } from "@/types";
 
 export interface ProfileRow {
@@ -59,6 +60,7 @@ export interface NodeRow {
   resource_kind: ResourceKind | null;
   resource_label: string | null;
   resource_query: string | null;
+  resource_resolved: ResolvedResource | null;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -125,7 +127,7 @@ export function rowToNode(r: NodeRow): GoalNode {
     positionY: r.position_y,
     aiReason: r.ai_reason,
     resource: r.resource_kind && r.resource_query
-      ? { kind: r.resource_kind, label: r.resource_label ?? r.resource_query, query: r.resource_query }
+      ? { kind: r.resource_kind, label: r.resource_label ?? r.resource_query, query: r.resource_query, resolved: r.resource_resolved ?? null }
       : null,
     createdAt: r.created_at,
     updatedAt: r.updated_at,

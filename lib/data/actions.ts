@@ -180,6 +180,22 @@ export async function setGoalNotes(input: { goalId: string; notes: string }): Pr
   return { ok: true, id: input.goalId };
 }
 
+/** Cache a real resolved resource (live video etc.) on a node so we resolve once. */
+export async function setNodeResolvedResource(input: {
+  nodeId: string;
+  resolved: { url: string; title: string; source: string; thumbnail: string | null };
+}): Promise<Result> {
+  if (!isRemote) return NO_OP;
+  const scoped = await getScopedClient();
+  if (!scoped) return NO_OP;
+  const { error } = await scoped.supabase
+    .from("goal_nodes")
+    .update({ resource_resolved: input.resolved })
+    .eq("id", input.nodeId);
+  if (error) return NO_OP;
+  return { ok: true, id: input.nodeId };
+}
+
 /** Log a completed focus session on a step (powers momentum + focus stats). */
 export async function logFocusSession(input: {
   goalId: string;

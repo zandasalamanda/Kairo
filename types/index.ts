@@ -40,12 +40,22 @@ export type Difficulty = "light" | "moderate" | "deep";
 
 /** A one-tap pointer to external content that helps you do a step. */
 export type ResourceKind = "watch" | "read" | "practice";
+/** A real, live result fetched from a source API (never model-generated). */
+export interface ResolvedResource {
+  url: string;
+  title: string;
+  /** channel or domain the result came from */
+  source: string;
+  thumbnail: string | null;
+}
 export interface NodeResource {
   kind: ResourceKind;
   /** short human label, e.g. "Winger agility drills" */
   label: string;
   /** the search string we open (never a raw URL — no dead links) */
   query: string;
+  /** a real link resolved from `query` via a source API, cached once found */
+  resolved?: ResolvedResource | null;
 }
 export type AiTone = "calm" | "direct" | "strict" | "encouraging";
 export type PlanningStyle = "balanced" | "ambitious" | "light" | "deep_work";

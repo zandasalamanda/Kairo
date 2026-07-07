@@ -3,10 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, CalendarPlus, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen } from "lucide-react";
-import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind } from "@/types";
+import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind, ResolvedResource } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
 import { expandNode, askNode } from "@/lib/ai/node-assist";
+import { viaRoute } from "@/lib/ai/provider";
 import type { Clarifier } from "@/lib/ai/types";
 import { clarifyGoal } from "@/lib/ai/clarify";
 import { GOAL_PALETTE, goalColorHex, goalColorIndex } from "@/lib/kairo/goal-color";
@@ -20,6 +21,7 @@ import {
   setGoalDeadline,
   setGoalNotes,
   logFocusSession,
+  setNodeResolvedResource,
   deleteGoal,
 } from "@/lib/data/actions";
 import { MicButton } from "@/components/ui/MicButton";
@@ -509,6 +511,17 @@ export function GalaxyMap({
     showToast("Saved to notebook");
   };
 
+  // Cache a real resolved resource (live video) on the node once found.
+  const resolveNodeResource = (nodeId: string, resolved: ResolvedResource) => {
+    setGoals((prev) =>
+      prev.map((g) => ({
+        ...g,
+        nodes: g.nodes.map((n) => (n.id === nodeId && n.resource ? { ...n, resource: { ...n.resource, resolved } } : n)),
+      }))
+    );
+    if (remote) void setNodeResolvedResource({ nodeId, resolved });
+  };
+
   const transform = `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`;
   const empty = goals.length === 0;
 
@@ -689,6 +702,7 @@ export function GalaxyMap({
               onFocus={() => openFocus(selectedNode)}
               onBranch={() => setBranchFor(selectedNode.id)}
               onBreakDown={() => setBreakdownFor(selectedNode)}
+              onResolveResource={resolveNodeResource}
             />
           ) : expanded ? (
             <GoalBar
@@ -1146,8 +1160,66 @@ function PreGenClarifier({ clarifiers, loading, onCreate, onCancel }: { clarifie
   );
 }
 
+/**
+ * A step's resource. For video steps it resolves the query to a REAL YouTube
+ * result on open (once, then cached on the node) and shows a titled card. If
+ * there's no key or no result — or for "read" steps — it falls back to today's
+ * live search link, so the link is never dead and never hallucinated.
+ */
+function NodeResourceBlock({ node, onResolve }: { node: GoalNode; onResolve: (r: ResolvedResource) => void }) {
+  const resource = node.resource!;
+  const resMeta = RESOURCE_META[resource.kind];
+  const [resolved, setResolved] = React.useState<ResolvedResource | null>(resource.resolved ?? null);
+  // Starts true when we'll resolve on open (video step, not yet resolved).
+  const [resolving, setResolving] = React.useState(() => resource.kind !== "read" && !resource.resolved);
+
+  React.useEffect(() => {
+    if (resolved || resource.kind === "read") return;
+    let alive = true;
+    viaRoute<{ resolved: ResolvedResource | null }>("/api/resource/resolve", { kind: resource.kind, query: resource.query })
+      .then((j) => {
+        if (!alive) return;
+        if (j?.resolved) { setResolved(j.resolved); onResolve(j.resolved); }
+        setResolving(false);
+      })
+      .catch(() => { if (alive) setResolving(false); });
+    return () => { alive = false; };
+    // Resolve once per node open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (resolved) {
+    return (
+      <a href={resolved.url} target="_blank" rel="noopener noreferrer" className="raised-btn mt-3 flex items-center gap-3 rounded-xl p-2 pr-3.5">
+        {resolved.thumbnail ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={resolved.thumbnail} alt="" className="h-12 w-[84px] shrink-0 rounded-lg object-cover" />
+        ) : (
+          <span className="grid h-12 w-[84px] shrink-0 place-items-center rounded-lg bg-white/5"><resMeta.Icon size={18} className="text-accent" /></span>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13px] font-medium text-ink">{resolved.title}</span>
+          <span className="block truncate text-[11px] text-faint">{resMeta.verb} · {resolved.source}</span>
+        </span>
+        <ExternalLink size={14} className="shrink-0 text-faint" />
+      </a>
+    );
+  }
+
+  return (
+    <a href={resourceUrl(resource)} target="_blank" rel="noopener noreferrer" className="raised-btn mt-3 flex items-center gap-3 rounded-xl px-3.5 py-2.5">
+      {resolving ? <Loader2 size={18} className="shrink-0 animate-spin text-accent" /> : <resMeta.Icon size={18} className="shrink-0 text-accent" />}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-medium text-ink">{resMeta.verb}: {resource.label}</span>
+        <span className="block text-[11px] text-faint">{resolving ? "Finding the best video…" : "Opens a search — pick the best result"}</span>
+      </span>
+      <ExternalLink size={14} className="shrink-0 text-faint" />
+    </a>
+  );
+}
+
 function NodeSheet({
-  node, hex, goalTitle, goalNotes, breaking, onClose, onDone, onFocus, onBranch, onBreakDown,
+  node, hex, goalTitle, goalNotes, breaking, onClose, onDone, onFocus, onBranch, onBreakDown, onResolveResource,
 }: {
   node: GoalNode;
   hex: string;
@@ -1159,12 +1231,12 @@ function NodeSheet({
   onFocus: () => void;
   onBranch: () => void;
   onBreakDown: () => void;
+  onResolveResource: (nodeId: string, resolved: ResolvedResource) => void;
 }) {
   const [asking, setAsking] = React.useState(false);
   const [question, setQuestion] = React.useState("");
   const [answer, setAnswer] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const resMeta = node.resource ? RESOURCE_META[node.resource.kind] : null;
 
   const ask = async () => {
     const q = question.trim();
@@ -1190,20 +1262,8 @@ function NodeSheet({
       </div>
       {node.description && <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{node.description}</p>}
 
-      {node.resource && resMeta && (
-        <a
-          href={resourceUrl(node.resource)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="raised-btn mt-3 flex items-center gap-3 rounded-xl px-3.5 py-2.5"
-        >
-          <resMeta.Icon size={18} className="shrink-0 text-accent" />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13px] font-medium text-ink">{resMeta.verb}: {node.resource.label}</span>
-            <span className="block text-[11px] text-faint">Opens a search — pick the best result</span>
-          </span>
-          <ExternalLink size={14} className="shrink-0 text-faint" />
-        </a>
+      {node.resource && (
+        <NodeResourceBlock node={node} onResolve={(r) => onResolveResource(node.id, r)} />
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

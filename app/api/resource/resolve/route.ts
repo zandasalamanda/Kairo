@@ -6,7 +6,7 @@ import type { ResourceKind } from "@/types";
 const KINDS: ResourceKind[] = ["watch", "practice", "read"];
 
 export async function POST(req: Request) {
-  const denied = await guardAi();
+  const denied = await guardAi({ pro: true });
   if (denied) return denied;
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const kind = KINDS.includes(b.kind as ResourceKind) ? (b.kind as ResourceKind) : "watch";

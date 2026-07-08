@@ -5,7 +5,7 @@ import { isObj } from "@/lib/ai/provider";
 import type { NodeStatus } from "@/types";
 
 export async function POST(req: Request) {
-  const denied = await guardAi();
+  const denied = await guardAi({ weight: 2 });
   if (denied) return denied;
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const nodes = Array.isArray(b.nodes)

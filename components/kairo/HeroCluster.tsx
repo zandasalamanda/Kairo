@@ -177,8 +177,8 @@ export function HeroCluster() {
 
       {/* opened showcase map */}
       {openMap && (
-        <div className="absolute inset-0 z-30 grid place-items-center bg-canvas/70 p-5 backdrop-blur-sm" onClick={() => setOpenId(null)}>
-          <div className="chrome animate-sheet-up relative w-full max-w-2xl rounded-3xl p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-30 grid place-items-center bg-canvas/95 p-5 backdrop-blur-md" onClick={() => setOpenId(null)}>
+          <div className="animate-sheet-up relative w-full max-w-2xl rounded-3xl border border-line-strong p-6 shadow-2xl" style={{ background: "#0f1116" }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setOpenId(null)} className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-lg text-faint transition-colors hover:text-ink" aria-label="Close">
               <X size={17} />
             </button>

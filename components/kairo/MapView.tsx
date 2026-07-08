@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Waypoints, List, Sparkles } from "lucide-react";
 import type { GoalWithNodes } from "@/types";
 import { GalaxyMap } from "./GalaxyMap";
@@ -10,7 +11,7 @@ import { usePersistentState } from "@/lib/store/persist";
 import { cn } from "@/lib/utils";
 
 /** The map surface with a Galaxy ↔ List toggle (spatial view + linear view). */
-export function MapView({ goals, initialGoalId, remote }: { goals: GoalWithNodes[]; initialGoalId?: string; remote: boolean }) {
+export function MapView({ goals, initialGoalId, remote, isPro }: { goals: GoalWithNodes[]; initialGoalId?: string; remote: boolean; isPro: boolean }) {
   const [view, setView] = usePersistentState<"galaxy" | "list">("kairo.mapview.v1", "galaxy");
   const [openId, setOpenId] = React.useState<string | undefined>(initialGoalId);
   const [askOpen, setAskOpen] = React.useState(false);
@@ -20,7 +21,7 @@ export function MapView({ goals, initialGoalId, remote }: { goals: GoalWithNodes
   return (
     <div className="absolute inset-0">
       {view === "galaxy" ? (
-        <GalaxyMap key={openId ?? "root"} goals={goals} initialGoalId={openId} remote={remote} />
+        <GalaxyMap key={openId ?? "root"} goals={goals} initialGoalId={openId} remote={remote} isPro={isPro} />
       ) : (
         <div className="absolute inset-0 overflow-y-auto">
           <GoalList goals={goals} onOpen={openInGalaxy} />
@@ -41,16 +42,25 @@ export function MapView({ goals, initialGoalId, remote }: { goals: GoalWithNodes
         </div>
       </div>
 
-      {/* Ask Sola — agentic plan assistant */}
+      {/* Ask Sola — agentic plan assistant (Pro) */}
       {goals.length > 0 && !askOpen && (
-        <button
-          onClick={() => setAskOpen(true)}
-          className="raised-gold absolute bottom-[calc(96px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-medium md:bottom-6"
-        >
-          <Sparkles size={16} /> Ask Sola
-        </button>
+        isPro ? (
+          <button
+            onClick={() => setAskOpen(true)}
+            className="raised-gold absolute bottom-[calc(96px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-medium md:bottom-6"
+          >
+            <Sparkles size={16} /> Ask Sola
+          </button>
+        ) : (
+          <Link
+            href="/app/billing"
+            className="raised-gold absolute bottom-[calc(96px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-medium md:bottom-6"
+          >
+            <Sparkles size={16} /> Ask Sola <span className="rounded-full bg-black/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase">Pro</span>
+          </Link>
+        )
       )}
-      {askOpen && <AskSola goals={goals} remote={remote} onClose={() => setAskOpen(false)} />}
+      {askOpen && isPro && <AskSola goals={goals} remote={remote} onClose={() => setAskOpen(false)} />}
     </div>
   );
 }

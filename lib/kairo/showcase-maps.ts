@@ -30,7 +30,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
       { title: "Audit your money", subs: ["Track 30 days of spending", "Find your biggest leaks"] },
       { title: "Build a cushion", subs: ["Open a separate savings account", "Automate a weekly transfer"] },
       { title: "Invest for growth", subs: ["Open a retirement account"] },
-      { title: "Reach lasting stability", subs: [] },
+      { title: "Lasting stability", subs: [] },
     ],
   },
   {
@@ -42,7 +42,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     milestones: [
       { title: "Set your baseline", subs: ["Take starting measurements", "Do a fitness test"] },
       { title: "Build the habit", subs: ["Train 4× a week for a month"] },
-      { title: "Add progressive overload", subs: ["Increase load each week"] },
+      { title: "Level up strength", subs: ["Increase load each week"] },
       { title: "Hit your peak", subs: [] },
     ],
   },
@@ -55,8 +55,8 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     milestones: [
       { title: "Learn 500 core words", subs: ["15 min of flashcards daily"] },
       { title: "Practice speaking", subs: ["Find a conversation partner"] },
-      { title: "Build real confidence", subs: ["Record yourself weekly"] },
-      { title: "Hold a full conversation", subs: [] },
+      { title: "Gain confidence", subs: ["Record yourself weekly"] },
+      { title: "Full conversation", subs: [] },
     ],
   },
   {
@@ -79,10 +79,10 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     icon: "travel",
     color: "#7fb0ad", // teal
     milestones: [
-      { title: "Choose the destination", subs: ["Research 3 places", "Set budget & dates"] },
+      { title: "Pick a destination", subs: ["Research 3 places", "Set budget & dates"] },
       { title: "Book the essentials", subs: ["Lock flights & stays"] },
       { title: "Plan the itinerary", subs: ["List must-sees", "Book experiences"] },
-      { title: "Depart with confidence", subs: [] },
+      { title: "Depart ready", subs: [] },
     ],
   },
 ];

@@ -3,7 +3,7 @@ import { draftForStep } from "@/lib/ai/draft";
 import { guardAi, clampText } from "@/lib/ai/guard";
 
 export async function POST(req: Request) {
-  const denied = await guardAi();
+  const denied = await guardAi({ weight: 2 });
   if (denied) return denied;
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const result = await draftForStep({

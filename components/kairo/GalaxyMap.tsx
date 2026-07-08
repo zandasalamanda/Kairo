@@ -181,14 +181,18 @@ function toLocalGoal(goalId: string, res: Awaited<ReturnType<typeof generateGoal
   };
 }
 
+const FREE_GOAL_CAP = 2;
+
 export function GalaxyMap({
   goals: initialGoals,
   initialGoalId,
   remote = false,
+  isPro = false,
 }: {
   goals: GoalWithNodes[];
   initialGoalId?: string;
   remote?: boolean;
+  isPro?: boolean;
 }) {
   const [goals, setGoals] = usePersistentState<GoalWithNodes[]>("kairo.goals.v1", initialGoals, !remote);
   const [positions, setPositions] = usePersistentState<Record<string, { x: number; y: number }>>("kairo.galaxy.v1", {});
@@ -418,11 +422,20 @@ export function GalaxyMap({
     showToast("Goal removed");
   };
 
+  // Free plan is capped at 2 active goals; Pro is unlimited.
+  const atGoalCap = () => {
+    if (isPro) return false;
+    if (goals.filter((g) => g.status === "active").length < FREE_GOAL_CAP) return false;
+    showToast("Free is capped at 2 goals — upgrade to Pro for unlimited");
+    return true;
+  };
+
   // Step 1: user submits a goal → fetch a couple tailored questions (small AI
   // call), shown before the plan is generated.
   const startCreate = async (text: string) => {
     const p = text.trim();
     if (!p || mapping) return;
+    if (atGoalCap()) { setComposing(false); return; }
     setComposing(false);
     setPrompt("");
     setPending({ prompt: p, clarifiers: [], loading: true });
@@ -478,7 +491,7 @@ export function GalaxyMap({
 
   // Adopt a starter template — a pre-built map, so NO AI call (instant + free).
   const adoptTemplate = async (t: GoalTemplate) => {
-    if (mapping) return;
+    if (mapping || atGoalCap()) return;
     setComposing(false);
     setBrowsingTemplates(false);
     const pos = beginForming();

@@ -24,6 +24,14 @@ export async function getProfile(): Promise<UserProfile> {
   return buildSeed().profile;
 }
 
+/** The signed-in user's plan (honours FORCE_PLAN=pro for pre-launch testing). */
+export async function getPlan(): Promise<"free" | "pro"> {
+  if (process.env.FORCE_PLAN === "pro") return "pro";
+  if (!isRemote) return "free";
+  const p = await ensureProfile();
+  return p?.plan === "pro" ? "pro" : "free";
+}
+
 export const getGoals = cache(async (): Promise<GoalWithNodes[]> => {
   // Demo mode starts with an empty galaxy — the app opens on "create your first
   // goal", not on fake data. (buildSeed still backs tests + the sign-in backdrop.)

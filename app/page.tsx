@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ChevronDown, Waypoints, Timer, PlayCircle, Gauge, Wand2, LayoutGrid } from "lucide-react";
+import { ArrowRight, ChevronDown, Waypoints, Timer, PlayCircle, Gauge, Wand2, LayoutGrid, Check } from "lucide-react";
 import { Logo } from "@/components/kairo/Logo";
 import { HeroCluster } from "@/components/kairo/HeroCluster";
 import { SectionLabel } from "@/components/kairo/PageHeader";
@@ -89,22 +89,32 @@ export default function LandingPage() {
           <SectionLabel className="mb-3 flex justify-center">Pricing</SectionLabel>
           <h2 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Start free. Upgrade when it&apos;s moving.</h2>
         </div>
-        <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
+        <div className="mx-auto grid max-w-3xl items-start gap-4 md:grid-cols-2">
           <div className="panel rounded-3xl p-8">
             <div className="text-sm font-semibold text-muted">Free</div>
             <div className="mt-2 font-display text-4xl font-semibold text-ink">$0</div>
-            <p className="mt-2 text-sm text-muted">A couple of active goals, focus sessions, real resources, and the pace mirror.</p>
-            <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">Get started <ArrowRight size={15} /></Link>
+            <p className="mt-2 text-sm text-muted">Everything you need to map a goal and start moving.</p>
+            <ul className="mt-6 space-y-2.5">
+              {["2 active goals", "AI goal mapping + focus sessions", "Real resource searches per step", "Pace mirror + momentum streaks", "Templates & shareable maps"].map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-ink/90"><Check size={15} className="mt-0.5 shrink-0 text-sage" />{f}</li>
+              ))}
+            </ul>
+            <Link href="/sign-up" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">Get started <ArrowRight size={15} /></Link>
           </div>
           <div className="panel-2 relative overflow-hidden rounded-3xl border border-accent/25 p-8">
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
-            <div className="text-sm font-semibold text-accent">Pro</div>
+            <div className="flex items-center gap-2"><div className="text-sm font-semibold text-accent">Pro</div><span className="rounded-full bg-accent/12 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">Most popular</span></div>
             <div className="mt-2 flex items-end gap-1">
               <span className="font-display text-4xl font-semibold text-ink">$8</span>
               <span className="mb-1.5 text-sm text-muted">/mo</span>
             </div>
-            <p className="mt-2 text-sm text-muted">Unlimited goals, the adapting map, co-written drafts, and a weekly pace digest.</p>
-            <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-ink hover:underline">Start with Pro <ArrowRight size={15} /></Link>
+            <p className="mt-2 text-sm text-muted">Everything in Free, plus the AI that does the work with you.</p>
+            <ul className="mt-6 space-y-2.5">
+              {["Unlimited goals", "Ask Sola — your agentic plan assistant", "“Do it for me” drafts + the adapting map", "Real, hand-checked video resources", "Deadline forecasting & the weekly digest", "Priority AI + much higher limits"].map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-ink"><Check size={15} className="mt-0.5 shrink-0 text-accent" />{f}</li>
+              ))}
+            </ul>
+            <Link href="/sign-up" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-ink hover:underline">Start free, upgrade in-app <ArrowRight size={15} /></Link>
           </div>
         </div>
       </section>

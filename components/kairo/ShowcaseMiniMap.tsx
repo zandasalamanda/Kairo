@@ -96,7 +96,7 @@ export function ShowcaseMiniMap({ map }: { map: ShowcaseMap }) {
               <circle cx={m.x - m.r * 0.3} cy={m.y - m.r * 0.34} r={m.r * 0.32} fill="#fff" fillOpacity={0.6} />
             </g>
             <text x={m.x} y={m.y - m.r - 9} textAnchor="middle" fill="#f2f3f5" fontSize="12.5" fontWeight={600} style={{ fontFamily: "var(--font-sans)", paintOrder: "stroke", stroke: "#0a0b0d", strokeWidth: 3, strokeLinejoin: "round" }}>
-              {truncate(m.title, 18)}
+              {truncate(m.title, 22)}
             </text>
           </g>
         ))}

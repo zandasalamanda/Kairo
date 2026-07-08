@@ -978,13 +978,13 @@ function GoalCluster({
         style={{ left: 0, top: 0 }}
         aria-label={goal.title}
       >
-        <span className="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 animate-pulse-soft rounded-full"
-          style={{ background: `radial-gradient(circle, ${hex}55, transparent 68%)`, width: 150, height: 150 }} />
+        <span className="absolute left-1/2 top-1/2 -z-10 h-[130px] w-[130px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
+          style={{ background: `${hex}3a` }} />
         <span
           className={cn("relative grid animate-grow-in place-items-center overflow-hidden rounded-full transition-transform", expanded ? "h-[92px] w-[92px]" : "h-20 w-20")}
           style={{
             background: `radial-gradient(circle at 34% 26%, #fdf3e0 0%, ${hex} 46%, #1a130a 100%)`,
-            boxShadow: `inset 0 -8px 22px rgba(0,0,0,0.5), inset 0 3px 9px rgba(255,255,255,0.35), 0 0 44px ${hex}44`,
+            boxShadow: `inset 0 -8px 22px rgba(0,0,0,0.5), inset 0 3px 9px rgba(255,255,255,0.35)`,
           }}
         >
           <PlanetSurface hex={hex} seed={goal.id} />

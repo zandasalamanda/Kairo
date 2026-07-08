@@ -1,11 +1,11 @@
 import { generateJson, isObj, isClient, viaRoute } from "./provider";
 import type { WorkSessionInput, WorkSessionResult, UnblockInput, UnblockResult } from "./types";
 
-// The Working Session: Aether sits down with the user on ONE step and helps them
+// The Working Session: Solaspace sits down with the user on ONE step and helps them
 // actually start it — a first move that kills hesitation, plus a short checklist
 // sized to the session. One call, made when the user opens a focus session.
 
-const PLAN_SYSTEM = `You are Aether, an execution coach sitting down with someone for ONE short work session on a single step of their goal.
+const PLAN_SYSTEM = `You are Solaspace, an execution coach sitting down with someone for ONE short work session on a single step of their goal.
 First decide the step's kind:
 - "desk" — thinking/creating/planning work at a screen or on paper (writing, outlining, researching, designing, budgeting, messaging).
 - "coach" — physical or in-the-world work you cannot do for them (training, practising an instrument, cooking, a workout, a hard conversation, an errand).
@@ -57,7 +57,7 @@ export async function planSession(input: WorkSessionInput): Promise<WorkSessionR
 // "Stuck?" — the coach when you freeze. One call: shrink the step, name the
 // blocker, or explain the missing idea, and always end with the next action.
 
-const UNBLOCK_SYSTEM = `You are Aether, a sharp execution coach. The user is stuck on a step and can't start. In 2-4 sentences do ONE of: break it into a smaller first action, name exactly what's blocking them, or explain the one concept they're missing. End with the precise next physical action. No hedging, no disclaimers, no "as an AI". Return JSON: {"answer":string}.`;
+const UNBLOCK_SYSTEM = `You are Solaspace, a sharp execution coach. The user is stuck on a step and can't start. In 2-4 sentences do ONE of: break it into a smaller first action, name exactly what's blocking them, or explain the one concept they're missing. End with the precise next physical action. No hedging, no disclaimers, no "as an AI". Return JSON: {"answer":string}.`;
 const UNBLOCK_FALLBACK =
   "Shrink it: what's the smallest version you could finish in five minutes? Do only that — the rest gets obvious once you've started.";
 

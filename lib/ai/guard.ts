@@ -33,7 +33,7 @@ export async function guardAi(): Promise<NextResponse | null> {
   if (!features.clerk) return null;
   const { auth } = await import("@clerk/nextjs/server");
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Sign in to use Aether." }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Sign in to use Solaspace." }, { status: 401 });
   if (await overLimit(userId)) {
     return NextResponse.json({ error: "You're going a bit fast — give it a moment." }, { status: 429 });
   }

@@ -106,7 +106,7 @@ export interface AskNodeInput {
   goalTitle: string;
   nodeTitle: string;
   question: string;
-  /** the goal's notebook context, so answers use what the user has told Aether */
+  /** the goal's notebook context, so answers use what the user has told Solaspace */
   context?: string;
 }
 export interface AskNodeResult {
@@ -124,7 +124,7 @@ export interface WorkSessionInput {
   context?: string;
 }
 export interface WorkSessionResult {
-  /** "desk" = screen/paper work Aether can co-produce; "coach" = physical work it can only brief. */
+  /** "desk" = screen/paper work Solaspace can co-produce; "coach" = physical work it can only brief. */
   kind: "desk" | "coach";
   /** the single smallest action to begin right now */
   firstMove: string;

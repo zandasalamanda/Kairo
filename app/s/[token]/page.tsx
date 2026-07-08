@@ -8,10 +8,10 @@ type Params = { params: Promise<{ token: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { token } = await params;
   const shared = await getSharedGoal(token);
-  if (!shared) return { title: "Shared plan · Aether" };
+  if (!shared) return { title: "Shared plan · Solaspace" };
   return {
-    title: `${shared.goal.title} · Aether`,
-    description: shared.goal.description || `A goal plan mapped with Aether.`,
+    title: `${shared.goal.title} · Solaspace`,
+    description: shared.goal.description || `A goal plan mapped with Solaspace.`,
     robots: { index: false },
   };
 }

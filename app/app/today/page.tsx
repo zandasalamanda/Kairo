@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/kairo/PageHeader";
 import { CockpitView } from "@/components/kairo/CockpitView";
 
-export const metadata: Metadata = { title: "Today · Aether" };
+export const metadata: Metadata = { title: "Today · Solaspace" };
 
 export default async function TodayPage() {
   const [goals, user] = await Promise.all([getGoals(), getSessionUser()]);

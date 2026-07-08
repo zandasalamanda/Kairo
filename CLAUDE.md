@@ -1,18 +1,18 @@
-# CLAUDE.md — Aether
+# CLAUDE.md — Solaspace
 
 Guidance for Claude Code working in this repository. These instructions override default behavior.
 
 ---
 
-## What Aether is
+## What Solaspace is
 
-Aether is a minimalist but visually rich, AI-powered **execution** app.
+Solaspace is a minimalist but visually rich, AI-powered **execution** app.
 
-> **Tell Aether what you want done. Tell it your time and energy. It maps the way and builds your day.**
+> **Tell Solaspace what you want done. Tell it your time and energy. It maps the way and builds your day.**
 
-Tagline: **Map the way. Build the day.** ("Aethers" = the right, opportune moment.)
+Tagline: **Map the way. Build the day.** ("Solaspaces" = the right, opportune moment.)
 
-Users create goals; Aether turns each into a **living goal map**; every morning the user gives Aether their available time + energy, and Aether builds the most efficient plan for today and keeps the goal moving. Every day the app answers one question: **What is the best thing I can do with the time I actually have today?**
+Users create goals; Solaspace turns each into a **living goal map**; every morning the user gives Solaspace their available time + energy, and Solaspace builds the most efficient plan for today and keeps the goal moving. Every day the app answers one question: **What is the best thing I can do with the time I actually have today?**
 
 **It IS:** a calm AI execution assistant · a living goal map · a daily efficiency scheduler · a futuristic personal command center · minimal but beautiful.
 

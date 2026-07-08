@@ -22,12 +22,12 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </Link>
         <div className="relative max-w-md">
           <h1 className="font-display text-[42px] font-semibold leading-[1.05] tracking-tight text-ink">
-            Map the way.
+            Chart it. Focus.
             <br />
-            Build the day.
+            Arrive.
           </h1>
           <p className="mt-5 text-[15px] leading-relaxed text-muted">
-            Tell Aether what you want done. It turns your goals, ideas, and available time into a clear plan for today.
+            Tell Solaspace a goal. It maps the whole path — then walks it with you, step by step.
           </p>
         </div>
         <p className="relative font-mono text-[12px] uppercase tracking-[0.18em] text-faint">Your best next move, mapped.</p>

@@ -55,7 +55,7 @@ const TEMPLATES: Template[] = [
   {
     match: /\b(launch|build|ship|app|startup|product|project|website|business)\b/i,
     description: (t) =>
-      `A focused build toward "${t}". Aether mapped the path from a clear MVP to your first real users, ordered so momentum compounds.`,
+      `A focused build toward "${t}". Solaspace mapped the path from a clear MVP to your first real users, ordered so momentum compounds.`,
     rhythm: "3 focus blocks / week · ~90 min each",
     weeks: 9,
     icon: "rocket",
@@ -83,7 +83,7 @@ const TEMPLATES: Template[] = [
   {
     match: /\b(study|exam|finals?|learn|school|course|class|degree|test)\b/i,
     description: (t) =>
-      `A calm study path toward "${t}". Aether turned it into a rhythm you can actually hold, weighted toward your weak spots.`,
+      `A calm study path toward "${t}". Solaspace turned it into a rhythm you can actually hold, weighted toward your weak spots.`,
     rhythm: "5 study blocks / week · ~45 min each",
     weeks: 6,
     icon: "school",
@@ -104,7 +104,7 @@ const TEMPLATES: Template[] = [
   {
     match: /\b(save|money|budget|debt|finance|invest|spend)\b/i,
     description: (t) =>
-      `A steady plan toward "${t}". Aether broke it into small, repeatable moves so progress compounds without stress.`,
+      `A steady plan toward "${t}". Solaspace broke it into small, repeatable moves so progress compounds without stress.`,
     rhythm: "2 money blocks / week · ~30 min each",
     weeks: 12,
     icon: "money",
@@ -120,7 +120,7 @@ const TEMPLATES: Template[] = [
   {
     match: /\b(routine|habit|organi[sz]e|health|fit|fitness|gym|run|sleep|clean)\b/i,
     description: (t) =>
-      `A grounded path toward "${t}". Aether started small and stackable so the routine sticks instead of stalling.`,
+      `A grounded path toward "${t}". Solaspace started small and stackable so the routine sticks instead of stalling.`,
     rhythm: "Daily anchor · ~20 min",
     weeks: 8,
     icon: "habit",
@@ -138,7 +138,7 @@ const TEMPLATES: Template[] = [
 const DEFAULT_TEMPLATE: Template = {
   match: /.*/,
   description: (t) =>
-    `A clear path toward "${t}". Aether broke it into ordered steps so you always know the next move.`,
+    `A clear path toward "${t}". Solaspace broke it into ordered steps so you always know the next move.`,
   rhythm: "3 focus blocks / week · ~60 min each",
   weeks: 8,
   icon: "target",
@@ -284,10 +284,10 @@ export function mockDailyPlan(input: DailyPlanInput): DailyPlanResult {
     blocks.length === 0
       ? "Every workable node needs more room than today's budget. Try a longer window, or make a task smaller."
       : input.energy === "low"
-        ? "Energy is low, so Aether kept blocks short and light — momentum matters more than volume today."
+        ? "Energy is low, so Solaspace kept blocks short and light — momentum matters more than volume today."
         : input.energy === "high"
-          ? "Energy is high, so Aether front-loaded the deepest work while you can carry it."
-          : "Aether balanced the day around what actually moves your goals, ordered by momentum.";
+          ? "Energy is high, so Solaspace front-loaded the deepest work while you can carry it."
+          : "Solaspace balanced the day around what actually moves your goals, ordered by momentum.";
 
   const recoveryNote = atRisk
     ? `"${atRisk.node.title}" is at risk. One of today's blocks targets it to pull the timeline back.`

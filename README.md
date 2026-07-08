@@ -1,8 +1,8 @@
-# Aether
+# Solaspace
 
 **Map the way. Build the day.**
 
-A minimalist but visually rich, AI-powered execution app. Tell Aether what you want done and how much time and energy you have — it turns messy goals into a living map and builds the most efficient plan for today.
+A minimalist but visually rich, AI-powered execution app. Tell Solaspace what you want done and how much time and energy you have — it turns messy goals into a living map and builds the most efficient plan for today.
 
 ## Stack
 
@@ -10,7 +10,7 @@ Next.js (App Router) · TypeScript (strict) · Tailwind CSS v4 · Supabase · Cl
 
 ## Runs with zero keys
 
-Every integration degrades gracefully. With **no** environment variables set, Aether runs in **demo mode** — seeded data, demo auth, and deterministic AI mocks — so it's fully explorable and deployable to a Vercel preview. Add keys (see `.env.example`) to light up real auth, database, payments, and AI.
+Every integration degrades gracefully. With **no** environment variables set, Solaspace runs in **demo mode** — seeded data, demo auth, and deterministic AI mocks — so it's fully explorable and deployable to a Vercel preview. Add keys (see `.env.example`) to light up real auth, database, payments, and AI.
 
 ## Scripts
 

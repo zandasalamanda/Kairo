@@ -61,7 +61,7 @@ export function buildSeed(): SeedData {
     userId: DEMO_USER_ID,
     title: "Launch my app by September",
     description:
-      "Ship a real MVP and win the first handful of customers. Aether mapped the path so momentum compounds week over week.",
+      "Ship a real MVP and win the first handful of customers. Solaspace mapped the path so momentum compounds week over week.",
     status: "active",
     progress: 38,
     targetDate: daysFromNow(58),

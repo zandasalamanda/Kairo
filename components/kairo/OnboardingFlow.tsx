@@ -54,7 +54,7 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
           <GoalCore size={140} className="mx-auto mb-8" />
           <h1 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">What are we making happen?</h1>
           <p className="mx-auto mt-3 max-w-md text-[15px] text-muted">
-            Tell Aether your goal. It will map the path and help build your day.
+            Tell Solaspace your goal. It will map the path and help build your day.
           </p>
 
           <div className="panel-2 mt-8 flex items-center gap-2 rounded-2xl p-2 pl-4 text-left">
@@ -90,7 +90,7 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
         <div className="my-auto flex flex-col items-center text-center">
           <GoalCore size={150} className="mb-8 animate-pulse-soft" />
           <p className="font-display text-xl font-medium text-ink">Mapping your goal…</p>
-          <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.2em] text-accent/70">Aether is drawing the path</p>
+          <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.2em] text-accent/70">Solaspace is drawing the path</p>
         </div>
       )}
 

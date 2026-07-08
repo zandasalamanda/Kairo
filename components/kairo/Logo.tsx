@@ -45,7 +45,7 @@ export function Logo({
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <KairoMark size={size} />
       {showWordmark && (
-        <span className="font-display text-[19px] font-semibold tracking-tight text-ink">Aether</span>
+        <span className="font-display text-[19px] font-semibold tracking-tight text-ink">Solaspace</span>
       )}
     </span>
   );

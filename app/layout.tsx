@@ -13,9 +13,9 @@ const sora = Sora({
   display: "swap",
 });
 
-const title = "Aether — Map the way. Build the day.";
+const title = "Solaspace — Chart it. Focus. Arrive.";
 const description =
-  "Tell Aether what you want done. It turns your goals, ideas, and available time into a clear plan for today.";
+  "Tell Solaspace what you want done. It turns your goals, ideas, and available time into a clear plan for today.";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kairo-zeta-five.vercel.app";
 
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title,
   description,
-  applicationName: "Aether",
-  appleWebApp: { capable: true, title: "Aether", statusBarStyle: "black-translucent" },
-  openGraph: { title, description, siteName: "Aether", type: "website" },
+  applicationName: "Solaspace",
+  appleWebApp: { capable: true, title: "Solaspace", statusBarStyle: "black-translucent" },
+  openGraph: { title, description, siteName: "Solaspace", type: "website" },
   twitter: { card: "summary_large_image", title, description },
 };
 

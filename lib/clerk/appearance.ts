@@ -1,4 +1,4 @@
-// Dark theme for Clerk's prebuilt components, matched to Aether's palette.
+// Dark theme for Clerk's prebuilt components, matched to Solaspace's palette.
 export const clerkAppearance = {
   variables: {
     colorBackground: "#0d0e11",

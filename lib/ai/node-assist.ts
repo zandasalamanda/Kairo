@@ -4,11 +4,11 @@ import type { ExpandNodeInput, ExpandNodeResult, AskNodeInput, AskNodeResult } f
 // Two small, user-initiated AI helpers on a single step of a plan:
 // "go deeper" (break a step into concrete sub-steps) and "ask a question".
 
-const EXPAND_SYSTEM = `You are Aether. Break ONE step of a plan into 2-4 concrete, do-this-now sub-steps the user can follow with zero further thinking. Return JSON: {"steps":[{"title":string,"estimatedMinutes":number,"aiReason":string}]}. Each title is imperative and specific — a single sitting of work, in the order it should be done. estimatedMinutes is realistic (10-90). "aiReason" is a short phrase. No fluff.`;
+const EXPAND_SYSTEM = `You are Solaspace. Break ONE step of a plan into 2-4 concrete, do-this-now sub-steps the user can follow with zero further thinking. Return JSON: {"steps":[{"title":string,"estimatedMinutes":number,"aiReason":string}]}. Each title is imperative and specific — a single sitting of work, in the order it should be done. estimatedMinutes is realistic (10-90). "aiReason" is a short phrase. No fluff.`;
 
-const ASK_SYSTEM = `You are Aether, a sharp, direct execution coach. Answer the user's question about a specific step of their plan in 2-4 sentences — concrete and practical, no fluff, no hedging, no disclaimers. Return JSON: {"answer":string}.`;
+const ASK_SYSTEM = `You are Solaspace, a sharp, direct execution coach. Answer the user's question about a specific step of their plan in 2-4 sentences — concrete and practical, no fluff, no hedging, no disclaimers. Return JSON: {"answer":string}.`;
 
-const ASK_FALLBACK = "Add an AI key to ask Aether about a step. For now: break this into the smallest possible first action and start there — momentum makes the rest obvious.";
+const ASK_FALLBACK = "Add an AI key to ask Solaspace about a step. For now: break this into the smallest possible first action and start there — momentum makes the rest obvious.";
 
 function validExpand(r: unknown): r is ExpandNodeResult {
   return isObj(r) && Array.isArray(r.steps);

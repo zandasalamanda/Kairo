@@ -114,7 +114,7 @@ export function computeReviewInsights(goals: GoalWithNodes[], nowMs: number): Re
   const withDeadline = paceList.filter((p) => p.state !== "none" && p.state !== "done").length;
   let headline: string;
   if (active.length === 0) headline = "No active goals to weigh in on yet.";
-  else if (withDeadline === 0) headline = "Set a deadline on a goal and Aether will track your pace to it.";
+  else if (withDeadline === 0) headline = "Set a deadline on a goal and Solaspace will track your pace to it.";
   else if (behind === 0) headline = "You're on pace across every goal with a deadline.";
   else if (behind === withDeadline) headline = `All ${behind} of your timed goals are behind pace — pick one to pull back.`;
   else headline = `${behind} of ${withDeadline} timed goals ${behind === 1 ? "is" : "are"} slipping behind pace.`;

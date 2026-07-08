@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/kairo/LegalPage";
 
-export const metadata: Metadata = { title: "Privacy · Aether" };
+export const metadata: Metadata = { title: "Privacy · Solaspace" };
 
 const CONTACT = "zander.leon@gmail.com";
 
@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy" updated="July 2026">
       <p>
-        Aether helps you turn goals into a plan. This policy explains what we collect, how we use it, and the
+        Solaspace helps you turn goals into a plan. This policy explains what we collect, how we use it, and the
         choices you have. We keep it short because we keep the data small.
       </p>
 
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
       <LegalSection heading="How your goals are processed by AI">
         <p>
-          When you ask Aether to map a goal or break down a step, the text you enter is sent to Google&rsquo;s Gemini
+          When you ask Solaspace to map a goal or break down a step, the text you enter is sent to Google&rsquo;s Gemini
           API to generate your plan. Only what&rsquo;s needed for that request is sent. We do not sell your data or use
           it to build advertising profiles.
         </p>

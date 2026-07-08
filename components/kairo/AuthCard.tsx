@@ -45,7 +45,7 @@ export function AuthCard({ mode }: { mode: "sign-in" | "sign-up" }) {
         </div>
 
         <p className="mt-5 text-center text-[13px] text-muted">
-          {signIn ? "New to Aether? " : "Already have an account? "}
+          {signIn ? "New to Solaspace? " : "Already have an account? "}
           <Link href={signIn ? "/sign-up" : "/sign-in"} className="text-accent hover:underline">
             {signIn ? "Create an account" : "Sign in"}
           </Link>

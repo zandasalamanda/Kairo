@@ -79,7 +79,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
       <div className="mt-3 flex items-center justify-between px-1">
         <p className="text-[13px] text-muted">{reasoning ?? `${items.length} item${items.length === 1 ? "" : "s"}`}</p>
         <Button variant="glass" size="sm" onClick={sortAll} disabled={sorting || items.length === 0}>
-          <Sparkle size={14} className={sorting ? "animate-pulse-soft" : ""} /> {sorting ? "Sorting…" : sorted ? "Re-sort" : "Sort with Aether"}
+          <Sparkle size={14} className={sorting ? "animate-pulse-soft" : ""} /> {sorting ? "Sorting…" : sorted ? "Re-sort" : "Sort with Solaspace"}
         </Button>
       </div>
 

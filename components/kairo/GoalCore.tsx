@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * The floating goal core — a single luminous orb. Aether's signature focal
+ * The floating goal core — a single luminous orb. Solaspace's signature focal
  * object; one of the few places that carries the accent and a soft glow.
  */
 export function GoalCore({

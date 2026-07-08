@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import Link from "next/link";
 import { Check, PlayCircle, Dumbbell, BookOpen, ExternalLink, ArrowRight } from "lucide-react";
 import type { SharedGoal, SharedNode } from "@/lib/data/shared";
@@ -23,7 +24,6 @@ function fmtDate(iso: string): string {
 /** Public, read-only view of a shared goal map. No auth, no interactivity. */
 export function SharedGoalView({ shared }: { shared: SharedGoal }) {
   const { goal, nodes } = shared;
-  const Icon = goalIcon(goal.icon);
   const milestones = nodes.filter((n) => !n.parentId);
   const childrenOf = (id: string) => nodes.filter((n) => n.parentId === id);
 
@@ -31,14 +31,14 @@ export function SharedGoalView({ shared }: { shared: SharedGoal }) {
     <div className="min-h-dvh bg-canvas px-5 py-8 md:py-14">
       <div className="mx-auto w-full max-w-2xl">
         <div className="flex items-center justify-between">
-          <Link href="/" className="font-display text-[15px] font-semibold tracking-tight text-ink">Aether</Link>
+          <Link href="/" className="font-display text-[15px] font-semibold tracking-tight text-ink">Solaspace</Link>
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Shared plan</span>
         </div>
 
         {/* hero */}
         <div className="mt-10 flex flex-col items-center text-center">
           <span className="grid h-14 w-14 place-items-center rounded-2xl" style={{ background: "rgba(230,184,119,0.12)" }}>
-            <Icon size={26} className="text-accent" />
+            {createElement(goalIcon(goal.icon), { size: 26, className: "text-accent" })}
           </span>
           <h1 className="mt-4 font-display text-2xl font-semibold text-ink md:text-3xl">{goal.title}</h1>
           {goal.description && <p className="mt-2 max-w-lg text-[15px] leading-relaxed text-muted">{goal.description}</p>}
@@ -74,7 +74,7 @@ export function SharedGoalView({ shared }: { shared: SharedGoal }) {
 
         {/* CTA — the growth loop */}
         <div className="mt-14 flex flex-col items-center gap-3 text-center">
-          <p className="text-[14px] text-muted">Map your own goal — Aether draws the whole path and helps you walk it.</p>
+          <p className="text-[14px] text-muted">Map your own goal — Solaspace draws the whole path and helps you walk it.</p>
           <Link href="/" className="raised-gold inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[15px] font-medium">
             Start your map <ArrowRight size={17} />
           </Link>

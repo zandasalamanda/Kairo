@@ -14,7 +14,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       <div className="animate-fade-up">
         <div className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">Unexpected error</div>
         <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Something slipped</h1>
-        <p className="mx-auto mt-3 max-w-sm text-[15px] text-muted">Aether hit a snag rendering this view. Give it another go.</p>
+        <p className="mx-auto mt-3 max-w-sm text-[15px] text-muted">Solaspace hit a snag rendering this view. Give it another go.</p>
         <button
           onClick={reset}
           className="mt-8 inline-flex h-11 items-center gap-2 rounded-xl bg-accent px-6 text-sm font-semibold text-[#1b1206] transition-all hover:brightness-105"

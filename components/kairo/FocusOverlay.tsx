@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const OPTIONS = [15, 25, 50];
 
 /**
- * A focus session on a single step — a calm timer that Aether sits down with you
+ * A focus session on a single step — a calm timer that Solaspace sits down with you
  * for. On open it plans the session (a first move + a short checklist); for desk
  * steps it can co-write a real draft, and "Stuck?" unblocks you. Completing it
  * logs the step done. Each AI beat is one user-initiated call.
@@ -49,7 +49,7 @@ export function FocusOverlay({
   const [stuckLoading, setStuckLoading] = React.useState(false);
   const [stuckAnswer, setStuckAnswer] = React.useState<string | null>(null);
 
-  // Draft with Aether (desk steps).
+  // Draft with Solaspace (desk steps).
   const [drafting, setDrafting] = React.useState(false);
   const [draft, setDraft] = React.useState<DraftResult | null>(null);
   const [draftLoading, setDraftLoading] = React.useState(false);
@@ -212,7 +212,7 @@ export function FocusOverlay({
                     <div className="h-3 w-full animate-pulse rounded bg-white/5" />
                     <div className="h-3 w-11/12 animate-pulse rounded bg-white/5" />
                     <div className="h-3 w-3/4 animate-pulse rounded bg-white/5" />
-                    <p className="pt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Aether is drafting…</p>
+                    <p className="pt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Solaspace is drafting…</p>
                   </div>
                 ) : (
                   <>
@@ -278,7 +278,7 @@ export function FocusOverlay({
                       </button>
                       {plan.kind === "desk" && (
                         <button onClick={openDraft} className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] text-accent transition-colors hover:text-ink">
-                          <PenLine size={13} /> Draft with Aether
+                          <PenLine size={13} /> Draft with Solaspace
                         </button>
                       )}
                     </div>

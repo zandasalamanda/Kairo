@@ -1,6 +1,6 @@
 // Pre-built, hardcoded maps shown on the landing page's interactive planet
 // cluster — NOT AI-generated. Each is a real, plausible plan so visitors can see
-// what Aether produces. Colors are distinct palette hues (the brand gold stays on
+// what Solaspace produces. Colors are distinct palette hues (the brand gold stays on
 // the catchphrase + CTA); GOAL_PALETTE: gold, coral, sage, periwinkle, teal.
 
 export interface ShowcaseMilestone {

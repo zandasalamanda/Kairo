@@ -172,7 +172,7 @@ export function Notebook({ goals, remote, initialGoalId }: { goals: GoalWithNode
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3 px-1">
-          <p className="min-w-0 text-[12px] text-faint">Aether reads these notes when you &ldquo;Ask&rdquo; or &ldquo;Go deeper&rdquo; on this goal&apos;s steps.</p>
+          <p className="min-w-0 text-[12px] text-faint">Solaspace reads these notes when you &ldquo;Ask&rdquo; or &ldquo;Go deeper&rdquo; on this goal&apos;s steps.</p>
           <button
             onClick={runExtract}
             disabled={!notes.trim() || extracting}

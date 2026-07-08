@@ -10,7 +10,7 @@ import { MomentumStrip } from "@/components/kairo/MomentumStrip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 
-export const metadata: Metadata = { title: "Review · Aether" };
+export const metadata: Metadata = { title: "Review · Solaspace" };
 
 export default async function ReviewPage() {
   const [goals, user, focus, insights] = await Promise.all([getGoals(), getSessionUser(), getFocusStats(), getReviewInsights()]);
@@ -21,7 +21,7 @@ export default async function ReviewPage() {
         <EmptyState
           icon={<Compass size={22} />}
           title="Nothing to review yet"
-          description="Map a goal with a deadline and Aether will tell you whether you're on pace to hit it."
+          description="Map a goal with a deadline and Solaspace will tell you whether you're on pace to hit it."
           action={
             <Link href="/app/map">
               <Button variant="primary" size="lg">Create a goal</Button>

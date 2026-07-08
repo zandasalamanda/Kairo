@@ -492,7 +492,7 @@ export function GalaxyMap({
       return {
         id, goalId, parentId, title: s.title, description: "", status: "not_started", progress: 0,
         priority: 3, estimatedMinutes: s.estimatedMinutes, dueDate: null, positionX: null, positionY: null,
-        aiReason: "Aether broke this down", resource: null, createdAt: nowISO(), updatedAt: nowISO(),
+        aiReason: "Solaspace broke this down", resource: null, createdAt: nowISO(), updatedAt: nowISO(),
       };
     });
     setGoals((prev) => prev.map((x) => (x.id === goalId ? { ...x, nodes: [...x.nodes, ...created] } : x)));
@@ -537,7 +537,7 @@ export function GalaxyMap({
     showToast("Saved to notebook");
   };
 
-  // The living map: ask Aether where the plan should adapt to the user's real
+  // The living map: ask Solaspace where the plan should adapt to the user's real
   // progress. Proposals are additive and shown for accept/dismiss — never auto-applied.
   const runReplan = async (goalId: string) => {
     const g = goals.find((x) => x.id === goalId);
@@ -640,7 +640,7 @@ export function GalaxyMap({
         {mapping && (
           <div className="pointer-events-none absolute inset-x-0 bottom-[calc(120px+env(safe-area-inset-bottom))] z-10 text-center md:bottom-24">
             <p className="font-display text-[15px] text-ink">Mapping your goal…</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-accent/70">Aether is drawing the path</p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-accent/70">Solaspace is drawing the path</p>
           </div>
         )}
 
@@ -1130,7 +1130,7 @@ function NewGoalBar({
         <p className="mb-3 text-center text-[15px] text-muted">
           <span className="font-display text-ink">What are we making happen?</span>
           <br />
-          Tell Aether a goal — it maps the whole path.
+          Tell Solaspace a goal — it maps the whole path.
         </p>
       )}
       <form
@@ -1228,7 +1228,7 @@ const REPLAN_META: Record<ReplanKind, string> = {
   stretch: "Stretch",
 };
 
-/** The living map's review sheet: accept or dismiss Aether's proposed changes. */
+/** The living map's review sheet: accept or dismiss Solaspace's proposed changes. */
 function ReplanSheet({ hex, loading, proposals, onAccept, onDismiss, onClose }: {
   hex: string;
   loading: boolean;
@@ -1479,7 +1479,7 @@ function NodeSheet({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Chip tone="accent" icon={<Timer size={14} />} onClick={onFocus}>Focus</Chip>
         <Chip tone="sage" icon={<Check size={14} />} onClick={onDone}>Done</Chip>
-        <Chip tone="accent" icon={<MessageCircle size={14} />} onClick={() => { setAsking((a) => !a); setBreakOpen(false); }}>Ask Aether</Chip>
+        <Chip tone="accent" icon={<MessageCircle size={14} />} onClick={() => { setAsking((a) => !a); setBreakOpen(false); }}>Ask Solaspace</Chip>
         <Chip tone="accent" icon={breaking ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} onClick={breaking ? undefined : () => { setBreakOpen((o) => !o); setAsking(false); }}>
           {breaking ? "Working…" : "Break it down"}
         </Chip>
@@ -1488,7 +1488,7 @@ function NodeSheet({
       {breakOpen && (
         <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3">
           <button onClick={() => { setBreakOpen(false); onBreakDown(); }} className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-accent transition-colors hover:text-ink">
-            <Sparkles size={14} /> Let Aether split it
+            <Sparkles size={14} /> Let Solaspace split it
           </button>
           <button onClick={() => { setBreakOpen(false); onBranch(); }} className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink">
             <GitBranch size={14} /> Add a step myself

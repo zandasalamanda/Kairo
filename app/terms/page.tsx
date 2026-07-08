@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/kairo/LegalPage";
 
-export const metadata: Metadata = { title: "Terms · Aether" };
+export const metadata: Metadata = { title: "Terms · Solaspace" };
 
 const CONTACT = "zander.leon@gmail.com";
 
@@ -9,20 +9,20 @@ export default function TermsPage() {
   return (
     <LegalPage title="Terms of Service" updated="July 2026">
       <p>
-        These terms cover your use of Aether. By creating an account or using the app, you agree to them. If you
+        These terms cover your use of Solaspace. By creating an account or using the app, you agree to them. If you
         don&rsquo;t agree, please don&rsquo;t use the service.
       </p>
 
       <LegalSection heading="The service">
         <p>
-          Aether turns goals into plans and helps you decide what to do next. Features may change as we improve the
+          Solaspace turns goals into plans and helps you decide what to do next. Features may change as we improve the
           product.
         </p>
       </LegalSection>
 
       <LegalSection heading="Your account">
         <p>
-          You&rsquo;re responsible for keeping your account secure and for the content you create. Don&rsquo;t use Aether
+          You&rsquo;re responsible for keeping your account secure and for the content you create. Don&rsquo;t use Solaspace
           for anything unlawful, or to disrupt, abuse, or overload the service.
         </p>
       </LegalSection>
@@ -36,14 +36,14 @@ export default function TermsPage() {
 
       <LegalSection heading="Availability and warranty">
         <p>
-          The service is provided &ldquo;as is,&rdquo; without warranties of any kind. We work to keep Aether reliable but
+          The service is provided &ldquo;as is,&rdquo; without warranties of any kind. We work to keep Solaspace reliable but
           can&rsquo;t guarantee it will be uninterrupted or error-free.
         </p>
       </LegalSection>
 
       <LegalSection heading="Limitation of liability">
         <p>
-          To the extent permitted by law, Aether is not liable for indirect or consequential damages arising from your
+          To the extent permitted by law, Solaspace is not liable for indirect or consequential damages arising from your
           use of the service.
         </p>
       </LegalSection>

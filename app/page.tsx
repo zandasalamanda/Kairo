@@ -6,8 +6,8 @@ import { SectionLabel } from "@/components/kairo/PageHeader";
 import { Button } from "@/components/ui/Button";
 
 const BEATS = [
-  { k: "Chart it", desc: "Tell Aether a goal. It maps the whole path — milestones, concrete steps, and a finish line — in about a minute." },
-  { k: "Focus", desc: "Run a calm focus session on the next step. Aether hands you a first move, a checklist sized to the session, and unblocks you when you stall." },
+  { k: "Chart it", desc: "Tell Solaspace a goal. It maps the whole path — milestones, concrete steps, and a finish line — in about a minute." },
+  { k: "Focus", desc: "Run a calm focus session on the next step. Solaspace hands you a first move, a checklist sized to the session, and unblocks you when you stall." },
   { k: "Arrive", desc: "See your true pace to every deadline and adapt as life shifts — so the plan stays honest and you actually finish." },
 ];
 
@@ -15,8 +15,8 @@ const FEATURES = [
   { icon: Waypoints, title: "Living goal maps", desc: "Every goal becomes a planet with a branching path of steps. The next move glows; the rest waits." },
   { icon: Timer, title: "Working sessions", desc: "A calm timer that sits with you — a first move, a checklist for the session, and drafts it writes alongside you." },
   { icon: PlayCircle, title: "Real resources", desc: "Each step can pull a real, hand-checked video — never a dead link, never a hallucinated one." },
-  { icon: Gauge, title: "The honest mirror", desc: "Not just what's done — whether you'll hit your deadline. Aether forecasts your pace and flags what's slipping." },
-  { icon: Wand2, title: "A map that adapts", desc: "Ahead or stuck for weeks? Aether proposes an easier on-ramp or a new phase — you accept or dismiss." },
+  { icon: Gauge, title: "The honest mirror", desc: "Not just what's done — whether you'll hit your deadline. Solaspace forecasts your pace and flags what's slipping." },
+  { icon: Wand2, title: "A map that adapts", desc: "Ahead or stuck for weeks? Solaspace proposes an easier on-ramp or a new phase — you accept or dismiss." },
   { icon: LayoutGrid, title: "Start from a path", desc: "Adopt a proven starter goal in one tap, or share any map as a clean read-only link." },
 ];
 

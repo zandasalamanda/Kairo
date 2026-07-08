@@ -5,7 +5,7 @@ import { GOAL_ICON_KEYS } from "@/lib/kairo/goal-icon-keys";
 import type { GoalMapInput, GoalMapResult, GeneratedNode } from "./types";
 import type { NodeResource, ResourceKind } from "@/types";
 
-const SYSTEM = `You are Aether, an execution planner and coach. Turn the user's goal into a DETAILED, DIRECT, step-by-step plan they can start with ZERO further thinking. The goal may include the user's answers to a few quick questions (deadline, level, budget, etc.) — honor them.
+const SYSTEM = `You are Solaspace, an execution planner and coach. Turn the user's goal into a DETAILED, DIRECT, step-by-step plan they can start with ZERO further thinking. The goal may include the user's answers to a few quick questions (deadline, level, budget, etc.) — honor them.
 
 Return JSON: {"title":string,"description":string,"suggestedTargetDate":ISO8601,"nodes":[{"title":string,"description":string,"status":"in_motion"|"not_started","estimatedMinutes":number,"priority":number,"aiReason":string,"parentIndex":number|null,"resource":{"kind":"watch"|"read"|"practice","label":string,"query":string}|null}],"firstNextAction":string,"weeklyRhythm":string,"icon":string}.
 

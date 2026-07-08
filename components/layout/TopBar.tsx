@@ -8,7 +8,7 @@ import type { SessionUser } from "@/lib/auth";
 export function TopBar({ user, className }: { user: SessionUser; className?: string }) {
   return (
     <header className={cn("sticky top-0 z-30 flex items-center justify-between border-b border-line bg-canvas/70 px-4 py-3 backdrop-blur-xl", className)}>
-      <Link href="/app/today" aria-label="Aether home">
+      <Link href="/app/today" aria-label="Solaspace home">
         <Logo size={24} />
       </Link>
       {clerkPublic ? (

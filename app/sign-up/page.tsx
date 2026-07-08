@@ -5,7 +5,7 @@ import { AuthShell } from "@/components/kairo/AuthShell";
 import { AuthCard } from "@/components/kairo/AuthCard";
 import { clerkAppearance } from "@/lib/clerk/appearance";
 
-export const metadata: Metadata = { title: "Sign up · Aether" };
+export const metadata: Metadata = { title: "Sign up · Solaspace" };
 
 export default function SignUpPage() {
   return (

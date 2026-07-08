@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Aether — Map the way. Build the day.";
+export const alt = "Solaspace — Chart it. Focus. Arrive.";
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -28,8 +28,8 @@ export default function OpengraphImage() {
             boxShadow: "0 0 90px rgba(230,184,119,0.55)",
           }}
         />
-        <div style={{ marginTop: 48, fontSize: 84, fontWeight: 600, letterSpacing: "-0.03em" }}>Aether</div>
-        <div style={{ marginTop: 14, fontSize: 32, color: "#9a9ea8" }}>Map the way. Build the day.</div>
+        <div style={{ marginTop: 48, fontSize: 84, fontWeight: 600, letterSpacing: "-0.03em" }}>Solaspace</div>
+        <div style={{ marginTop: 14, fontSize: 32, color: "#9a9ea8" }}>Chart it. Focus. Arrive.</div>
       </div>
     ),
     { ...size }

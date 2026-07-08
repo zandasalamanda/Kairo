@@ -31,6 +31,7 @@ import {
 import { MicButton } from "@/components/ui/MicButton";
 import { Chip } from "@/components/ui/Chip";
 import { FocusOverlay } from "./FocusOverlay";
+import { MappingNarration } from "./MappingNarration";
 import { cn, formatDuration, newId, relativeDays, truncate } from "@/lib/utils";
 
 const GOLDEN = 2.399963229;
@@ -640,7 +641,7 @@ export function GalaxyMap({
         {mapping && (
           <div className="pointer-events-none absolute inset-x-0 bottom-[calc(120px+env(safe-area-inset-bottom))] z-10 text-center md:bottom-24">
             <p className="font-display text-[15px] text-ink">Mapping your goal…</p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-accent/70">Solaspace is drawing the path</p>
+            <MappingNarration />
           </div>
         )}
 

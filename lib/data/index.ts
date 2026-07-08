@@ -85,8 +85,7 @@ export const getInbox = cache(async (): Promise<InboxItem[]> => {
 });
 
 export async function getTodayPlan(): Promise<DailyPlanWithBlocks | null> {
-  // Today's plan is derived on demand from the user's live goals (see
-  // TodayBuilder), so there's nothing persisted to read.
+  // No persisted daily plan — Today (the Cockpit) is derived live from goals.
   return null;
 }
 

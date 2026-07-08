@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getGoals } from "@/lib/data";
+import { getGoals, isRemote } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/kairo/PageHeader";
-import { TodayBuilder } from "@/components/kairo/TodayBuilder";
+import { CockpitView } from "@/components/kairo/CockpitView";
 
 export const metadata: Metadata = { title: "Today · Aether" };
 
@@ -12,8 +12,8 @@ export default async function TodayPage() {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   return (
     <PageContainer user={user}>
-      <PageHeader eyebrow={today} title="Today" description="How much time and energy do you have? Aether builds the plan that fits." />
-      <TodayBuilder goals={goals} />
+      <PageHeader eyebrow={today} title="Your move" description="The next real step in each goal — pick one and run a focus session, right here." />
+      <CockpitView goals={goals} remote={isRemote} />
     </PageContainer>
   );
 }

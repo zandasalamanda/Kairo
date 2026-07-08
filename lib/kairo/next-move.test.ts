@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeNextMove } from "./next-move";
+import { computeNextMove, nextNodeForGoal } from "./next-move";
 import type { GoalWithNodes, GoalNode } from "@/types";
 
 const nd = (over: Partial<GoalNode>): GoalNode => ({
@@ -36,5 +36,15 @@ describe("computeNextMove", () => {
     const g = gl({ nodes: [nd({ status: "done" }), nd({ status: "blocked" })] });
     expect(computeNextMove([g])).toBeNull();
     expect(computeNextMove([])).toBeNull();
+  });
+});
+
+describe("nextNodeForGoal", () => {
+  it("returns the top-ranked open node for a goal", () => {
+    const g = gl({ nodes: [nd({ status: "not_started", title: "NS" }), nd({ status: "at_risk", title: "AR" })] });
+    expect(nextNodeForGoal(g)?.title).toBe("AR");
+  });
+  it("returns null when the goal has no open steps", () => {
+    expect(nextNodeForGoal(gl({ nodes: [nd({ status: "done" }), nd({ status: "blocked" })] }))).toBeNull();
   });
 });

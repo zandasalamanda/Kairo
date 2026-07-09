@@ -99,6 +99,9 @@ export function HeroCluster() {
 
     const onDown = (e: PointerEvent) => {
       if (openIdRef.current) return;
+      // Don't hijack clicks on a control (the CTA link/button) into a drag —
+      // otherwise the pointer capture below swallows the click.
+      if ((e.target as HTMLElement | null)?.closest("a, button")) return;
       dragging = true; movedRef.current = false; lastX = e.clientX; downX = e.clientX; downY = e.clientY;
       try { wrap.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     };

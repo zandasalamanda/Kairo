@@ -23,6 +23,7 @@ export async function POST(req: Request) {
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripeCustomerId,
       return_url: `${origin}/app/billing`,
+      ...(process.env.STRIPE_PORTAL_CONFIG_ID ? { configuration: process.env.STRIPE_PORTAL_CONFIG_ID } : {}),
     });
     return NextResponse.json({ url: session.url });
   } catch (e) {

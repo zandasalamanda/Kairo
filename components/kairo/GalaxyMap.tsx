@@ -32,6 +32,7 @@ import {
   setNodeResolvedResource,
   shareGoal,
   deleteGoal,
+  addNodeEvidence,
 } from "@/lib/data/actions";
 import { MicButton } from "@/components/ui/MicButton";
 import { Chip } from "@/components/ui/Chip";
@@ -1052,6 +1053,7 @@ function NodeOrb({
 }) {
   const done = node.status === "done";
   const dim = node.status === "not_started";
+  const proven = done && (node.evidence?.length ?? 0) > 0; // done WITH real proof attached
   const size = spine ? 50 : 38;
   const glow = done
     ? `0 0 24px ${hex}88, inset 0 0 12px ${hex}55`
@@ -1073,6 +1075,9 @@ function NodeOrb({
       >
         {(isNext || selected) && (
           <span className="absolute inset-0 animate-pulse-soft rounded-full" style={{ boxShadow: `0 0 0 4px ${hex}22, 0 0 24px ${hex}66`, margin: -4 }} />
+        )}
+        {proven && (
+          <span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 2px rgba(255,240,210,0.85), 0 0 18px ${hex}cc`, margin: -3 }} />
         )}
         {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
         <span
@@ -1484,6 +1489,10 @@ function NodeSheet({
   const [researching, setResearching] = React.useState(false);
   const [researchResult, setResearchResult] = React.useState<ResearchResult | null>(null);
   const [researchLoading, setResearchLoading] = React.useState(false);
+  const [provingDone, setProvingDone] = React.useState(false);
+  const [evKind, setEvKind] = React.useState<"link" | "note" | "metric">("link");
+  const [evValue, setEvValue] = React.useState("");
+  const [savingEv, setSavingEv] = React.useState(false);
 
   const router = useRouter();
   // Blocking AI responses (upgrade / rate-limit / sign-in) surface as a toast —
@@ -1495,6 +1504,18 @@ function NodeSheet({
       return true;
     }
     return false;
+  };
+
+  const markDone = async (withProof: boolean) => {
+    if (withProof && evValue.trim()) {
+      setSavingEv(true);
+      await addNodeEvidence({ nodeId: node.id, kind: evKind, value: evValue.trim() });
+      setSavingEv(false);
+    }
+    setProvingDone(false);
+    setEvValue("");
+    onDone();
+    router.refresh();
   };
 
   const runResearch = async () => {
@@ -1579,10 +1600,27 @@ function NodeSheet({
         <NodeResourceBlock node={node} onResolve={(r) => onResolveResource(node.id, r)} />
       )}
 
+      {node.evidence && node.evidence.length > 0 && (
+        <div className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">Proof</div>
+          {node.evidence.map((ev) =>
+            ev.kind === "link" ? (
+              <a key={ev.id} href={ev.value.startsWith("http") ? ev.value : `https://${ev.value}`} target="_blank" rel="noopener noreferrer" className="truncate rounded-lg bg-white/[0.03] px-3 py-1.5 text-[12.5px] text-accent underline decoration-accent/30 underline-offset-2 hover:decoration-accent">
+                {ev.value}
+              </a>
+            ) : (
+              <div key={ev.id} className="rounded-lg bg-white/[0.03] px-3 py-1.5 text-[12.5px] text-ink/90">
+                <span className="mr-1.5 font-mono text-[10px] uppercase text-faint">{ev.kind === "metric" ? "metric" : "note"}</span>{ev.value}
+              </div>
+            )
+          )}
+        </div>
+      )}
+
       {/* Two verbs that matter (Focus, Done) + two grouped helpers (Ask, Break down). */}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Chip tone="accent" icon={<Timer size={14} />} onClick={onFocus}>Focus</Chip>
-        <Chip tone="sage" icon={<Check size={14} />} onClick={onDone}>Done</Chip>
+        <Chip tone="sage" icon={<Check size={14} />} onClick={() => setProvingDone((p) => !p)}>Done</Chip>
         <Chip tone="accent" icon={<MessageCircle size={14} />} onClick={() => { setAsking((a) => !a); setBreakOpen(false); }}>Ask Solaspace</Chip>
         <Chip tone="accent" icon={breaking ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} onClick={breaking ? undefined : () => { setBreakOpen((o) => !o); setAsking(false); }}>
           {breaking ? "Working…" : "Break it down"}
@@ -1590,6 +1628,36 @@ function NodeSheet({
         <Chip tone="accent" icon={<Wand2 size={14} />} onClick={() => void runDraft()}>Do it for me</Chip>
         <Chip tone="accent" pro icon={<Search size={14} />} onClick={() => void runResearch()}>Research</Chip>
       </div>
+
+      {provingDone && (
+        <div className="mt-3 border-t border-line pt-3">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">Proof of progress</span>
+            <button onClick={() => setProvingDone(false)} className="text-faint transition-colors hover:text-ink" aria-label="Close"><X size={14} /></button>
+          </div>
+          <p className="mb-2 text-[12px] text-muted">Attach what you produced (optional) — it stays on your map as real proof.</p>
+          <div className="inset-well mb-2 flex gap-1 rounded-xl p-1">
+            {(["link", "note", "metric"] as const).map((k) => (
+              <button key={k} onClick={() => setEvKind(k)} className={cn("flex-1 rounded-lg px-2 py-1 text-[12px] capitalize transition-colors", evKind === k ? "raised-btn text-ink" : "text-muted hover:text-ink")}>
+                {k === "metric" ? "Number" : k}
+              </button>
+            ))}
+          </div>
+          <input
+            autoFocus
+            value={evValue}
+            onChange={(e) => setEvValue(e.target.value)}
+            placeholder={evKind === "link" ? "Paste a link — a doc, PR, post…" : evKind === "metric" ? "e.g. 1,400 words · 3 miles · 12 reps" : "A quick note on what you did"}
+            className="inset-well w-full rounded-xl px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint focus-visible:outline-none"
+          />
+          <div className="mt-2.5 flex items-center gap-3">
+            <button onClick={() => void markDone(true)} disabled={savingEv} className="raised-gold inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-medium disabled:opacity-50">
+              {savingEv ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Mark done
+            </button>
+            <button onClick={() => void markDone(false)} disabled={savingEv} className="text-[12px] text-faint transition-colors hover:text-muted">Just mark done</button>
+          </div>
+        </div>
+      )}
 
       {researching && (
         <div className="mt-3 border-t border-line pt-3">

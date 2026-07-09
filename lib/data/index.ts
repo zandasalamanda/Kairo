@@ -3,10 +3,10 @@ import { buildSeed } from "@/lib/mock/seed";
 import { features } from "@/lib/config";
 import { getScopedClient } from "@/lib/supabase/scoped";
 import { ensureProfile } from "./profile";
-import { rowToGoal, rowToNode, rowToInbox, type GoalRow, type NodeRow, type InboxRow } from "./mappers";
+import { rowToGoal, rowToNode, rowToInbox, rowToEvidence, type GoalRow, type NodeRow, type InboxRow, type EvidenceRow } from "./mappers";
 import { computeFocusStats, type FocusSessionRow } from "./focus-stats";
 import { computeReviewInsights, type ReviewInsights } from "@/lib/kairo/review-insights";
-import type { GoalWithNodes, GoalNode, InboxItem, UserProfile, DailyPlanWithBlocks, FocusStats } from "@/types";
+import type { GoalWithNodes, GoalNode, NodeEvidence, InboxItem, UserProfile, DailyPlanWithBlocks, FocusStats } from "@/types";
 
 // Data-access seam. In demo mode (no Supabase + Clerk) these serve seeded data
 // so the app is fully explorable with zero keys. When both are configured,
@@ -60,9 +60,20 @@ export const getGoals = cache(async (): Promise<GoalWithNodes[]> => {
   if (nodesRes.error) throw new Error(`Failed to load steps: ${nodesRes.error.message}`);
   const nodeRows = (nodesRes.data ?? []) as NodeRow[];
 
+  // Proof-of-Progress: pull any evidence attached to these nodes and group it.
+  const evByNode = new Map<string, NodeEvidence[]>();
+  if (nodeRows.length > 0) {
+    const evRes = await scoped.supabase.from("node_evidence").select("*").in("node_id", nodeRows.map((n) => n.id));
+    for (const row of (evRes.data ?? []) as EvidenceRow[]) {
+      const list = evByNode.get(row.node_id) ?? [];
+      list.push(rowToEvidence(row));
+      evByNode.set(row.node_id, list);
+    }
+  }
+
   const byGoal = new Map<string, GoalNode[]>();
   for (const row of nodeRows) {
-    const node = rowToNode(row);
+    const node: GoalNode = { ...rowToNode(row), evidence: evByNode.get(row.id) ?? [] };
     const list = byGoal.get(node.goalId) ?? [];
     list.push(node);
     byGoal.set(node.goalId, list);

@@ -259,6 +259,29 @@ export async function setTestPlan(plan: "free" | "pro"): Promise<Result> {
   return { ok: true };
 }
 
+/** Proof-of-Progress: attach evidence (a link, note, or metric) to a step. */
+export async function addNodeEvidence(input: { nodeId: string; kind: "link" | "note" | "metric"; value: string; label?: string }): Promise<Result> {
+  if (!isRemote) return NO_OP;
+  const scoped = await getScopedClient();
+  const profile = await ensureProfile();
+  if (!scoped || !profile) return NO_OP;
+  const value = input.value.trim().slice(0, 500);
+  if (!value) return NO_OP;
+  const { error } = await scoped.supabase.from("node_evidence").insert({
+    node_id: input.nodeId,
+    user_id: profile.id,
+    kind: input.kind,
+    value,
+    label: (input.label ?? "").trim().slice(0, 100),
+  });
+  if (error) {
+    console.error("[addNodeEvidence]", error.message);
+    return { ok: false, error: "Couldn't save that. Try again." };
+  }
+  revalidatePath("/app", "layout");
+  return { ok: true };
+}
+
 /** Save a goal's notebook text. */
 export async function setGoalNotes(input: { goalId: string; notes: string }): Promise<Result> {
   if (!isRemote) return NO_OP;

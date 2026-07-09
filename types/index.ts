@@ -112,8 +112,18 @@ export interface GoalNode {
   positionY: number | null;
   aiReason: string | null;
   resource: NodeResource | null;
+  evidence?: NodeEvidence[];
   createdAt: string;
   updatedAt: string;
+}
+
+/** Proof a step was actually done — a link, a note, or a metric. */
+export interface NodeEvidence {
+  id: string;
+  kind: "link" | "note" | "metric";
+  value: string;
+  label: string;
+  createdAt: string;
 }
 
 export interface InboxItem {

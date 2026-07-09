@@ -13,6 +13,7 @@ import type {
   InboxCategory,
   ResourceKind,
   ResolvedResource,
+  NodeEvidence,
 } from "@/types";
 
 export interface ProfileRow {
@@ -155,4 +156,18 @@ export function rowToInbox(r: InboxRow): InboxItem {
     updatedAt: r.updated_at,
     archivedAt: r.archived_at,
   };
+}
+
+export interface EvidenceRow {
+  id: string;
+  node_id: string;
+  user_id: string;
+  kind: "link" | "note" | "metric";
+  value: string;
+  label: string;
+  created_at: string;
+}
+
+export function rowToEvidence(r: EvidenceRow): NodeEvidence {
+  return { id: r.id, kind: r.kind, value: r.value, label: r.label, createdAt: r.created_at };
 }

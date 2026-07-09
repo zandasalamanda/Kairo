@@ -1,4 +1,4 @@
-import { generateJson, isObj, isClient, viaRoute } from "./provider";
+import { generateJson, isObj, isClient, viaRoute, viaRouteResult, aiErrorText } from "./provider";
 import type { ExpandNodeInput, ExpandNodeResult, AskNodeInput, AskNodeResult } from "./types";
 
 // Two small, user-initiated AI helpers on a single step of a plan:
@@ -8,7 +8,7 @@ const EXPAND_SYSTEM = `You are Solaspace. Break ONE step of a plan into 2-4 conc
 
 const ASK_SYSTEM = `You are Solaspace, a sharp, direct execution coach. Answer the user's question about a specific step of their plan in 2-4 sentences — concrete and practical, no fluff, no hedging, no disclaimers. Return JSON: {"answer":string}.`;
 
-const ASK_FALLBACK = "Add an AI key to ask Solaspace about a step. For now: break this into the smallest possible first action and start there — momentum makes the rest obvious.";
+const ASK_FALLBACK = "Break this into the smallest possible first action and start there — momentum makes the rest obvious.";
 
 function validExpand(r: unknown): r is ExpandNodeResult {
   return isObj(r) && Array.isArray(r.steps);
@@ -55,8 +55,9 @@ export async function expandNode(input: ExpandNodeInput): Promise<ExpandNodeResu
 
 export async function askNode(input: AskNodeInput): Promise<AskNodeResult> {
   if (isClient()) {
-    const j = await viaRoute<AskNodeResult>("/api/ai/ask-node", input);
-    return validAsk(j) ? j : { answer: ASK_FALLBACK };
+    const res = await viaRouteResult<AskNodeResult>("/api/ai/ask-node", input);
+    if (validAsk(res.data)) return res.data;
+    return { answer: res.status === 402 || res.status === 429 ? aiErrorText(res) : ASK_FALLBACK };
   }
   const r = await generateJson<AskNodeResult>(
     ASK_SYSTEM,

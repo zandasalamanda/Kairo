@@ -19,18 +19,47 @@ export function isObj(x: unknown): x is Record<string, unknown> {
 
 export const isClient = () => typeof window !== "undefined";
 
-/** From the browser, run an AI task through its server route (key stays server-side). */
-export async function viaRoute<T>(path: string, input: unknown): Promise<T | null> {
+export interface RouteResult<T> { data: T | null; status: number; error?: string; upgrade?: boolean }
+
+/** Browser → server route (key stays server-side), preserving the HTTP status so
+ *  callers can tell a rate-limit / upgrade / outage apart from a valid empty result. */
+export async function viaRouteResult<T>(path: string, input: unknown): Promise<RouteResult<T>> {
   try {
     const res = await fetch(path, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(input),
     });
-    return res.ok ? ((await res.json()) as T) : null;
+    if (res.ok) return { data: (await res.json()) as T, status: res.status };
+    let error: string | undefined;
+    let upgrade: boolean | undefined;
+    try {
+      const b: unknown = await res.json();
+      if (isObj(b)) {
+        if (typeof b.error === "string") error = b.error;
+        if (typeof b.upgrade === "boolean") upgrade = b.upgrade;
+      }
+    } catch {
+      /* non-JSON error body */
+    }
+    return { data: null, status: res.status, error, upgrade };
   } catch {
-    return null;
+    return { data: null, status: 0 };
   }
+}
+
+/** From the browser, run an AI task through its server route (key stays server-side). */
+export async function viaRoute<T>(path: string, input: unknown): Promise<T | null> {
+  return (await viaRouteResult<T>(path, input)).data;
+}
+
+/** A human message for a failed AI route, tuned to the status (limit / upgrade / outage). */
+export function aiErrorText(r: { status: number; error?: string }): string {
+  if (r.status === 401) return "Please sign in to use Solaspace's AI.";
+  if (r.status === 402) return r.error || "That's a Pro feature — upgrade in Settings → Billing to unlock it.";
+  if (r.status === 429) return r.error || "You've reached today's AI limit — it resets soon.";
+  if (r.status === 0) return "You seem to be offline — check your connection and try again.";
+  return r.error || "Sola couldn't respond just now — it may be busy. Try again in a moment.";
 }
 
 function extractJson(text: string): unknown {

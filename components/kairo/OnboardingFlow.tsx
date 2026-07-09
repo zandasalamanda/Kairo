@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { MicButton } from "@/components/ui/MicButton";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
 import { nodeStatusMeta } from "@/lib/kairo/status";
+import { track } from "@/lib/analytics";
 import { cn, formatDuration, relativeDays } from "@/lib/utils";
 
 const CHIPS = ["Launch a project", "Study better", "Get organized", "Save money", "Build a routine"];
@@ -31,6 +32,7 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
     if (!p) return;
     setError(null);
     setStep("mapping");
+    track("goal_mapping_started");
     try {
       await new Promise((r) => setTimeout(r, 1200));
       const res = await generateGoalMap({ prompt: p });
@@ -51,6 +53,7 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
         }
         if (saved.id) setGoalId(saved.id);
       }
+      track("goal_created", { remote });
       setStep("result");
     } catch (e) {
       console.error("[onboarding] submit failed", e);

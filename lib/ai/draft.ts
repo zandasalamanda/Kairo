@@ -1,4 +1,4 @@
-import { generateJson, isObj, isClient, viaRoute } from "./provider";
+import { generateJson, isObj, isClient, viaRouteResult, aiErrorText } from "./provider";
 import type { DraftInput, DraftResult } from "./types";
 
 // Co-produced artifacts: for a desk step, Solaspace writes a real first draft of
@@ -10,7 +10,7 @@ const SYSTEM = `You are Solaspace, co-writing with the user on ONE step of their
 const FALLBACK: DraftResult = {
   title: "Starter draft",
   content:
-    "Add an AI key and Solaspace will co-write a real first draft here. For now, write your own rough first pass — even one messy paragraph beats a blank page.",
+    "Sola couldn't draft this just now. Write your own rough first pass — even one messy paragraph beats a blank page.",
 };
 
 function valid(r: unknown): r is DraftResult {
@@ -20,8 +20,9 @@ function valid(r: unknown): r is DraftResult {
 /** Draft a real artifact for a desk step, from the user's context. */
 export async function draftForStep(input: DraftInput): Promise<DraftResult> {
   if (isClient()) {
-    const j = await viaRoute<DraftResult>("/api/ai/draft", input);
-    return valid(j) ? { title: j.title.slice(0, 48), content: j.content.slice(0, 6000) } : FALLBACK;
+    const res = await viaRouteResult<DraftResult>("/api/ai/draft", input);
+    if (valid(res.data)) return { title: res.data.title.slice(0, 48), content: res.data.content.slice(0, 6000) };
+    return res.status === 402 || res.status === 429 ? { title: "Sola is at its limit", content: aiErrorText(res) } : FALLBACK;
   }
   const r = await generateJson<DraftResult>(
     SYSTEM,

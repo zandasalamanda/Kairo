@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { track } from "@/lib/analytics";
 import type { Plan } from "@/types";
 
 const FREE = [
@@ -53,7 +54,7 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
     }
   };
 
-  const upgrade = () => post("/api/stripe/checkout", { interval });
+  const upgrade = () => { track("checkout_started", { interval, price }); post("/api/stripe/checkout", { interval }); };
   const manage = () => post("/api/stripe/portal");
 
   return (

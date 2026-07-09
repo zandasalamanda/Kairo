@@ -1,4 +1,4 @@
-import { generateJson, isObj, isClient, viaRoute } from "./provider";
+import { generateJson, isObj, isClient, viaRouteResult, aiErrorText } from "./provider";
 import type { AskSolaInput, AskSolaResult, SolaChange, SolaChangeKind, SolaPlanGoal } from "./types";
 import type { NodeStatus } from "@/types";
 
@@ -69,12 +69,12 @@ function buildUser(input: AskSolaInput): string {
   return `Plan:\n${plan || "(no goals yet)"}\n\nUser: ${input.message}`;
 }
 
-const FALLBACK: AskSolaResult = { reply: "Add an AI key and I can read your plan and propose changes here.", changes: [] };
+const FALLBACK: AskSolaResult = { reply: "Sola couldn't read your plan just now — try again in a moment.", changes: [] };
 
 export async function askSola(input: AskSolaInput): Promise<AskSolaResult> {
   if (isClient()) {
-    const j = await viaRoute<AskSolaResult>("/api/ai/ask-sola", input);
-    return valid(j) ? clean(j, input.plan) : FALLBACK;
+    const res = await viaRouteResult<AskSolaResult>("/api/ai/ask-sola", input);
+    return valid(res.data) ? clean(res.data, input.plan) : { reply: aiErrorText(res), changes: [] };
   }
   const r = await generateJson<AskSolaResult>(SYSTEM, buildUser(input));
   return valid(r) ? clean(r, input.plan) : FALLBACK;

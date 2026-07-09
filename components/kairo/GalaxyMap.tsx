@@ -89,7 +89,7 @@ interface Placed {
 
 const SPINE_RAD = 224; // distance to the next milestone along the spine
 const LEAF_RAD = 150; // distance to a rib (leaf sub-step)
-const SPINE_ARC = 0.17; // gentle, consistent bend so the spine curves instead of running off
+const SPINE_ARC = 0.11; // a slight, consistent bend — keeps the spine a clear, readable path
 
 /**
  * Fishbone layout relative to the goal core at (0,0): milestones flow forward
@@ -929,10 +929,10 @@ function GoalCluster({
         <svg width={1} height={1} className="absolute" style={{ left: 0, top: 0, overflow: "visible" }} aria-hidden>
           {placed.map((p) => {
             const isNext = p.node.id === nId;
-            // Tuck line ends a few px UNDER each orb (orbs paint on top) so the
-            // connectors join cleanly with no visible gap.
-            const CORE_R = p.px === 0 && p.py === 0 ? 40 : 16;
-            const NODE_R = p.spine ? 20 : 14;
+            // End the connectors right at each orb's edge (nodes are now centred
+            // exactly on their position, so lines meet the rings cleanly).
+            const CORE_R = p.px === 0 && p.py === 0 ? 44 : 22;
+            const NODE_R = p.spine ? 23 : 17;
             const dx = p.x - p.px;
             const dy = p.y - p.py;
             const d = Math.hypot(dx, dy) || 1;
@@ -951,7 +951,7 @@ function GoalCluster({
                 d={`M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`}
                 fill="none"
                 stroke={hex}
-                strokeWidth={isNext ? 1.7 : 1.1}
+                strokeWidth={isNext ? 1.9 : p.spine ? 1.6 : 1.0}
                 strokeLinecap="round"
                 strokeDasharray={isNext ? "3 7" : undefined}
                 className={isNext ? "animate-flow" : undefined}
@@ -1068,26 +1068,26 @@ function NodeOrb({
       <button
         onClick={(e) => { e.stopPropagation(); onSelect(); }}
         onPointerDown={(e) => e.stopPropagation()}
-        className="flex flex-col items-center gap-1.5 p-1.5"
-        style={{ animation: "breathe 6s ease-in-out infinite" }}
+        className="relative grid place-items-center"
+        style={{ width: size, height: size, animation: "breathe 6s ease-in-out infinite" }}
       >
-        <span className="relative grid place-items-center" style={{ width: size, height: size }}>
-          {(isNext || selected) && (
-            <span className="absolute inset-0 animate-pulse-soft rounded-full" style={{ boxShadow: `0 0 0 4px ${hex}22, 0 0 24px ${hex}66`, margin: -4 }} />
+        {(isNext || selected) && (
+          <span className="absolute inset-0 animate-pulse-soft rounded-full" style={{ boxShadow: `0 0 0 4px ${hex}22, 0 0 24px ${hex}66`, margin: -4 }} />
+        )}
+        {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
+        <span
+          className={cn("grid place-items-center rounded-full border", popping && "animate-pop")}
+          style={{ width: size, height: size, borderColor: dim ? `${hex}88` : hex, background: bg, boxShadow: glow, opacity: dim ? 0.92 : 1, transition: "background .4s ease, box-shadow .4s ease" }}
+        >
+          {done ? (
+            <Check size={spine ? 18 : 15} className="text-[#0d1a14]" strokeWidth={2.5} />
+          ) : (
+            <span className="rounded-full" style={{ width: spine ? 9 : 7, height: spine ? 9 : 7, background: hex, boxShadow: `0 0 8px ${hex}` }} />
           )}
-          {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
-          <span
-            className={cn("grid place-items-center rounded-full border", popping && "animate-pop")}
-            style={{ width: size, height: size, borderColor: dim ? `${hex}88` : hex, background: bg, boxShadow: glow, opacity: dim ? 0.92 : 1, transition: "background .4s ease, box-shadow .4s ease" }}
-          >
-            {done ? (
-              <Check size={spine ? 18 : 15} className="text-[#0d1a14]" strokeWidth={2.5} />
-            ) : (
-              <span className="rounded-full" style={{ width: spine ? 9 : 7, height: spine ? 9 : 7, background: hex, boxShadow: `0 0 8px ${hex}` }} />
-            )}
-          </span>
         </span>
-        <span className="max-w-[100px] text-center leading-tight">
+        {/* Label floats below the orb (absolute) so the ORB stays centred on the node
+            position — otherwise the label pushes the orb off-centre and connectors miss. */}
+        <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 max-w-[110px] -translate-x-1/2 text-center leading-tight">
           <span
             className={cn("block truncate text-[11px]", selected ? "font-semibold text-ink" : "text-ink/85")}
             style={{ textShadow: "0 1px 8px rgba(8,9,11,0.96), 0 0 3px rgba(8,9,11,0.95)" }}

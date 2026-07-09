@@ -23,6 +23,7 @@ export async function POST(req: Request) {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
+      payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       // tag the user so the webhook can map the subscription back to their profile
       client_reference_id: profile.id,
@@ -39,6 +40,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url });
   } catch (e) {
     console.error("[stripe.checkout]", e instanceof Error ? e.message : e);
-    return NextResponse.json({ error: "Checkout could not be created. Check your Stripe price IDs." }, { status: 500 });
+    return NextResponse.json({ error: "Checkout is temporarily unavailable — please try again shortly." }, { status: 500 });
   }
 }

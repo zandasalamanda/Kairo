@@ -57,7 +57,7 @@ export async function planSession(input: WorkSessionInput): Promise<WorkSessionR
 // "Stuck?" — the coach when you freeze. One call: shrink the step, name the
 // blocker, or explain the missing idea, and always end with the next action.
 
-const UNBLOCK_SYSTEM = `You are Solaspace, a sharp execution coach. The user is stuck on a step and can't start. In 2-4 sentences do ONE of: break it into a smaller first action, name exactly what's blocking them, or explain the one concept they're missing. End with the precise next physical action. No hedging, no disclaimers, no "as an AI". Return JSON: {"answer":string}.`;
+const UNBLOCK_SYSTEM = `You are Solaspace, a sharp execution coach. The user is stuck and can't start. In clean markdown: name the real blocker in one line, put the smallest first action in bold, then give 2-3 concrete micro-steps as a numbered list, and end with the precise next physical action. Keep it tight and practical — no hedging, no disclaimers, no "as an AI". Return JSON: {"answer":string} where "answer" is the markdown.`;
 const UNBLOCK_FALLBACK =
   "Shrink it: what's the smallest version you could finish in five minutes? Do only that — the rest gets obvious once you've started.";
 

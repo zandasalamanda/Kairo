@@ -50,6 +50,17 @@ export interface GoalMapResult {
   isMock?: boolean;
 }
 
+export interface ResearchInput {
+  goalTitle: string;
+  nodeTitle: string;
+  context?: string;
+  question?: string;
+}
+export interface ResearchResult {
+  answer: string;
+  sources: { title: string; url: string }[];
+}
+
 // ---------- Daily plan ----------
 export interface DailyPlanInput {
   availableMinutes: number;

@@ -91,7 +91,7 @@ export async function generateJson<T>(system: string, user: string): Promise<T |
         temperature: 0.4,
         max_tokens: 1600,
         messages: [
-          { role: "system", content: `${system}\n\nRespond with ONLY valid minified JSON — no prose, no markdown code fences.` },
+          { role: "system", content: `${system}\n\nReturn ONLY a valid minified JSON object — no surrounding prose and no code fences around the JSON. String values inside it may contain rich markdown: headings, bullet and numbered lists, tables, and fenced code blocks (including diagrams tagged mermaid).` },
           { role: "user", content: user },
         ],
       }),

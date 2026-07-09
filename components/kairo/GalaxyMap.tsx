@@ -2,14 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid, Share2, Save } from "lucide-react";
+import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid, Share2, Save, Search } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind, ResolvedResource } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
 import { expandNode, askNode } from "@/lib/ai/node-assist";
 import { unblock } from "@/lib/ai/work-session";
 import { draftForStep } from "@/lib/ai/draft";
-import type { DraftResult } from "@/lib/ai/types";
+import { research } from "@/lib/ai/research";
+import type { DraftResult, ResearchResult } from "@/lib/ai/types";
 import { replanGoal } from "@/lib/ai/replan";
 import { viaRoute } from "@/lib/ai/provider";
 import type { Clarifier, ReplanProposal, ReplanKind, GoalMapResult } from "@/lib/ai/types";
@@ -1466,6 +1467,17 @@ function NodeSheet({
   const [draftLoading, setDraftLoading] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
   const [editingDraft, setEditingDraft] = React.useState(false);
+  const [researching, setResearching] = React.useState(false);
+  const [researchResult, setResearchResult] = React.useState<ResearchResult | null>(null);
+  const [researchLoading, setResearchLoading] = React.useState(false);
+
+  const runResearch = async () => {
+    setResearching(true); setAsking(false); setBreakOpen(false); setDrafting(false);
+    if (researchResult || researchLoading) return;
+    setResearchLoading(true);
+    const r = await research({ goalTitle, nodeTitle: node.title, context: goalNotes.trim() || undefined });
+    setResearchResult(r); setResearchLoading(false);
+  };
 
   const runDraft = async () => {
     setDrafting(true); setAsking(false); setBreakOpen(false); setEditingDraft(false);
@@ -1506,7 +1518,7 @@ function NodeSheet({
         </div>
         <button onClick={onClose} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={16} /></button>
       </div>
-      {node.description && <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{node.description}</p>}
+      {node.description && <div className="mt-1.5 text-[13px] leading-relaxed text-muted"><Markdown>{node.description}</Markdown></div>}
 
       {node.resource && (
         <NodeResourceBlock node={node} onResolve={(r) => onResolveResource(node.id, r)} />
@@ -1521,7 +1533,43 @@ function NodeSheet({
           {breaking ? "Working…" : "Break it down"}
         </Chip>
         <Chip tone="accent" icon={<Wand2 size={14} />} onClick={() => void runDraft()}>Do it for me</Chip>
+        <Chip tone="accent" icon={<Search size={14} />} onClick={() => void runResearch()}>Research</Chip>
       </div>
+
+      {researching && (
+        <div className="mt-3 border-t border-line pt-3">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">Researched · sourced</span>
+            <div className="flex items-center gap-2">
+              {!researchLoading && researchResult && <button onClick={() => { setResearchResult(null); void runResearch(); }} className="text-[12px] text-faint transition-colors hover:text-muted">Redo</button>}
+              <button onClick={() => setResearching(false)} className="text-faint transition-colors hover:text-ink" aria-label="Close research"><X size={14} /></button>
+            </div>
+          </div>
+          {researchLoading ? (
+            <div className="mt-2 space-y-2">
+              <div className="h-3 w-full animate-pulse rounded bg-white/5" />
+              <div className="h-3 w-4/5 animate-pulse rounded bg-white/5" />
+              <p className="pt-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">Searching the web…</p>
+            </div>
+          ) : researchResult ? (
+            <>
+              <div className="mt-2 rounded-xl bg-white/[0.03] p-3 text-[13px] leading-relaxed text-ink"><Markdown>{researchResult.answer}</Markdown></div>
+              {researchResult.sources.length > 0 && (
+                <div className="mt-2.5">
+                  <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Sources</div>
+                  <div className="flex flex-col gap-1">
+                    {researchResult.sources.map((s, i) => (
+                      <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="truncate text-[12px] text-accent underline decoration-accent/30 underline-offset-2 transition-colors hover:decoration-accent">
+                        {i + 1}. {s.title}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : null}
+        </div>
+      )}
 
       {drafting && (
         <div className="mt-3 border-t border-line pt-3">

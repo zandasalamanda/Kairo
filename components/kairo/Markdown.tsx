@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { MermaidBlock } from "./MermaidBlock";
 
 /**
  * A tiny, dependency-free Markdown renderer for AI-written prose (Ask Sola,
@@ -105,17 +106,24 @@ function parseBlocks(src: string): React.ReactNode[] {
 
     if (line.trim() === "") { i++; continue; }
 
-    // fenced code block
-    if (/^\s*```/.test(line)) {
+    // fenced code block — ```mermaid renders as a diagram, others as code
+    const fence = /^\s*```\s*([\w-]*)/.exec(line);
+    if (fence) {
+      const lang = (fence[1] || "").toLowerCase();
       const body: string[] = [];
       i++;
       while (i < lines.length && !/^\s*```/.test(lines[i])) { body.push(lines[i]); i++; }
       i++; // closing fence
-      blocks.push(
-        <pre key={key++} className="overflow-x-auto rounded-lg border border-line bg-white/[0.04] p-3">
-          <code className="whitespace-pre font-mono text-[0.85em] text-ink">{body.join("\n")}</code>
-        </pre>
-      );
+      const code = body.join("\n");
+      if (lang === "mermaid" && code.trim()) {
+        blocks.push(<MermaidBlock key={key++} code={code} />);
+      } else {
+        blocks.push(
+          <pre key={key++} className="overflow-x-auto rounded-lg border border-line bg-white/[0.04] p-3">
+            <code className="whitespace-pre font-mono text-[0.85em] text-ink">{code}</code>
+          </pre>
+        );
+      }
       continue;
     }
 

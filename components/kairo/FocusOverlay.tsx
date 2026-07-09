@@ -5,6 +5,7 @@ import { X, Play, Pause, Check, RotateCcw, Flag, HelpCircle, PenLine, Loader2, S
 import { planSession, unblock } from "@/lib/ai/work-session";
 import { draftForStep } from "@/lib/ai/draft";
 import type { WorkSessionResult, DraftResult } from "@/lib/ai/types";
+import { Markdown } from "./Markdown";
 import { cn } from "@/lib/utils";
 
 const OPTIONS = [15, 25, 50];
@@ -55,6 +56,7 @@ export function FocusOverlay({
   const [draftLoading, setDraftLoading] = React.useState(false);
   const [draftBody, setDraftBody] = React.useState("");
   const [saved, setSaved] = React.useState(false);
+  const [editingDraft, setEditingDraft] = React.useState(false);
 
   React.useEffect(() => {
     if (!running) return;
@@ -101,6 +103,7 @@ export function FocusOverlay({
   const fetchDraft = async () => {
     setDraftLoading(true);
     setSaved(false);
+    setEditingDraft(false);
     const d = await draftForStep({ goalTitle, nodeTitle: title, nodeDescription, context });
     setDraft(d);
     setDraftBody(d.content);
@@ -204,7 +207,10 @@ export function FocusOverlay({
                     <span className="truncate font-display text-[15px] font-semibold text-ink">{draft?.title ?? "Drafting"}</span>
                   </div>
                   {!draftLoading && draft && (
-                    <button onClick={() => void fetchDraft()} className="inline-flex shrink-0 items-center gap-1.5 text-[12px] text-faint transition-colors hover:text-muted"><RefreshCw size={12} /> Redo</button>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <button onClick={() => setEditingDraft((e) => !e)} className="text-[12px] text-faint transition-colors hover:text-muted">{editingDraft ? "Preview" : "Edit"}</button>
+                      <button onClick={() => void fetchDraft()} className="inline-flex items-center gap-1.5 text-[12px] text-faint transition-colors hover:text-muted"><RefreshCw size={12} /> Redo</button>
+                    </div>
                   )}
                 </div>
                 {draftLoading ? (
@@ -216,11 +222,18 @@ export function FocusOverlay({
                   </div>
                 ) : (
                   <>
-                    <textarea
-                      value={draftBody}
-                      onChange={(e) => { setDraftBody(e.target.value); setSaved(false); }}
-                      className="mt-3 min-h-[220px] w-full resize-none rounded-xl border border-transparent bg-white/[0.03] p-3 text-[14px] leading-relaxed text-ink transition-colors focus:outline-none focus:border-accent/40 focus-visible:shadow-none"
-                    />
+                    {editingDraft ? (
+                      <textarea
+                        autoFocus
+                        value={draftBody}
+                        onChange={(e) => { setDraftBody(e.target.value); setSaved(false); }}
+                        className="mt-3 min-h-[220px] w-full resize-none rounded-xl border border-transparent bg-white/[0.03] p-3 text-[14px] leading-relaxed text-ink transition-colors focus:outline-none focus:border-accent/40 focus-visible:shadow-none"
+                      />
+                    ) : (
+                      <div className="mt-3 min-h-[220px] rounded-xl bg-white/[0.03] p-3 text-[14px] leading-relaxed text-ink">
+                        <Markdown>{draftBody}</Markdown>
+                      </div>
+                    )}
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <button onClick={saveDraft} disabled={saved || !draftBody.trim()} className="raised-gold inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-medium disabled:opacity-40">
                         {saved ? <><Check size={14} /> Saved to notebook</> : <><Save size={14} /> Save to notebook</>}
@@ -284,7 +297,7 @@ export function FocusOverlay({
                     </div>
 
                     {stuckAnswer && (
-                      <p className="mt-3 whitespace-pre-line rounded-xl bg-white/[0.03] p-3 text-[13px] leading-relaxed text-muted">{stuckAnswer}</p>
+                      <div className="mt-3 rounded-xl bg-white/[0.03] p-3 text-[13px] leading-relaxed text-muted"><Markdown>{stuckAnswer}</Markdown></div>
                     )}
                   </>
                 ) : null}

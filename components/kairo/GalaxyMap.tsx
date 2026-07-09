@@ -34,6 +34,7 @@ import { MicButton } from "@/components/ui/MicButton";
 import { Chip } from "@/components/ui/Chip";
 import { FocusOverlay } from "./FocusOverlay";
 import { MappingNarration } from "./MappingNarration";
+import { Markdown } from "./Markdown";
 import { cn, formatDuration, newId, relativeDays, truncate } from "@/lib/utils";
 
 const GOLDEN = 2.399963229;
@@ -1464,9 +1465,10 @@ function NodeSheet({
   const [draftBody, setDraftBody] = React.useState("");
   const [draftLoading, setDraftLoading] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
+  const [editingDraft, setEditingDraft] = React.useState(false);
 
   const runDraft = async () => {
-    setDrafting(true); setAsking(false); setBreakOpen(false);
+    setDrafting(true); setAsking(false); setBreakOpen(false); setEditingDraft(false);
     if (draft || draftLoading) return;
     setDraftLoading(true); setSaved(false);
     const d = await draftForStep({ goalTitle, nodeTitle: node.title, nodeDescription: node.description, context: goalNotes.trim() || undefined });
@@ -1538,11 +1540,23 @@ function NodeSheet({
             </div>
           ) : (
             <>
-              <textarea
-                value={draftBody}
-                onChange={(e) => { setDraftBody(e.target.value); setSaved(false); }}
-                className="mt-2 min-h-[160px] w-full resize-none rounded-xl border border-transparent bg-white/[0.03] p-3 text-[13px] leading-relaxed text-ink transition-colors focus:border-accent/40 focus:outline-none focus-visible:shadow-none"
-              />
+              <div className="mt-1.5 flex justify-end">
+                <button onClick={() => setEditingDraft((e) => !e)} className="text-[11px] text-faint transition-colors hover:text-muted">
+                  {editingDraft ? "Preview" : "Edit"}
+                </button>
+              </div>
+              {editingDraft ? (
+                <textarea
+                  autoFocus
+                  value={draftBody}
+                  onChange={(e) => { setDraftBody(e.target.value); setSaved(false); }}
+                  className="mt-1 min-h-[160px] w-full resize-none rounded-xl border border-transparent bg-white/[0.03] p-3 text-[13px] leading-relaxed text-ink transition-colors focus:border-accent/40 focus:outline-none focus-visible:shadow-none"
+                />
+              ) : (
+                <div className="mt-1 max-h-[280px] overflow-y-auto rounded-xl bg-white/[0.03] p-3 text-[13px] leading-relaxed text-ink">
+                  <Markdown>{draftBody}</Markdown>
+                </div>
+              )}
               <button onClick={() => { if (draft) { onSaveArtifact(draft.title, draftBody); setSaved(true); } }} disabled={saved || !draftBody.trim()} className="raised-gold mt-2 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12.5px] font-medium disabled:opacity-40">
                 {saved ? <><Check size={14} /> Saved to notebook</> : <><Save size={14} /> Save to notebook</>}
               </button>
@@ -1579,7 +1593,7 @@ function NodeSheet({
           <button onClick={() => void runStuck()} disabled={loading} className="mt-2 inline-flex items-center gap-1.5 text-[12.5px] text-muted transition-colors hover:text-ink disabled:opacity-40">
             <HelpCircle size={13} /> I&apos;m stuck — just tell me how to start
           </button>
-          {answer && <p className="mt-2.5 whitespace-pre-line text-[13px] leading-relaxed text-muted">{answer}</p>}
+          {answer && <div className="mt-2.5 text-[13px] leading-relaxed text-muted"><Markdown>{answer}</Markdown></div>}
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@ import type { SolaChange, SolaChangeKind, SolaPlanGoal } from "@/lib/ai/types";
 import { askSola } from "@/lib/ai/ask-sola";
 import { addNode, updateNode, setNodeStatus, setGoalDeadline } from "@/lib/data/actions";
 import { parseDeadline } from "@/lib/kairo/deadline";
+import { Markdown } from "./Markdown";
 import { newId, cn } from "@/lib/utils";
 
 type PendingChange = SolaChange & { on: boolean };
@@ -108,7 +109,7 @@ export function AskSola({ goals, remote, onClose }: { goals: GoalWithNodes[]; re
         {messages.map((m) => (
           <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
             <div className={cn("max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[14px] leading-relaxed", m.role === "user" ? "raised-btn text-ink" : "bg-white/[0.03] text-muted")}>
-              <p className="whitespace-pre-line">{m.text}</p>
+              {m.role === "sola" ? <Markdown>{m.text}</Markdown> : <p className="whitespace-pre-line">{m.text}</p>}
               {m.changes && m.changes.length > 0 && (
                 <div className="mt-3 space-y-1.5">
                   {m.changes.map((c, i) => {

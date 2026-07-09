@@ -209,6 +209,25 @@ export async function deleteGoal(input: { goalId: string }): Promise<Result> {
   return { ok: true, id: input.goalId };
 }
 
+/** Update the signed-in user's email-notification preferences (via a scoped RPC). */
+export async function updateNotificationPrefs(prefs: { email: boolean; deadlines: boolean; nudges: boolean; digest: boolean }): Promise<Result> {
+  if (!isRemote) return NO_OP;
+  const scoped = await getScopedClient();
+  if (!scoped) return NO_OP;
+  const { error } = await scoped.supabase.rpc("set_notification_prefs", {
+    p_email: prefs.email,
+    p_deadlines: prefs.deadlines,
+    p_nudges: prefs.nudges,
+    p_digest: prefs.digest,
+  });
+  if (error) {
+    console.error("[updateNotificationPrefs]", error.message);
+    return { ok: false, error: "Couldn't save your preferences. Try again." };
+  }
+  revalidatePath("/app/settings");
+  return { ok: true };
+}
+
 /** Save a goal's notebook text. */
 export async function setGoalNotes(input: { goalId: string; notes: string }): Promise<Result> {
   if (!isRemote) return NO_OP;

@@ -14,6 +14,7 @@ export const features = {
   supabase: has("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   stripe: has("STRIPE_SECRET_KEY"),
   ai: has("AI_API_KEY") || has("OPENAI_API_KEY") || has("GEMINI_API_KEY"),
+  email: has("RESEND_API_KEY"),
 };
 
 /** True when nothing external is wired — the app runs on seeded demo data. */

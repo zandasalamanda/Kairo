@@ -69,6 +69,10 @@ export interface UserProfile {
   subscriptionStatus: SubscriptionStatus;
   subscriptionPriceId: string | null;
   plan: Plan;
+  notifyEmail?: boolean;
+  notifyDeadlines?: boolean;
+  notifyNudges?: boolean;
+  notifyDigest?: boolean;
   createdAt: string;
   updatedAt: string;
 }

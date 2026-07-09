@@ -24,6 +24,10 @@ export interface ProfileRow {
   subscription_status: SubscriptionStatus;
   subscription_price_id: string | null;
   plan: Plan;
+  notify_email?: boolean;
+  notify_deadlines?: boolean;
+  notify_nudges?: boolean;
+  notify_digest?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +93,10 @@ export function rowToProfile(r: ProfileRow): UserProfile {
     subscriptionStatus: r.subscription_status,
     subscriptionPriceId: r.subscription_price_id,
     plan: r.plan,
+    notifyEmail: r.notify_email ?? true,
+    notifyDeadlines: r.notify_deadlines ?? true,
+    notifyNudges: r.notify_nudges ?? true,
+    notifyDigest: r.notify_digest ?? true,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };

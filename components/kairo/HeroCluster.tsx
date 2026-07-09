@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { SHOWCASE_MAPS } from "@/lib/kairo/showcase-maps";
 import { ShowcaseMiniMap } from "./ShowcaseMiniMap";
 import { PlanetOrb } from "./PlanetOrb";
@@ -161,7 +161,7 @@ export function HeroCluster() {
       ))}
 
       {/* catchphrase + CTA — top on mobile (cluster sits below), centred on desktop */}
-      <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-start px-5 pt-[13vh] text-center md:justify-center md:pt-0">
+      <div className="pointer-events-none absolute inset-0 z-[120] flex flex-col items-center justify-start px-5 pt-[13vh] text-center md:justify-center md:pt-0">
         <div className="pointer-events-none absolute left-1/2 top-1/2 hidden h-64 w-[38rem] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-canvas/55 blur-3xl md:block" />
         <h1 className="relative font-display text-[2.75rem] font-semibold leading-[1.04] tracking-tight text-ink sm:text-6xl md:text-8xl">
           <span className="inline-block animate-fade-up" style={{ animationDelay: "0.1s" }}>Chart it.</span>{" "}
@@ -169,9 +169,7 @@ export function HeroCluster() {
           <span className="inline-block animate-fade-up" style={{ animationDelay: "0.46s" }}>Arrive.</span>
         </h1>
         <div className="animate-fade-up relative mt-7 flex flex-col items-center gap-3 md:mt-9" style={{ animationDelay: "0.62s" }}>
-          <Link href="/onboarding" className="pointer-events-auto">
-            <Button variant="primary" size="lg">Get started</Button>
-          </Link>
+          <Link href="/onboarding" className={buttonVariants({ variant: "primary", size: "lg", className: "pointer-events-auto" })}>Get started</Link>
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Drag to explore · tap a goal</span>
         </div>
       </div>

@@ -914,9 +914,9 @@ function GoalCluster({
   // spine stays legible rather than at an arbitrary angle.
   const baseDir = React.useMemo(() => {
     const d = Math.hypot(pos.x, pos.y);
+    // Point the tree smoothly straight away from the centre — no snapping to fixed directions.
     if (d < 60) return -Math.PI / 2;
-    const step = Math.PI / 4;
-    return Math.round(Math.atan2(pos.y, pos.x) / step) * step;
+    return Math.atan2(pos.y, pos.x);
   }, [pos.x, pos.y]);
   const placed = React.useMemo(() => (expanded ? layoutTree(goal.nodes, baseDir) : []), [expanded, goal.nodes, baseDir]);
   const maxDist = React.useMemo(() => Math.max(1, ...placed.map((p) => Math.hypot(p.x, p.y))), [placed]);
@@ -1234,10 +1234,10 @@ function GoalBar({
               <button onClick={onAdapt} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-accent" aria-label="Adapt the plan" title="Adapt the plan to your progress"><Wand2 size={15} /></button>
             )}
             <button onClick={onShare} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Share this map" title="Copy a public link"><Share2 size={15} /></button>
-            <Link href={`/app/notebook?goal=${goal.id}`} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Notes"><NotebookPen size={15} /></Link>
-            <button onClick={onColor} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Change color"><Palette size={15} /></button>
-            <button onClick={() => setArmed(true)} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-warn" aria-label="Delete goal"><Trash2 size={15} /></button>
-            <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={15} /></button>
+            <Link href={`/app/notebook?goal=${goal.id}`} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Notebook" title="Notebook"><NotebookPen size={15} /></Link>
+            <button onClick={onColor} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Change color" title="Change color"><Palette size={15} /></button>
+            <button onClick={() => setArmed(true)} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-warn" aria-label="Delete goal" title="Delete goal"><Trash2 size={15} /></button>
+            <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close" title="Close"><X size={15} /></button>
           </div>
           <form onSubmit={(e) => { e.preventDefault(); onAddStep(); }} className="inset-well flex items-center gap-2 rounded-xl p-1 pl-3.5">
             <input

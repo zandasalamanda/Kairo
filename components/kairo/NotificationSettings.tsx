@@ -21,9 +21,24 @@ function Row({ label, desc, on, disabled, onChange }: { label: string; desc: str
         aria-label={label}
         disabled={disabled}
         onClick={() => onChange(!on)}
-        className={cn("relative h-6 w-11 shrink-0 rounded-full transition-colors", on ? "bg-accent" : "bg-white/10", disabled && "cursor-not-allowed")}
+        className={cn("relative h-6 w-11 shrink-0 rounded-full border transition-all", disabled && "cursor-not-allowed")}
+        style={{
+          borderColor: on ? "rgba(230,184,119,0.5)" : "rgba(255,255,255,0.08)",
+          background: on ? "linear-gradient(180deg,#eabf7e,#c9975a)" : "rgba(0,0,0,0.35)",
+          boxShadow: on
+            ? "0 0 10px rgba(230,184,119,0.4), inset 0 1px 0 rgba(255,255,255,0.35)"
+            : "inset 0 1px 3px rgba(0,0,0,0.6)",
+        }}
       >
-        <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform", on ? "translate-x-[22px]" : "translate-x-0.5")} />
+        <span
+          className="absolute top-1/2 h-[18px] w-[18px] rounded-full transition-transform"
+          style={{
+            left: 3,
+            transform: `translateY(-50%) translateX(${on ? 20 : 0}px)`,
+            background: "radial-gradient(circle at 35% 30%, #ffffff, #dfe1e5 70%)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.9)",
+          }}
+        />
       </button>
     </div>
   );

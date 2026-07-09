@@ -66,7 +66,7 @@ function GoalRow({ goal, hex, onOpen }: { goal: GoalWithNodes; hex: string; onOp
 function NodeRow({ node, hex, isNext, onOpen, sub }: { node: GoalNode; hex: string; isNext: boolean; onOpen: () => void; sub?: boolean }) {
   const done = node.status === "done";
   return (
-    <button onClick={onOpen} className={cn("flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-white/[0.03]", sub && "ml-6")}>
+    <button onClick={onOpen} className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-white/[0.03]", sub && "pl-9")}>
       <span
         className={cn("grid h-4 w-4 shrink-0 place-items-center rounded-full", !done && "border border-line")}
         style={done ? { background: hex } : isNext ? { boxShadow: `0 0 0 2px ${hex}66` } : undefined}

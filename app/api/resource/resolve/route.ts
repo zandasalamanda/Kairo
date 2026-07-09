@@ -6,7 +6,9 @@ import type { ResourceKind } from "@/types";
 const KINDS: ResourceKind[] = ["watch", "practice", "read"];
 
 export async function POST(req: Request) {
-  const denied = await guardAi({ pro: true });
+  // Video resolution is available on all plans (YouTube Data API is free-quota);
+  // still rate-limited via guardAi so it counts toward the AI budget.
+  const denied = await guardAi();
   if (denied) return denied;
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const kind = KINDS.includes(b.kind as ResourceKind) ? (b.kind as ResourceKind) : "watch";

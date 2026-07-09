@@ -95,7 +95,7 @@ export default function LandingPage() {
             <div className="mt-2 font-display text-4xl font-semibold text-ink">$0</div>
             <p className="mt-2 text-sm text-muted">Everything you need to map a goal and start moving.</p>
             <ul className="mt-6 space-y-2.5">
-              {["2 active goals", "AI goal mapping + focus sessions", "Real resource searches per step", "Pace mirror + momentum streaks", "Templates & shareable maps"].map((f) => (
+              {["2 active goals", "AI goal mapping + focus sessions", "Video resources with thumbnails per step", "Pace mirror + momentum streaks", "Templates & shareable maps"].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-ink/90"><Check size={15} className="mt-0.5 shrink-0 text-sage" />{f}</li>
               ))}
             </ul>
@@ -110,7 +110,7 @@ export default function LandingPage() {
             </div>
             <p className="mt-2 text-sm text-muted">Everything in Free, plus the AI that does the work with you.</p>
             <ul className="mt-6 space-y-2.5">
-              {["Unlimited goals", "Ask Sola — your agentic plan assistant", "“Do it for me” drafts + the adapting map", "Real, hand-checked video resources", "Deadline forecasting & the weekly digest", "Priority AI + much higher limits"].map((f) => (
+              {["Unlimited goals", "Ask Sola — your agentic plan assistant", "“Do it for me” drafts + the adapting map", "Grounded research with cited sources", "Deadline forecasting & the weekly digest", "Priority AI + much higher limits"].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-ink"><Check size={15} className="mt-0.5 shrink-0 text-accent" />{f}</li>
               ))}
             </ul>

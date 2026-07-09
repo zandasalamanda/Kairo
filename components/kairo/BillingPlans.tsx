@@ -11,7 +11,7 @@ import type { Plan } from "@/types";
 const FREE = [
   "2 active goals",
   "AI goal mapping + focus sessions",
-  "Real resource searches per step",
+  "Video resources with thumbnails per step",
   "Pace mirror + momentum streaks",
   "Templates & shareable maps",
 ];
@@ -19,7 +19,7 @@ const PRO = [
   "Unlimited goals",
   "Ask Sola — your agentic plan assistant",
   "“Do it for me” drafts + the adapting map",
-  "Real, hand-checked video resources",
+  "Grounded research with cited sources",
   "Deadline forecasting & the weekly digest",
   "Priority AI + much higher limits",
 ];

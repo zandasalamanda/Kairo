@@ -19,21 +19,24 @@ const MONTH = 2_592_000;
 async function planFor(userId: string, supabase: SupabaseClient): Promise<Plan> {
   if (process.env.FORCE_PLAN === "pro" && process.env.NODE_ENV !== "production") return "pro"; // non-prod only: test Pro without Stripe
   try {
-    const { data } = await supabase.rpc("plan_for", { p_sub: userId });
+    const { data, error } = await supabase.rpc("plan_for", { p_sub: userId });
+    if (error) { console.error("[guardAi] plan_for error:", error.message); return "free"; }
     return data === "pro" ? "pro" : "free";
   } catch (e) {
-    console.error("[guardAi] plan_for failed:", e instanceof Error ? e.message : e);
+    console.error("[guardAi] plan_for threw:", e instanceof Error ? e.message : e);
     return "free";
   }
 }
 
 async function rlHit(supabase: SupabaseClient, key: string, limit: number, windowSec: number, cost: number): Promise<boolean> {
   try {
-    const { data } = await supabase.rpc("rate_limit_hit_cost", { p_key: key, p_limit: limit, p_window_seconds: windowSec, p_cost: cost });
-    return data !== false;
+    const { data, error } = await supabase.rpc("rate_limit_hit_cost", { p_key: key, p_limit: limit, p_window_seconds: windowSec, p_cost: cost });
+    // supabase-js returns Postgres errors in `error` rather than throwing — fail closed on them too.
+    if (error) { console.error("[guardAi] rate_limit_hit_cost error (denying):", error.message); return false; }
+    return data === true;
   } catch (e) {
     // Fail CLOSED: if we can't verify the budget, deny rather than risk unlimited spend.
-    console.error("[guardAi] rate_limit_hit_cost failed (denying to protect budget):", e instanceof Error ? e.message : e);
+    console.error("[guardAi] rate_limit_hit_cost threw (denying to protect budget):", e instanceof Error ? e.message : e);
     return false;
   }
 }
@@ -77,12 +80,20 @@ export async function guardAi(opts: GuardOptions = {}): Promise<NextResponse | n
   }
 
   const L = LIMITS[plan];
-  const [burst, day, month] = await Promise.all([
+  const globalDaily = Number(process.env.AI_GLOBAL_DAILY_CAP) || 50_000;
+  const [globalOk, burst, day, month] = await Promise.all([
+    rlHit(supabase, "ai:global", globalDaily, DAY, weight),
     rlHit(supabase, `ai:m:${userId}`, L.burst, 60, 1),
     rlHit(supabase, `ai:cd:${userId}`, L.day, DAY, weight),
     rlHit(supabase, `ai:cmo:${userId}`, L.month, MONTH, weight),
   ]);
 
+  // Global daily backstop: bounds total AI spend no matter how many accounts are
+  // created (blunts multi-account abuse). Tune via AI_GLOBAL_DAILY_CAP.
+  if (!globalOk) {
+    console.error("[guardAi] global daily AI cap reached");
+    return NextResponse.json({ error: "Solaspace's AI is at capacity right now — please try again later." }, { status: 429 });
+  }
   if (!burst) return NextResponse.json({ error: "You're going a bit fast — give it a moment." }, { status: 429 });
   if (!day || !month) {
     return NextResponse.json(

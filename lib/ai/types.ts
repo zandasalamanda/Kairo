@@ -46,6 +46,8 @@ export interface GoalMapResult {
   clarifiers?: Clarifier[];
   /** An icon key from GOAL_ICON_KEYS that fits the goal. */
   icon?: string | null;
+  /** True when this is the deterministic placeholder (AI unavailable / failed). */
+  isMock?: boolean;
 }
 
 // ---------- Daily plan ----------

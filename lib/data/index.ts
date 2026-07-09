@@ -46,6 +46,9 @@ export const getGoals = cache(async (): Promise<GoalWithNodes[]> => {
     .eq("user_id", profile.id)
     .is("archived_at", null)
     .order("created_at", { ascending: true });
+  // Surface a real query failure as an error (retry boundary) instead of an
+  // empty galaxy — a transient error must never read as "you have no goals".
+  if (goalsRes.error) throw new Error(`Failed to load goals: ${goalsRes.error.message}`);
   const goalRows = (goalsRes.data ?? []) as GoalRow[];
   if (goalRows.length === 0) return [];
 
@@ -54,6 +57,7 @@ export const getGoals = cache(async (): Promise<GoalWithNodes[]> => {
     .select("*")
     .in("goal_id", goalRows.map((g) => g.id))
     .order("sort_order", { ascending: true });
+  if (nodesRes.error) throw new Error(`Failed to load steps: ${nodesRes.error.message}`);
   const nodeRows = (nodesRes.data ?? []) as NodeRow[];
 
   const byGoal = new Map<string, GoalNode[]>();
@@ -89,6 +93,7 @@ export const getInbox = cache(async (): Promise<InboxItem[]> => {
     .eq("user_id", profile.id)
     .is("archived_at", null)
     .order("created_at", { ascending: false });
+  if (res.error) throw new Error(`Failed to load inbox: ${res.error.message}`);
   return ((res.data ?? []) as InboxRow[]).map(rowToInbox);
 });
 

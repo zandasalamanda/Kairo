@@ -23,20 +23,40 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
   const [prompt, setPrompt] = React.useState("");
   const [result, setResult] = React.useState<GoalMapResult | null>(null);
   const [goalId, setGoalId] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
   const speech = useSpeechInput(setPrompt);
 
   const submit = async () => {
     const p = prompt.trim();
     if (!p) return;
+    setError(null);
     setStep("mapping");
-    await new Promise((r) => setTimeout(r, 1200));
-    const res = await generateGoalMap({ prompt: p });
-    setResult(res);
-    if (remote) {
-      const saved = await persistGoalFromMap({ result: res });
-      if (saved.ok && saved.id) setGoalId(saved.id);
+    try {
+      await new Promise((r) => setTimeout(r, 1200));
+      const res = await generateGoalMap({ prompt: p });
+      // If the AI fell back to a generic placeholder for a real account, don't
+      // save it as their goal — surface the failure and let them retry.
+      if (remote && res.isMock) {
+        setError("Sola couldn't map that just now — you may have hit a limit, or the service is busy. Give it another go.");
+        setStep("input");
+        return;
+      }
+      setResult(res);
+      if (remote) {
+        const saved = await persistGoalFromMap({ result: res });
+        if (!saved.ok) {
+          setError("Your plan was created but couldn't be saved. Please try again.");
+          setStep("input");
+          return;
+        }
+        if (saved.id) setGoalId(saved.id);
+      }
+      setStep("result");
+    } catch (e) {
+      console.error("[onboarding] submit failed", e);
+      setError("Something went wrong mapping your goal. Please try again.");
+      setStep("input");
     }
-    setStep("result");
   };
 
   const reset = () => {
@@ -71,6 +91,8 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
               Map my goal <ArrowRight size={16} />
             </Button>
           </div>
+
+          {error && <p className="mt-4 text-[13px] text-warn">{error}</p>}
 
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {CHIPS.map((c) => (

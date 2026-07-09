@@ -82,9 +82,9 @@ function finish(r: GoalMapResult, prompt: string): GoalMapResult {
 export async function generateGoalMap(input: GoalMapInput): Promise<GoalMapResult> {
   if (isClient()) {
     const j = await viaRoute<GoalMapResult>("/api/ai/goal-map", input);
-    return valid(j) ? finish(j, input.prompt) : mockGoalMap(input);
+    return valid(j) ? finish(j, input.prompt) : { ...mockGoalMap(input), isMock: true };
   }
   const today = new Date().toISOString().slice(0, 10);
   const r = await generateJson<GoalMapResult>(SYSTEM, `Today's date: ${today}\nGoal: ${input.prompt}`);
-  return valid(r) ? finish(r, input.prompt) : mockGoalMap(input);
+  return valid(r) ? finish(r, input.prompt) : { ...mockGoalMap(input), isMock: true };
 }

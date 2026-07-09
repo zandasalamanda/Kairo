@@ -2,7 +2,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { features } from "@/lib/config";
-import { getSupabaseServer } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 export type Plan = "free" | "pro";
 
@@ -32,10 +32,9 @@ async function rlHit(supabase: SupabaseClient, key: string, limit: number, windo
     const { data } = await supabase.rpc("rate_limit_hit_cost", { p_key: key, p_limit: limit, p_window_seconds: windowSec, p_cost: cost });
     return data !== false;
   } catch (e) {
-    // Fail open so a transient DB blip doesn't block legitimate users — but log
-    // it loudly so sustained failures are visible (durable backstop is a follow-up).
-    console.error("[guardAi] rate_limit_hit_cost failed (allowing call):", e instanceof Error ? e.message : e);
-    return true;
+    // Fail CLOSED: if we can't verify the budget, deny rather than risk unlimited spend.
+    console.error("[guardAi] rate_limit_hit_cost failed (denying to protect budget):", e instanceof Error ? e.message : e);
+    return false;
   }
 }
 
@@ -57,8 +56,18 @@ export async function guardAi(opts: GuardOptions = {}): Promise<NextResponse | n
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Sign in to use Solaspace." }, { status: 401 });
 
-  const supabase = getSupabaseServer();
-  if (!supabase) return null; // no DB — auth still gates the route
+  // The limiter runs with the SERVICE-ROLE client so clients can't reach the
+  // counter RPCs directly (they're revoked from anon/authenticated).
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    // Unavailable while Supabase is configured = misconfig; fail closed to
+    // protect the AI budget rather than allow unlimited calls.
+    if (features.supabase) {
+      console.error("[guardAi] service-role client unavailable — denying to protect the AI budget");
+      return NextResponse.json({ error: "AI is temporarily unavailable. Please try again shortly." }, { status: 503 });
+    }
+    return null; // demo mode (no DB) — nothing to meter
+  }
 
   const weight = Math.max(1, Math.round(opts.weight ?? 1));
   const plan = await planFor(userId, supabase);

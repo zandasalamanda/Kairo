@@ -6,8 +6,12 @@ import { NextResponse, type NextRequest, type NextFetchEvent } from "next/server
 const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && !!process.env.CLERK_SECRET_KEY;
 const clerk = hasClerk ? clerkMiddleware() : null;
 
-// Temporary early-access gate: require a code (entered at /gate) to browse the
-// app. Sets an httpOnly cookie via /api/gate. API routes stay exempt (they're
+// Optional early-access gate: require a code (entered at /gate) to browse the
+// app. OFF by default — set SITE_GATE=1 in the environment to turn it back on
+// (e.g. for a future private beta). When off, the site is fully public.
+const gateEnabled = process.env.SITE_GATE === "1";
+
+// Sets an httpOnly cookie via /api/gate. API routes stay exempt (they're
 // already auth-gated) so integrations/verification keep working.
 function gateOpen(p: string): boolean {
   return (
@@ -25,7 +29,7 @@ function gateOpen(p: string): boolean {
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
   const { pathname } = req.nextUrl;
   const gated = req.cookies.get("sp_gate")?.value === "1";
-  if (!gated && !gateOpen(pathname)) {
+  if (gateEnabled && !gated && !gateOpen(pathname)) {
     const url = req.nextUrl.clone();
     const to = pathname + req.nextUrl.search;
     url.pathname = "/gate";

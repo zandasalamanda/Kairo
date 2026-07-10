@@ -30,7 +30,7 @@ export function MapView({ goals, initialGoalId, remote, isPro }: { goals: GoalWi
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex justify-center pt-[max(12px,env(safe-area-inset-top))] md:pt-5">
         <div className="chrome pointer-events-auto inline-flex gap-1 rounded-full p-1">
-          {([["galaxy", Waypoints, "Galaxy"], ["list", List, "List"]] as const).map(([v, Icon, label]) => (
+          {([["galaxy", Waypoints, "Map"], ["list", List, "List"]] as const).map(([v, Icon, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}

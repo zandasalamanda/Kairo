@@ -57,7 +57,17 @@ export interface GuardOptions {
  * to short-circuit (401 / 402 / 429), or null to proceed.
  */
 export async function guardAi(opts: GuardOptions = {}): Promise<NextResponse | null> {
-  if (!features.clerk) return null;
+  if (!features.clerk) {
+    // No Clerk = demo mode, nothing to meter. BUT if a real AI key is configured
+    // without Clerk, that's a misconfig that would expose the model unauthenticated
+    // and unmetered — fail CLOSED to protect the budget (mirrors the Supabase branch
+    // below). Only a keyless demo deploy is allowed straight through.
+    if (features.ai) {
+      console.error("[guardAi] AI key present but Clerk not configured — denying to protect the AI budget");
+      return NextResponse.json({ error: "AI is temporarily unavailable. Please try again shortly." }, { status: 503 });
+    }
+    return null;
+  }
   const { auth } = await import("@clerk/nextjs/server");
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Sign in to use Solaspace." }, { status: 401 });
@@ -83,20 +93,16 @@ export async function guardAi(opts: GuardOptions = {}): Promise<NextResponse | n
   }
 
   const L = LIMITS[plan];
-  const globalDaily = Number(process.env.AI_GLOBAL_DAILY_CAP) || 50_000;
-  const [globalOk, burst, day, month] = await Promise.all([
-    rlHit(supabase, "ai:global", globalDaily, DAY, weight),
+  // Per-user budget FIRST. If a user is already over their own limit, we must NOT
+  // charge the shared global counter for their (about-to-be-denied) request —
+  // otherwise one account firing at its burst limit could inflate `ai:global` past
+  // the cap and deny AI to everyone. The global backstop is charged only for calls
+  // that actually pass the per-user budget, so it reflects real usage.
+  const [burst, day, month] = await Promise.all([
     rlHit(supabase, `ai:m:${userId}`, L.burst, 60, 1),
     rlHit(supabase, `ai:cd:${userId}`, L.day, DAY, weight),
     rlHit(supabase, `ai:cmo:${userId}`, L.month, MONTH, weight),
   ]);
-
-  // Global daily backstop: bounds total AI spend no matter how many accounts are
-  // created (blunts multi-account abuse). Tune via AI_GLOBAL_DAILY_CAP.
-  if (!globalOk) {
-    console.error("[guardAi] global daily AI cap reached");
-    return NextResponse.json({ error: "Solaspace's AI is at capacity right now — please try again later." }, { status: 429 });
-  }
   if (!burst) return NextResponse.json({ error: "You're going a bit fast — give it a moment." }, { status: 429 });
   if (!day || !month) {
     return NextResponse.json(
@@ -106,6 +112,15 @@ export async function guardAi(opts: GuardOptions = {}): Promise<NextResponse | n
       },
       { status: 429 }
     );
+  }
+
+  // Global daily backstop: bounds total AI spend no matter how many accounts are
+  // created (blunts multi-account abuse). Tune via AI_GLOBAL_DAILY_CAP.
+  const globalDaily = Number(process.env.AI_GLOBAL_DAILY_CAP) || 50_000;
+  const globalOk = await rlHit(supabase, "ai:global", globalDaily, DAY, weight);
+  if (!globalOk) {
+    console.error("[guardAi] global daily AI cap reached");
+    return NextResponse.json({ error: "Solaspace's AI is at capacity right now — please try again later." }, { status: 429 });
   }
   return null;
 }

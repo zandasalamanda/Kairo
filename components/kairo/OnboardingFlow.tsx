@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, RotateCcw } from "lucide-react";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
 import { persistGoalFromMap } from "@/lib/data/actions";
@@ -17,18 +18,25 @@ import { cn, formatDuration, relativeDays } from "@/lib/utils";
 
 const CHIPS = ["Launch a project", "Study better", "Get organized", "Save money", "Build a routine"];
 
+// Where the typed goal waits while the visitor creates their account. Kept in
+// sessionStorage (never a URL) so the goal text stays private and same-origin.
+const PENDING_KEY = "solaspace:pending-goal";
+
 type Step = "input" | "mapping" | "result";
 
-export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
+export function OnboardingFlow({ remote = false, signedIn = false }: { remote?: boolean; signedIn?: boolean }) {
   const [step, setStep] = React.useState<Step>("input");
   const [prompt, setPrompt] = React.useState("");
   const [result, setResult] = React.useState<GoalMapResult | null>(null);
   const [goalId, setGoalId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const speech = useSpeechInput(setPrompt);
+  const router = useRouter();
 
-  const submit = async () => {
-    const p = prompt.trim();
+  // The actual mapping: generate → (when signed in) persist → show the path.
+  // Only ever runs for a signed-in user, so every AI call is metered to an account.
+  const runMap = React.useCallback(async (raw: string) => {
+    const p = raw.trim();
     if (!p) return;
     setError(null);
     setStep("mapping");
@@ -60,7 +68,36 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
       setError("Something went wrong mapping your goal. Please try again.");
       setStep("input");
     }
+  }, [remote]);
+
+  const submit = () => {
+    const p = prompt.trim();
+    if (!p) return;
+    // Capture the goal first, then send them to make a free account — we map it
+    // the moment they land back here. No anonymous AI calls (which would just
+    // fail with a confusing limit error and be a way around the per-account limits).
+    if (remote && !signedIn) {
+      try { window.sessionStorage.setItem(PENDING_KEY, p); } catch { /* private mode */ }
+      track("goal_capture_signup");
+      router.push("/sign-up");
+      return;
+    }
+    void runMap(p);
   };
+
+  // Returning from sign-up (now signed in): pick up the goal they typed and map
+  // it automatically, so account creation feels like part of the same motion.
+  const claimed = React.useRef(false);
+  React.useEffect(() => {
+    if (claimed.current || !remote || !signedIn) return;
+    let pending: string | null = null;
+    try { pending = window.sessionStorage.getItem(PENDING_KEY); } catch { /* private mode */ }
+    if (!pending) return;
+    claimed.current = true;
+    try { window.sessionStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
+    setPrompt(pending);
+    void runMap(pending);
+  }, [remote, signedIn, runMap]);
 
   const reset = () => {
     setStep("input");
@@ -87,15 +124,19 @@ export function OnboardingFlow({ remote = false }: { remote?: boolean }) {
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
               placeholder={speech.listening ? "Listening…" : "Launch my app by September…"}
-              className="h-11 flex-1 bg-transparent text-[15px] text-ink placeholder:text-faint focus:outline-none"
+              className="h-11 min-w-0 flex-1 bg-transparent text-[15px] text-ink placeholder:text-faint focus:outline-none"
             />
             {speech.supported && <MicButton listening={speech.listening} onClick={() => speech.toggle(prompt)} />}
-            <Button variant="primary" onClick={submit} disabled={!prompt.trim()}>
+            <Button variant="primary" onClick={submit} disabled={!prompt.trim()} className="shrink-0 whitespace-nowrap">
               Map my goal <ArrowRight size={16} />
             </Button>
           </div>
 
           {error && <p className="mt-4 text-[13px] text-warn">{error}</p>}
+
+          {remote && !signedIn && !error && (
+            <p className="mt-3 text-[12.5px] text-faint">Free to start — you&apos;ll make your account next, and your goal will be waiting.</p>
+          )}
 
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {CHIPS.map((c) => (

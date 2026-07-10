@@ -1462,12 +1462,12 @@ function NodeResourceBlock({ node, onResolve }: { node: GoalNode; onResolve: (r:
 // One line is chosen deterministically per step (hash of the node id) so the
 // same step always reads the same, and it never feels random or cheesy.
 const DONE_LINES: { title: string; sub: string }[] = [
-  { title: "Well done.", sub: "That's a real step forward — and it's yours." },
-  { title: "Locked in.", sub: "The map moved because you moved it." },
-  { title: "Nice work.", sub: "One clear piece of this goal, in place." },
-  { title: "That's done.", sub: "This is exactly how the goal gets built." },
-  { title: "Step cleared.", sub: "Momentum you can see. Keep it going." },
-  { title: "Good move.", sub: "Another step behind you, the path a little shorter." },
+  { title: "Beautiful.", sub: "A real step, done." },
+  { title: "Yes — done.", sub: "You moved the map today." },
+  { title: "Love to see it.", sub: "One piece closer." },
+  { title: "That's the way.", sub: "The momentum's yours." },
+  { title: "Nicely done.", sub: "That one counts." },
+  { title: "Good work.", sub: "The path just got shorter." },
 ];
 
 function hashId(s: string): number {
@@ -1483,10 +1483,10 @@ function celebrate(
   const base = DONE_LINES[hashId(nodeId) % DONE_LINES.length];
   const sub = proofKind
     ? proofKind === "metric"
-      ? "Proof saved to your map — a number that counts, just for you."
+      ? "Logged — that number's yours."
       : proofKind === "link"
-        ? "Proof saved to your map — the receipt's there when you want it."
-        : "Proof saved to your map — a note to your future self."
+        ? "Saved — the proof's on your map."
+        : "Saved — a note to future you."
     : base.sub;
   return { title: base.title, sub, proof: proofKind !== null };
 }

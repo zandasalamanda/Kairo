@@ -123,11 +123,16 @@ body::before {
 
 ::selection { background: rgba(230, 184, 119, 0.25); color: #fff; }
 
+/* A single gold focus ring that HUGS each element's real shape — modern `outline`
+   follows the element's own border-radius, so a round orb gets a round ring and a
+   pill gets a pill ring (no more fixed-radius box that looks out of place). */
 *:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-canvas), 0 0 0 3px rgba(230, 184, 119, 0.6);
-  border-radius: 6px;
+  outline: 2px solid rgba(230, 184, 119, 0.75);
+  outline-offset: 2px;
 }
+/* Kill the default grey tap-flash box on touch devices — it reads as a stray
+   box on an otherwise premium surface. Interactive states are handled in-app. */
+* { -webkit-tap-highlight-color: transparent; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 9px; height: 9px; }

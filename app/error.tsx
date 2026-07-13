@@ -17,7 +17,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <p className="mx-auto mt-3 max-w-sm text-[15px] text-muted">Solaspace hit a snag rendering this view. Give it another go.</p>
         <button
           onClick={reset}
-          className="mt-8 inline-flex h-11 items-center gap-2 rounded-xl bg-accent px-6 text-sm font-semibold text-[#1b1206] transition-all hover:brightness-105"
+          className="raised-gold mt-8 inline-flex h-11 items-center gap-2 rounded-xl px-6 text-sm font-medium"
         >
           <RotateCcw size={15} /> Try again
         </button>

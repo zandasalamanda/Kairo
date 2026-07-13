@@ -1757,11 +1757,11 @@ function NodeSheet({
             </div>
           ) : researchResult ? (
             <>
-              <div className="mt-2 rounded-xl bg-white/[0.03] p-3 text-[13px] leading-relaxed text-ink"><Markdown>{researchResult.answer}</Markdown></div>
+              <div className="mt-2 max-h-[42vh] overflow-y-auto overscroll-contain rounded-xl bg-white/[0.03] p-3 text-[13px] leading-relaxed text-ink"><Markdown>{researchResult.answer}</Markdown></div>
               {researchResult.sources.length > 0 && (
                 <div className="mt-2.5">
                   <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Sources</div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex max-h-[22vh] flex-col gap-1 overflow-y-auto overscroll-contain">
                     {researchResult.sources.map((s, i) => (
                       <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="truncate text-[12px] text-accent underline decoration-accent/30 underline-offset-2 transition-colors hover:decoration-accent">
                         {i + 1}. {s.title}

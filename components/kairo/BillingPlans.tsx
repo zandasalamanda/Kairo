@@ -9,18 +9,18 @@ import { track } from "@/lib/analytics";
 import type { Plan } from "@/types";
 
 const FREE = [
-  "2 active goals",
-  "AI goal mapping + focus sessions",
-  "Video resources with thumbnails per step",
-  "Pace mirror + momentum streaks",
-  "Templates & shareable maps",
+  "Up to 2 active goals",
+  "AI goal maps & a daily focus plan",
+  "Guidance and video picks for each step",
+  "Proof of progress on completed steps",
+  "Weekly progress review",
 ];
 const PRO = [
   "Unlimited goals",
-  "Ask Sola — your agentic plan assistant",
-  "“Do it for me” drafts + the adapting map",
-  "Grounded research with cited sources",
-  "Deadline forecasting & the weekly digest",
+  "Ask Sola — coaching on any step",
+  "Deep research with cited sources",
+  "Reminders & a weekly digest",
+  "Accountability: share your progress",
   "Priority AI + much higher limits",
 ];
 

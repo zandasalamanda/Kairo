@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Waypoints, NotebookPen, Sparkles, Loader2, Check, Plus, X } from "lucide-react";
+import { Waypoints, NotebookPen, Sparkles, Loader2, Check, Plus, X, Eye, Pencil } from "lucide-react";
 import type { GoalWithNodes } from "@/types";
+import { Markdown } from "./Markdown";
 import { goalIcon } from "@/lib/kairo/goal-icon";
 import { useGoalColors } from "@/lib/kairo/use-goal-colors";
 import { setGoalNotes, addNode } from "@/lib/data/actions";
@@ -26,6 +27,7 @@ export function Notebook({ goals, remote, initialGoalId }: { goals: GoalWithNode
     () => (initialGoalId && goals.some((g) => g.id === initialGoalId) ? initialGoalId : goals[0]?.id ?? "")
   );
   const [saved, setSaved] = React.useState(true);
+  const [preview, setPreview] = React.useState(false);
   const timer = React.useRef<number | null>(null);
   const [extracting, setExtracting] = React.useState(false);
   const [picks, setPicks] = React.useState<{ step: string; on: boolean }[] | null>(null);
@@ -122,18 +124,29 @@ export function Notebook({ goals, remote, initialGoalId }: { goals: GoalWithNode
       <div className="panel rounded-2xl p-1.5 transition-colors focus-within:border-accent/40">
         <div className="flex items-center justify-between px-3.5 pt-2.5">
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">{saved ? "Saved" : "Saving…"}</span>
-          <Link href={`/app/map?goal=${selected.id}`} className="inline-flex items-center gap-1.5 text-[12px] text-muted transition-colors hover:text-ink">
-            <Waypoints size={13} /> Open in map
-          </Link>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setPreview((p) => !p)} className="inline-flex items-center gap-1.5 text-[12px] text-muted transition-colors hover:text-ink">
+              {preview ? <><Pencil size={12} /> Edit</> : <><Eye size={12} /> Preview</>}
+            </button>
+            <Link href={`/app/map?goal=${selected.id}`} className="inline-flex items-center gap-1.5 text-[12px] text-muted transition-colors hover:text-ink">
+              <Waypoints size={13} /> Open in map
+            </Link>
+          </div>
         </div>
-        <textarea
-          key={selected.id}
-          value={notesByGoal[selected.id] ?? ""}
-          onChange={(e) => onChange(selected.id, e.target.value)}
-          onBlur={(e) => flush(selected.id, e.target.value)}
-          placeholder={`Notes, links, and context for "${selected.title}"…`}
-          className="min-h-[320px] w-full resize-none bg-transparent px-3.5 py-3 text-[15px] leading-relaxed text-ink placeholder:text-faint focus:outline-none focus-visible:shadow-none"
-        />
+        {preview ? (
+          <div className="min-h-[320px] w-full px-3.5 py-3 text-[15px] leading-relaxed text-ink">
+            {notes.trim() ? <Markdown>{notes}</Markdown> : <p className="text-faint">Nothing to preview yet — switch to Edit and jot some notes. Markdown works: **bold**, - lists, # headings, tables.</p>}
+          </div>
+        ) : (
+          <textarea
+            key={selected.id}
+            value={notesByGoal[selected.id] ?? ""}
+            onChange={(e) => onChange(selected.id, e.target.value)}
+            onBlur={(e) => flush(selected.id, e.target.value)}
+            placeholder={`Notes, links, and context for "${selected.title}"…`}
+            className="min-h-[320px] w-full resize-none bg-transparent px-3.5 py-3 text-[15px] leading-relaxed text-ink placeholder:text-faint focus:outline-none focus-visible:shadow-none"
+          />
+        )}
       </div>
 
       {picks ? (

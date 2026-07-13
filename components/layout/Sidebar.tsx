@@ -12,10 +12,12 @@ import { useGoalColors } from "@/lib/kairo/use-goal-colors";
 import type { SessionUser } from "@/lib/auth";
 import type { NextMove } from "@/lib/kairo/next-move";
 
-export function Sidebar({ user, nextMove, className }: { user: SessionUser; nextMove: NextMove | null; className?: string }) {
+export function Sidebar({ user, nextMove, usage, className }: { user: SessionUser; nextMove: NextMove | null; usage?: { dayUsed: number; dayLimit: number } | null; className?: string }) {
   const pathname = usePathname();
   const goalColor = useGoalColors();
   const moveHex = nextMove ? goalColor(nextMove.goalId) : "#e6b877";
+  const usePct = usage ? Math.min(100, Math.round((usage.dayUsed / Math.max(1, usage.dayLimit)) * 100)) : 0;
+  const useOver = !!usage && usage.dayUsed >= usage.dayLimit;
   return (
     <aside
       className={cn(
@@ -63,6 +65,21 @@ export function Sidebar({ user, nextMove, className }: { user: SessionUser; next
       </div>
 
       <div className="space-y-3">
+        {user.plan === "free" && usage && (
+          <div className="rounded-xl border border-line bg-white/[0.02] px-3.5 py-2.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-mono uppercase tracking-[0.14em] text-faint">Daily AI</span>
+              <span className={cn("font-mono", useOver ? "text-warn" : "text-muted")}>{usage.dayUsed}/{usage.dayLimit}</span>
+            </div>
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full border border-black/40 bg-black/30">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${usePct}%`, background: useOver ? "linear-gradient(180deg,#f0a36a,#d9784a)" : "linear-gradient(180deg,#f3d6a0,#e6b877)" }}
+              />
+            </div>
+            {useOver && <p className="mt-1.5 text-[11px] leading-snug text-faint">You&apos;ve used today&apos;s free AI. It resets tomorrow — or go Pro.</p>}
+          </div>
+        )}
         {user.plan === "free" && (
           <Link
             href="/app/billing"

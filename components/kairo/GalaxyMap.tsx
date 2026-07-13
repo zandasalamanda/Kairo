@@ -12,6 +12,7 @@ import { draftForStep } from "@/lib/ai/draft";
 import { research } from "@/lib/ai/research";
 import { AiError } from "@/lib/ai/provider";
 import { track } from "@/lib/analytics";
+import { UpgradeModal } from "./UpgradeModal";
 import { useRouter } from "next/navigation";
 import type { DraftResult, ResearchResult } from "@/lib/ai/types";
 import { replanGoal } from "@/lib/ai/replan";
@@ -207,6 +208,8 @@ export function GalaxyMap({
   const [positions, setPositions] = usePersistentState<Record<string, { x: number; y: number }>>("kairo.galaxy.v1", {});
   const [colorIdx, setColorIdx] = usePersistentState<Record<string, number>>("kairo.colors.v1", {});
   const router = useRouter();
+  // The moment-of-intent upgrade prompt (goal cap etc.) — string = reason & open flag.
+  const [upgradeReason, setUpgradeReason] = React.useState<string | null>(null);
 
   const initialExpanded = initialGoalId ?? (initialGoals.length === 1 ? initialGoals[0].id : null);
   const [view, setView] = React.useState(() => {
@@ -438,7 +441,8 @@ export function GalaxyMap({
   const atGoalCap = () => {
     if (isPro) return false;
     if (goals.filter((g) => g.status === "active").length < FREE_GOAL_CAP) return false;
-    showToast("Free is capped at 2 goals — upgrade to Pro for unlimited");
+    // The strongest buy signal in the app — meet it with a one-tap upgrade, not a toast.
+    setUpgradeReason(`You've reached the free limit of ${FREE_GOAL_CAP} active goals. Go Pro for unlimited goals and the full engine.`);
     return true;
   };
 
@@ -882,6 +886,8 @@ export function GalaxyMap({
           onSaveArtifact={(label, body) => appendGoalNote(expanded.id, `${label} · ${focusNode.title}`, body)}
         />
       )}
+
+      <UpgradeModal reason={upgradeReason} onClose={() => setUpgradeReason(null)} />
     </div>
   );
 }

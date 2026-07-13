@@ -13,16 +13,18 @@ import type { NextMove } from "@/lib/kairo/next-move";
 export function KairoShell({
   user,
   nextMove,
+  usage,
   children,
 }: {
   user: SessionUser;
   nextMove: NextMove | null;
+  usage?: { dayUsed: number; dayLimit: number } | null;
   children: React.ReactNode;
 }) {
   return (
     <div className="relative min-h-[100dvh]">
       <OrbBackground />
-      <Sidebar user={user} nextMove={nextMove} className="hidden md:flex" />
+      <Sidebar user={user} nextMove={nextMove} usage={usage} className="hidden md:flex" />
       <div className="min-h-[100dvh] md:pl-[248px]">{children}</div>
       <BottomNav nextMove={nextMove} className="md:hidden" />
     </div>

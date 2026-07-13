@@ -82,42 +82,66 @@ export function CockpitView({ goals: initial, remote }: { goals: GoalWithNodes[]
     );
   }
 
+  const [primary, ...rest] = moves;
+  const pHex = color(primary.g.id);
+  const pSlipping = primary.node.status === "at_risk";
+
   return (
     <>
       <p className="mb-5 text-[14px] text-muted">
-        {moves.length} move{moves.length === 1 ? "" : "s"} on deck — one per goal that needs you. Pick one and go.
+        The single best thing to do with the time you have today.{rest.length > 0 ? ` ${rest.length} more can wait.` : ""}
       </p>
 
-      <div className="space-y-3">
-        {moves.map(({ g, node }) => {
-          const hex = color(g.id);
-          const Icon = goalIcon(g.icon);
-          const slipping = node.status === "at_risk";
-          return (
-            <div key={node.id} className="panel rounded-2xl p-4">
-              <div className="flex items-center gap-2">
-                <Icon size={14} className="shrink-0" style={{ color: hex }} />
-                <span className="min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-faint">Next in {g.title}</span>
-                {slipping && <span className="shrink-0 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-medium text-warn">slipping</span>}
-                <span className="shrink-0 font-mono text-[11px] text-faint">{formatDuration(node.estimatedMinutes)}</span>
-              </div>
-              <h3 className="mt-1.5 font-display text-[17px] font-medium leading-snug text-ink">{node.title}</h3>
-              {node.description && <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted">{node.description}</p>}
-              <div className="mt-3.5 flex items-center gap-2">
-                <button onClick={() => startFocus(g.id, node)} className="raised-gold inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[14px] font-medium">
-                  <Timer size={16} /> Focus
-                </button>
-                <button onClick={() => markDone(g.id, node.id)} className="raised-btn inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[13px] text-sage">
-                  <Check size={15} /> Done
-                </button>
-                <Link href={`/app/map?goal=${g.id}`} className="ml-auto grid h-8 w-8 place-items-center rounded-lg text-faint transition-colors hover:text-ink" aria-label="Open in map" title="Open in map">
-                  <Waypoints size={15} />
-                </Link>
-              </div>
-            </div>
-          );
-        })}
+      {/* The one move — prominent. Everything else is secondary (one-next-move). */}
+      <div className="panel-2 relative overflow-hidden rounded-3xl p-6">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl" style={{ background: `${pHex}22` }} />
+        <div className="relative flex items-center gap-2">
+          {React.createElement(goalIcon(primary.g.icon), { size: 15, className: "shrink-0", style: { color: pHex } })}
+          <span className="min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-faint">Next in {primary.g.title}</span>
+          {pSlipping && <span className="shrink-0 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-medium text-warn">slipping</span>}
+          <span className="shrink-0 font-mono text-[11px] text-faint">{formatDuration(primary.node.estimatedMinutes)}</span>
+        </div>
+        <h2 className="relative mt-2 font-display text-2xl font-semibold leading-snug text-ink">{primary.node.title}</h2>
+        {primary.node.description && <p className="relative mt-1.5 line-clamp-3 text-[13.5px] leading-relaxed text-muted">{primary.node.description}</p>}
+        <div className="relative mt-5 flex items-center gap-2">
+          <button onClick={() => startFocus(primary.g.id, primary.node)} className="raised-gold inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-[14px] font-medium">
+            <Timer size={16} /> Focus
+          </button>
+          <button onClick={() => markDone(primary.g.id, primary.node.id)} className="raised-btn inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] text-sage">
+            <Check size={15} /> Done
+          </button>
+          <Link href={`/app/map?goal=${primary.g.id}`} className="ml-auto grid h-9 w-9 place-items-center rounded-lg text-faint transition-colors hover:text-ink" aria-label="Open in map" title="Open in map">
+            <Waypoints size={15} />
+          </Link>
+        </div>
       </div>
+
+      {rest.length > 0 && (
+        <div className="mt-7">
+          <div className="mb-2.5 px-1 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">Also on deck · {rest.length}</div>
+          <div className="space-y-2">
+            {rest.map(({ g, node }) => {
+              const hex = color(g.id);
+              const Icon = goalIcon(g.icon);
+              return (
+                <div key={node.id} className="panel flex items-center gap-3 rounded-2xl p-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg" style={{ background: `${hex}1f` }}><Icon size={15} style={{ color: hex }} /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[14px] font-medium text-ink">{node.title}</div>
+                    <div className="truncate font-mono text-[10px] uppercase tracking-[0.14em] text-faint">{g.title} · {formatDuration(node.estimatedMinutes)}</div>
+                  </div>
+                  <button onClick={() => startFocus(g.id, node)} className="raised-btn inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] text-accent" aria-label={`Focus on ${node.title}`}>
+                    <Timer size={14} /> Focus
+                  </button>
+                  <button onClick={() => markDone(g.id, node.id)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-faint transition-colors hover:text-sage" aria-label={`Mark ${node.title} done`} title="Done">
+                    <Check size={15} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {focus && focusGoal && (
         <FocusOverlay

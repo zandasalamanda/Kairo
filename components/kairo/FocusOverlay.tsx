@@ -6,6 +6,7 @@ import { planSession, unblock } from "@/lib/ai/work-session";
 import { draftForStep } from "@/lib/ai/draft";
 import type { WorkSessionResult, DraftResult } from "@/lib/ai/types";
 import { Markdown } from "./Markdown";
+import { fireHaptic } from "@/lib/kairo/celebrate";
 import { cn } from "@/lib/utils";
 
 const OPTIONS = [15, 25, 50];
@@ -74,6 +75,11 @@ export function FocusOverlay({
     return () => window.clearInterval(id);
   }, [running]);
 
+  // The moment a session lands — a small haptic tap so completing real, sustained
+  // work registers in the body, not just on screen (reduced-motion-safe, no-op where
+  // unsupported).
+  React.useEffect(() => { if (done) fireHaptic([10, 40, 12]); }, [done]);
+
   React.useEffect(() => {
     // planLoading starts true; this runs once (overlay is keyed by node id upstream).
     let alive = true;
@@ -132,11 +138,17 @@ export function FocusOverlay({
 
       <div className="flex min-h-full flex-col items-center justify-center px-6 py-16">
         <div className="flex w-full max-w-md flex-col items-center text-center">
-          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-faint">{done ? "Session complete" : "Focus session"}</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.22em]" style={done ? { color: hex } : undefined}>{done ? "Session complete" : "Focus session"}</span>
           <h2 className="mt-2 line-clamp-2 font-display text-xl font-semibold text-ink">{title}</h2>
+          {done && (
+            <p className="mt-2 text-[13px] leading-relaxed text-muted">
+              You gave this {minutes} focused minute{minutes === 1 ? "" : "s"}. That&apos;s real work — mark it done.
+            </p>
+          )}
 
           <div className="relative my-8 grid place-items-center" style={{ width: 224, height: 224 }}>
             <span className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, ${hex}22, transparent 70%)` }} />
+            {done && <span className="absolute inset-6 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} aria-hidden />}
             <svg width={224} height={224} className="absolute -rotate-90">
               <circle cx={112} cy={112} r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={4} />
               <circle
@@ -153,10 +165,14 @@ export function FocusOverlay({
               />
             </svg>
             <span
-              className={cn("grid h-40 w-40 place-items-center rounded-full", running && "animate-pulse-soft")}
+              className={cn("grid h-40 w-40 place-items-center rounded-full", running && "animate-pulse-soft", done && "animate-grow-in")}
               style={{ background: `radial-gradient(circle at 36% 30%, ${hex}33, rgba(12,14,18,0.9) 72%)`, boxShadow: `0 0 60px ${hex}33, inset 0 0 30px ${hex}22` }}
             >
-              <span className="font-display text-4xl font-bold tabular-nums text-ink">{mm}:{ss}</span>
+              {done ? (
+                <Check size={56} className="text-ink" strokeWidth={2} />
+              ) : (
+                <span className="font-display text-4xl font-bold tabular-nums text-ink">{mm}:{ss}</span>
+              )}
             </span>
           </div>
 

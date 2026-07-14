@@ -6,31 +6,20 @@ import { Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { track } from "@/lib/analytics";
+import { PLAN_FREE_FEATURES, PLAN_PRO_FEATURES, priceDisplay } from "@/lib/kairo/plans";
 import type { Plan } from "@/types";
-
-const FREE = [
-  "Up to 2 active goals",
-  "AI goal maps & a daily focus plan",
-  "Guidance and video picks for each step",
-  "Proof of progress on completed steps",
-  "Weekly progress review",
-];
-const PRO = [
-  "Unlimited goals",
-  "Ask Sola for coaching on any step",
-  "Deep research with cited sources",
-  "Reminders & a weekly digest",
-  "Accountability: share your progress",
-  "Priority AI + much higher limits",
-];
 
 export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: number; yearly: number }) {
   const [interval, setInterval] = React.useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<string | null>(null);
 
+  // What's actually charged (for the renewal line) vs the anchored headline: when
+  // billed yearly we show the effective per-month cost struck against the monthly price.
   const price = interval === "monthly" ? monthly : yearly;
   const per = interval === "monthly" ? "mo" : "yr";
+  const isYearly = interval === "yearly";
+  const headline = isYearly ? priceDisplay.yearlyPerMonth : monthly;
 
   const post = async (url: string, body?: unknown) => {
     setLoading(true);
@@ -77,7 +66,7 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
           <div className="mt-2 font-display text-3xl font-semibold text-ink">$0</div>
           <p className="mt-1 text-[13px] text-muted">Everything you need to start.</p>
           <ul className="mt-5 space-y-2.5">
-            {FREE.map((f) => (
+            {PLAN_FREE_FEATURES.map((f) => (
               <li key={f} className="flex items-center gap-2.5 text-[14px] text-ink/90">
                 <Check size={15} className="text-faint" /> {f}
               </li>
@@ -98,14 +87,17 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
           <div className="flex items-center gap-2 text-sm font-semibold text-accent">
             <Zap size={15} /> Pro
           </div>
-          <div className="mt-2 flex items-end gap-1">
-            <span className="font-display text-3xl font-semibold text-ink">${price}</span>
-            <span className="mb-1 text-[13px] text-muted">/{per}</span>
+          <div className="mt-2 flex items-end gap-1.5">
+            <span className="font-display text-3xl font-semibold text-ink">${headline}</span>
+            <span className="mb-1 text-[13px] text-muted">/mo</span>
+            {isYearly && <span className="mb-1 text-[13px] text-faint line-through">${monthly}</span>}
           </div>
-          <p className="mt-0.5 font-mono text-[11px] text-faint">Cents a day for a daily execution engine.</p>
+          <p className="mt-0.5 font-mono text-[11px] text-faint">
+            {isYearly ? `Billed yearly ($${yearly}) · about ${priceDisplay.perDay} a day` : `About ${priceDisplay.perDay} a day, billed yearly`}
+          </p>
           <p className="mt-1.5 text-[13px] text-muted">Everything in Free, plus the AI that does the work with you.</p>
           <ul className="mt-5 space-y-2.5">
-            {PRO.map((f) => (
+            {PLAN_PRO_FEATURES.map((f) => (
               <li key={f} className="flex items-center gap-2.5 text-[14px] text-ink">
                 <Check size={15} className="text-accent" /> {f}
               </li>

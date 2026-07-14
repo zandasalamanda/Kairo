@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { features } from "@/lib/config";
 import { SITE_URL } from "@/lib/site";
 import { SiteAnalytics } from "@/components/kairo/SiteAnalytics";
+import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
 const sora = Sora({
@@ -47,7 +48,11 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         {/* ClerkProvider only when Clerk is configured; demo mode runs bare. */}
-        {features.clerk ? <ClerkProvider>{children}</ClerkProvider> : children}
+        {features.clerk ? (
+          <ClerkProvider><ToastProvider>{children}</ToastProvider></ClerkProvider>
+        ) : (
+          <ToastProvider>{children}</ToastProvider>
+        )}
         <SiteAnalytics />
       </body>
     </html>

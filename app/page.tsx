@@ -4,6 +4,7 @@ import { Logo } from "@/components/kairo/Logo";
 import { HeroCluster } from "@/components/kairo/HeroCluster";
 import { SectionLabel } from "@/components/kairo/PageHeader";
 import { Button } from "@/components/ui/Button";
+import { PLAN_FREE_FEATURES, PLAN_PRO_FEATURES, priceDisplay } from "@/lib/kairo/plans";
 
 // The three beats of the real loop — this IS a sequence, so numbering earns its place.
 const BEATS = [
@@ -19,9 +20,6 @@ const PILLARS = [
   { icon: ShieldCheck, title: "Real accountability", desc: "Attach real proof to finished steps and share your progress. The map becomes a record of actual work, not just checkboxes." },
   { icon: Activity, title: "Progress you can see", desc: "A weekly report of what you produced and your true pace to every deadline. A clear picture, every week." },
 ];
-
-const FREE = ["Up to 2 active goals", "AI goal maps & a daily focus plan", "Guidance and video picks for each step", "Proof of progress on completed steps", "Weekly progress review"];
-const PRO = ["Unlimited goals", "Ask Sola for coaching on any step", "Deep research with cited sources", "Reminders & a weekly digest", "Accountability: share your progress", "Priority AI + much higher limits"];
 
 export default function LandingPage() {
   return (
@@ -107,7 +105,7 @@ export default function LandingPage() {
             <div className="mt-2 font-display text-4xl font-semibold text-ink">$0</div>
             <p className="mt-2 text-sm text-muted">Everything you need to map a goal and start moving.</p>
             <ul className="mt-6 space-y-2.5">
-              {FREE.map((f) => (
+              {PLAN_FREE_FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink/90"><Check size={15} className="mt-0.5 shrink-0 text-sage" />{f}</li>
               ))}
             </ul>
@@ -116,14 +114,15 @@ export default function LandingPage() {
           <div className="panel-2 relative overflow-hidden rounded-3xl border border-accent/25 p-8">
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
             <div className="flex items-center gap-2"><div className="text-sm font-semibold text-accent">Pro</div><span className="rounded-full bg-accent/12 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">Most popular</span></div>
-            <div className="mt-2 flex items-end gap-1">
-              <span className="font-display text-4xl font-semibold text-ink">$12</span>
+            <div className="mt-2 flex items-end gap-2">
+              <span className="font-display text-4xl font-semibold text-ink">${priceDisplay.yearlyPerMonth}</span>
               <span className="mb-1.5 text-sm text-muted">/mo</span>
+              <span className="mb-2 text-sm text-faint line-through">${priceDisplay.monthly}</span>
             </div>
-            <p className="mt-1 text-[13px] text-faint">or $96/yr, save 33%. Cents a day for a daily execution engine.</p>
+            <p className="mt-1 text-[13px] text-faint">Billed yearly (${priceDisplay.yearly}) · about {priceDisplay.perDay} a day · save {priceDisplay.savingsPct}%</p>
             <p className="mt-2 text-sm text-muted">Everything in Free, plus the AI that does the work with you.</p>
             <ul className="mt-6 space-y-2.5">
-              {PRO.map((f) => (
+              {PLAN_PRO_FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink"><Check size={15} className="mt-0.5 shrink-0 text-accent" />{f}</li>
               ))}
             </ul>

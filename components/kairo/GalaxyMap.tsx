@@ -13,6 +13,7 @@ import { research } from "@/lib/ai/research";
 import { AiError } from "@/lib/ai/provider";
 import { track } from "@/lib/analytics";
 import { UpgradeModal } from "./UpgradeModal";
+import { Celebration } from "./Celebration";
 import { useRouter } from "next/navigation";
 import type { DraftResult, ResearchResult } from "@/lib/ai/types";
 import { replanGoal } from "@/lib/ai/replan";
@@ -22,6 +23,8 @@ import { TEMPLATES, templateToMap, type GoalTemplate } from "@/lib/kairo/templat
 import { clarifyGoal } from "@/lib/ai/clarify";
 import { GOAL_PALETTE, goalColorHex, goalColorIndex } from "@/lib/kairo/goal-color";
 import { goalIcon } from "@/lib/kairo/goal-icon";
+import { pickCelebration, pickGoalCelebration, fireHaptic } from "@/lib/kairo/celebrate";
+import { upgradeReasonForGoalCap } from "@/lib/kairo/plans";
 import { usePersistentState } from "@/lib/store/persist";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
 import {
@@ -258,6 +261,8 @@ export function GalaxyMap({
   const router = useRouter();
   // The moment-of-intent upgrade prompt (goal cap etc.) — string = reason & open flag.
   const [upgradeReason, setUpgradeReason] = React.useState<string | null>(null);
+  // The big moment: a whole goal just reached 100%. Held as a full-screen beat.
+  const [goalDone, setGoalDone] = React.useState<{ title: string; sub: string; hex: string } | null>(null);
 
   const initialExpanded = initialGoalId ?? (initialGoals.length === 1 ? initialGoals[0].id : null);
   const [view, setView] = React.useState(() => {
@@ -443,6 +448,14 @@ export function GalaxyMap({
     if (status === "done") {
       setPoppedId(id);
       window.setTimeout(() => setPoppedId((c) => (c === id ? null : c)), 650);
+      // If this was the final step, the whole goal just landed — the biggest win in
+      // the app deserves its own beat, not just another node pop.
+      const g = goals.find((x) => x.id === goalId);
+      if (g && g.nodes.length > 1 && g.nodes.every((n) => n.id === id || n.status === "done")) {
+        const line = pickGoalCelebration(goalId);
+        setGoalDone({ title: line.title, sub: line.sub, hex: hexOf(goalId) });
+        fireHaptic([12, 50, 12, 50, 16]);
+      }
     }
     if (remote) void setNodeStatus({ goalId, nodeId: id, status });
   };
@@ -490,7 +503,7 @@ export function GalaxyMap({
     if (isPro) return false;
     if (goals.filter((g) => g.status === "active").length < FREE_GOAL_CAP) return false;
     // The strongest buy signal in the app — meet it with a one-tap upgrade, not a toast.
-    setUpgradeReason(`You've reached the free limit of ${FREE_GOAL_CAP} active goals. Go Pro for unlimited goals and every AI tool.`);
+    setUpgradeReason(upgradeReasonForGoalCap(FREE_GOAL_CAP));
     return true;
   };
 
@@ -956,6 +969,17 @@ export function GalaxyMap({
           onClose={() => setFocusNode(null)}
           onSaveArtifact={(label, body) => appendGoalNote(expanded.id, `${label} · ${focusNode.title}`, body)}
         />
+      )}
+
+      {goalDone && (
+        <div className="fixed inset-0 z-[135] grid place-items-center bg-canvas/80 px-6 backdrop-blur-sm" onClick={() => setGoalDone(null)} role="dialog" aria-modal="true" aria-label="Goal complete">
+          <div className="chrome animate-sheet-up flex flex-col items-center rounded-3xl px-10 py-8 text-center" onClick={(e) => e.stopPropagation()}>
+            <Celebration hex={goalDone.hex} size={84} />
+            <h2 className="mt-5 font-display text-2xl font-semibold text-ink">{goalDone.title}</h2>
+            <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-muted">{goalDone.sub}</p>
+            <button onClick={() => setGoalDone(null)} className="raised-gold mt-6 inline-flex items-center gap-1.5 rounded-xl px-6 py-2.5 text-[14px] font-medium">Continue</button>
+          </div>
+        </div>
       )}
 
       <UpgradeModal reason={upgradeReason} onClose={() => setUpgradeReason(null)} />
@@ -1554,40 +1578,6 @@ export function NodeResourceBlock({ node, onResolve }: { node: GoalNode; onResol
   );
 }
 
-// Pre-authored congratulations — a fixed library, so every completion gets a
-// warm, on-brand acknowledgement without spending a single AI output token.
-// One line is chosen deterministically per step (hash of the node id) so the
-// same step always reads the same, and it never feels random or cheesy.
-const DONE_LINES: { title: string; sub: string }[] = [
-  { title: "Beautiful.", sub: "A real step, done." },
-  { title: "Yes, done.", sub: "You moved the map today." },
-  { title: "Love to see it.", sub: "One piece closer." },
-  { title: "That's the way.", sub: "The momentum's yours." },
-  { title: "Nicely done.", sub: "That one counts." },
-  { title: "Good work.", sub: "The path just got shorter." },
-];
-
-function hashId(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-function celebrate(
-  nodeId: string,
-  proofKind: "link" | "note" | "metric" | null,
-): { title: string; sub: string; proof: boolean } {
-  const base = DONE_LINES[hashId(nodeId) % DONE_LINES.length];
-  const sub = proofKind
-    ? proofKind === "metric"
-      ? "Logged. That number's yours."
-      : proofKind === "link"
-        ? "Saved. The proof's on your map."
-        : "Saved. A note to future you."
-    : base.sub;
-  return { title: base.title, sub, proof: proofKind !== null };
-}
-
 function NodeSheet({
   node, hex, goalTitle, goalNotes, breaking, isPro, onToast, onClose, onDone, onFocus, onBranch, onBreakDown, onMakeSmaller, onResolveResource, onSaveArtifact,
 }: {
@@ -1652,7 +1642,7 @@ function NodeSheet({
     setEvValue("");
     onDone();            // mark the step done (optimistic) — the sheet stays open…
     router.refresh();    // …reload so proof + the verified halo appear on the map
-    setCongrats(celebrate(node.id, proofKind)); // …and land on a congratulation
+    setCongrats(pickCelebration(node.id, proofKind)); // …and land on a congratulation
   };
 
   const runResearch = async () => {

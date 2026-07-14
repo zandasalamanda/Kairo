@@ -10,6 +10,8 @@ import { useGoalColors } from "@/lib/kairo/use-goal-colors";
 import { setNodeStatus, logFocusSession, setGoalNotes } from "@/lib/data/actions";
 import { track } from "@/lib/analytics";
 import { FocusOverlay } from "./FocusOverlay";
+import { Celebration } from "./Celebration";
+import { pickCelebration, fireHaptic } from "@/lib/kairo/celebrate";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { formatDuration } from "@/lib/utils";
@@ -26,6 +28,9 @@ export function CockpitView({ goals: initial, remote }: { goals: GoalWithNodes[]
   const color = useGoalColors();
   const [goals, setGoals] = React.useState(initial);
   const [focus, setFocus] = React.useState<{ goalId: string; node: GoalNode } | null>(null);
+  const [celebration, setCelebration] = React.useState<{ title: string; sub: string; hex: string } | null>(null);
+  const celebrateTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => () => { if (celebrateTimer.current) clearTimeout(celebrateTimer.current); }, []);
 
   const moves = goals
     .filter((g) => g.status === "active")
@@ -49,6 +54,13 @@ export function CockpitView({ goals: initial, remote }: { goals: GoalWithNodes[]
     // Activation event: a real step finished (created a goal + completed a step).
     track("step_completed", { goalId, surface: "today" });
     if (remote && minutes) void logFocusSession({ goalId, nodeId, minutes });
+    // A real step done earns a real beat — the same warm line the map gives, so
+    // finishing in Today no longer feels like a silent checkbox flip.
+    const line = pickCelebration(nodeId);
+    setCelebration({ title: line.title, sub: line.sub, hex: color(goalId) });
+    fireHaptic();
+    if (celebrateTimer.current) clearTimeout(celebrateTimer.current);
+    celebrateTimer.current = setTimeout(() => setCelebration(null), 1700);
   };
 
   const startFocus = (goalId: string, node: GoalNode) => {
@@ -71,14 +83,39 @@ export function CockpitView({ goals: initial, remote }: { goals: GoalWithNodes[]
   const hasGoals = goals.some((g) => g.status === "active");
   const focusGoal = focus ? goals.find((g) => g.id === focus.goalId) : null;
 
+  // A momentary reward that floats over whatever's on screen, then fades.
+  const celebrationOverlay = celebration ? (
+    <div className="pointer-events-none fixed inset-0 z-[135] grid place-items-center px-6">
+      <div className="chrome animate-sheet-up flex flex-col items-center rounded-2xl px-8 py-6 text-center">
+        <Celebration hex={celebration.hex} size={60} />
+        <h3 className="mt-3 font-display text-lg font-semibold text-ink">{celebration.title}</h3>
+        <p className="mt-1 max-w-[15rem] text-[13px] leading-relaxed text-muted">{celebration.sub}</p>
+      </div>
+    </div>
+  ) : null;
+
   if (moves.length === 0) {
     return (
-      <EmptyState
-        icon={<Sunrise size={22} />}
-        title={hasGoals ? "You're all caught up" : "Nothing on deck yet"}
-        description={hasGoals ? "Every goal's open steps are done or waiting. Add a step, or unblock what's stuck on the map." : "Map a goal and your next move in each one shows up here, ready to run."}
-        action={<Link href="/app/map"><Button variant="primary" size="lg">{hasGoals ? "Open the map" : "Create a goal"}</Button></Link>}
-      />
+      <>
+        {celebrationOverlay}
+        {hasGoals ? (
+          <div className="grid place-items-center py-16 text-center">
+            <Celebration size={72} />
+            <h2 className="mt-6 font-display text-2xl font-semibold text-ink">You cleared your day</h2>
+            <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-muted">
+              Every goal&apos;s next move is done. That&apos;s the whole game — one real step at a time.
+            </p>
+            <Link href="/app/map" className="mt-7"><Button variant="glass" size="lg">Open the map</Button></Link>
+          </div>
+        ) : (
+          <EmptyState
+            icon={<Sunrise size={22} />}
+            title="Nothing on deck yet"
+            description="Map a goal and your next move in each one shows up here, ready to run."
+            action={<Link href="/app/map"><Button variant="primary" size="lg">Create a goal</Button></Link>}
+          />
+        )}
+      </>
     );
   }
 
@@ -88,6 +125,7 @@ export function CockpitView({ goals: initial, remote }: { goals: GoalWithNodes[]
 
   return (
     <>
+      {celebrationOverlay}
       <p className="mb-5 text-[14px] text-muted">
         The single best thing to do with the time you have today.{rest.length > 0 ? ` ${rest.length} more can wait.` : ""}
       </p>

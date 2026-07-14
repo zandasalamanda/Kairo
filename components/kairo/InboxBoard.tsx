@@ -11,6 +11,7 @@ import { MicButton } from "@/components/ui/MicButton";
 import { usePersistentState } from "@/lib/store/persist";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
 import { addInboxItem, applyInboxSort, archiveInboxItem } from "@/lib/data/actions";
+import { useToast } from "@/components/ui/Toast";
 import { cn, newId } from "@/lib/utils";
 
 interface LiteItem { id: string; content: string; category: InboxCategory }
@@ -25,7 +26,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
   const [sorting, setSorting] = React.useState(false);
   const [sorted, setSorted] = React.useState(false);
   const [reasoning, setReasoning] = React.useState<string | null>(null);
-  const [flash, setFlash] = React.useState<string | null>(null);
+  const toast = useToast();
   const speech = useSpeechInput(setInput);
 
   const add = () => {
@@ -46,7 +47,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
   };
   const remove = (id: string, msg: string) => {
     setItems((p) => p.filter((i) => i.id !== id));
-    setFlash(msg); window.setTimeout(() => setFlash((f) => (f === msg ? null : f)), 2200);
+    toast(msg);
     if (remote) void archiveInboxItem({ id });
   };
 
@@ -83,8 +84,6 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
         </Button>
       </div>
 
-      {flash && <div className="mt-6 rounded-xl border border-sage/25 bg-sage/5 px-4 py-2.5 text-center text-[13px] text-sage">{flash}</div>}
-
       {items.length === 0 ? (
         <p className="py-16 text-center text-sm text-muted">Inbox zero. Drop new thoughts above whenever they land.</p>
       ) : !sorted ? (
@@ -93,10 +92,10 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
         </div>
       ) : (
         <div className={cn("mt-8 space-y-9 transition-opacity", sorting && "opacity-50")}>
-          {groups.map((g) => {
+          {groups.map((g, gi) => {
             const meta = inboxCategoryMeta[g.category];
             return (
-              <section key={g.category}>
+              <section key={g.category} className="animate-fade-up" style={{ animationDelay: `${gi * 70}ms` }}>
                 <div className="mb-2 flex items-center gap-2 px-2">
                   <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
                   <span className={cn("text-[11px] font-medium uppercase tracking-[0.14em]", meta.text)}>{meta.label}</span>

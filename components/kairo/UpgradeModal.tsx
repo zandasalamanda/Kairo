@@ -3,8 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { X, Zap, Check } from "lucide-react";
-
-const PRO_LINES = ["Unlimited goals", "Ask Sola on any step", "Deep research, cited", "Reminders & a weekly digest"];
+import { PRO_UPGRADE_LINES, priceDisplay } from "@/lib/kairo/plans";
 
 /**
  * The moment-of-intent upgrade prompt — shown when a free user hits the goal cap
@@ -53,10 +52,13 @@ export function UpgradeModal({ reason, onClose }: { reason: string | null; onClo
         </div>
         <p className="mt-2 text-[14px] leading-relaxed text-muted">{reason}</p>
         <ul className="mt-4 space-y-2">
-          {PRO_LINES.map((l) => (
+          {PRO_UPGRADE_LINES.map((l) => (
             <li key={l} className="flex items-center gap-2 text-[14px] text-ink/90"><Check size={14} className="shrink-0 text-accent" />{l}</li>
           ))}
         </ul>
+        <p className="mt-4 text-center text-[12px] text-faint">
+          Pro is <span className="text-muted">${priceDisplay.yearlyPerMonth}/mo</span> billed yearly — about {priceDisplay.perDay} a day.
+        </p>
         <button onClick={() => void upgrade()} disabled={loading} className="raised-gold mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-[14px] font-medium disabled:opacity-50">
           {loading ? "Starting…" : "Upgrade to Pro"}
         </button>

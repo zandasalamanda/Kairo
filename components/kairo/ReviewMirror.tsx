@@ -15,7 +15,7 @@ const STATE_TONE: Record<PaceState, string> = {
   behind: "text-warn",
   on: "text-sage",
   ahead: "text-sage",
-  done: "text-faint",
+  done: "text-sage", // a finished goal is a win, not the dimmest thing on screen
   none: "text-faint",
 };
 
@@ -34,12 +34,12 @@ export function ReviewMirror({ insights, goals }: { insights: ReviewInsights; go
         <div>
           <SectionLabel>On pace</SectionLabel>
           <div className="mt-3 space-y-3.5">
-            {timed.map((p) => {
+            {timed.map((p, i) => {
               const g = byId.get(p.goalId);
               const hex = g ? color(g.id) : "#e6b877";
               const Icon = goalIcon(g?.icon ?? null);
               return (
-                <Link key={p.goalId} href={`/app/map?goal=${p.goalId}`} className="panel block rounded-2xl p-3.5 transition-transform hover:-translate-y-0.5">
+                <Link key={p.goalId} href={`/app/map?goal=${p.goalId}`} className={cn("panel block rounded-2xl p-3.5 transition-transform hover:-translate-y-0.5 animate-fade-up", p.state === "done" && "border-sage/25 bg-sage/[0.04]")} style={{ animationDelay: `${i * 60}ms` }}>
                   <div className="flex items-center gap-2.5">
                     <Icon size={15} className="shrink-0" style={{ color: hex }} />
                     <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink">{p.title}</span>

@@ -185,9 +185,9 @@ export function HeroCluster() {
             <button onClick={() => setOpenId(null)} className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-lg text-faint transition-colors hover:text-ink" aria-label="Close">
               <X size={17} />
             </button>
-            <div className="overflow-y-auto px-5 pb-3 pt-7 sm:px-6">
+            <div className="overflow-y-auto px-5 pb-3 pt-11 sm:px-6">
               <div className="text-center">
-                <h3 className="font-display text-xl font-semibold text-ink">{openMap.title}</h3>
+                <h3 className="mx-auto max-w-[86%] font-display text-lg font-semibold text-ink sm:text-xl">{openMap.title}</h3>
                 <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Starter map · {openMap.milestones.length} milestones</div>
               </div>
               {/* the real 2D goal map, exactly as it looks in the app */}

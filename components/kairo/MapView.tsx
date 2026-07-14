@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Waypoints, List, Sparkles } from "lucide-react";
+import { Waypoints, List, MessageCircle } from "lucide-react";
 import type { GoalWithNodes } from "@/types";
 import { GalaxyMap } from "./GalaxyMap";
 import { GoalList } from "./GoalList";
@@ -52,14 +52,14 @@ export function MapView({ goals, initialGoalId, remote, isPro }: { goals: GoalWi
             onClick={() => setAskOpen(true)}
             className="raised-gold absolute bottom-[calc(96px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-medium md:bottom-6"
           >
-            <Sparkles size={16} /> Ask Sola
+            <MessageCircle size={16} /> Ask Sola
           </button>
         ) : (
           <Link
             href="/app/billing"
             className="raised-gold absolute bottom-[calc(96px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-medium md:bottom-6"
           >
-            <Sparkles size={16} /> Ask Sola <span className="rounded-full bg-black/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase">Pro</span>
+            <MessageCircle size={16} /> Ask Sola <span className="rounded-full bg-black/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase">Pro</span>
           </Link>
         )
       )}

@@ -137,19 +137,30 @@ export function ShowcaseTree({ map }: { map: ShowcaseMap }) {
       );
     };
     measure();
-    // Web fonts can settle after first layout and shift label widths — re-measure once.
+    // The first pass can run before layout has settled (e.g. mounted below the fold on
+    // initial page load), so measure again on the next frame when positions are final.
+    const raf = requestAnimationFrame(measure);
+    // Web fonts can settle later and shift label widths — re-measure once more.
     if (document.fonts && document.fonts.status !== "loaded") {
       document.fonts.ready.then(() => requestAnimationFrame(measure)).catch(() => {});
     }
-  }, [placed]);
+    return () => cancelAnimationFrame(raf);
+  }, [placed, cw]);
 
   React.useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    const ro = new ResizeObserver((e) => setCw(e[0].contentRect.width));
+    // Read the width synchronously first — a ResizeObserver's first callback can be
+    // deferred (or not fire) for an element mounted below the fold, which would leave
+    // the tree unframed forever. The observer then keeps it responsive to resizes.
+    const apply = () => setCw(el.getBoundingClientRect().width);
+    apply();
+    const ro = new ResizeObserver(apply);
     ro.observe(el);
-    const id = requestAnimationFrame(() => setOn(true));
-    return () => { ro.disconnect(); cancelAnimationFrame(id); };
+    // Trigger the build-in; a timer backs up the rAF in case it's throttled off-screen.
+    const raf = requestAnimationFrame(() => setOn(true));
+    const timer = window.setTimeout(() => setOn(true), 80);
+    return () => { ro.disconnect(); cancelAnimationFrame(raf); clearTimeout(timer); };
   }, []);
 
   const MAXH = 420, PAD = 16;

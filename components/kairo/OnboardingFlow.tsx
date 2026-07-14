@@ -289,7 +289,7 @@ export function OnboardingFlow({ remote = false, signedIn = false }: { remote?: 
         <div className="my-auto flex flex-col items-center text-center">
           <GoalCore size={150} className="mb-8 animate-pulse-soft" />
           <p className="font-display text-xl font-medium text-ink">Mapping your goal…</p>
-          <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.2em] text-accent/70">Solaspace is drawing the path</p>
+          <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.2em] text-accent/70">Sola is drawing your path</p>
         </div>
       )}
 

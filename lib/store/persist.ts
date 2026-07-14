@@ -40,10 +40,13 @@ export function usePersistentState<T>(
   const [state, setState] = React.useState<T>(initial);
   const first = React.useRef(true);
 
-  // hydrate once, client-only
+  // hydrate once, client-only. The synchronous setState is intentional: reading
+  // localStorage during render would cause an SSR hydration mismatch, so we render
+  // the server-safe `initial` first and swap in the saved value on mount.
   React.useEffect(() => {
     if (!enabled) return;
     const saved = loadPersisted<T>(key);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved != null) setState(saved);
   }, [key, enabled]);
 

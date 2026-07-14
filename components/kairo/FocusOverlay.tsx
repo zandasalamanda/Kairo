@@ -51,7 +51,7 @@ export function FocusOverlay({
   const [stuckLoading, setStuckLoading] = React.useState(false);
   const [stuckAnswer, setStuckAnswer] = React.useState<string | null>(null);
 
-  // Draft with Solaspace (desk steps).
+  // Draft with Sola (desk steps).
   const [drafting, setDrafting] = React.useState(false);
   const [draft, setDraft] = React.useState<DraftResult | null>(null);
   const [draftLoading, setDraftLoading] = React.useState(false);
@@ -234,7 +234,7 @@ export function FocusOverlay({
                     <div className="h-3 w-full animate-pulse rounded bg-white/5" />
                     <div className="h-3 w-11/12 animate-pulse rounded bg-white/5" />
                     <div className="h-3 w-3/4 animate-pulse rounded bg-white/5" />
-                    <p className="pt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Solaspace is drafting…</p>
+                    <p className="pt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Sola is drafting…</p>
                   </div>
                 ) : (
                   <>
@@ -307,7 +307,7 @@ export function FocusOverlay({
                       </button>
                       {plan.kind === "desk" && (
                         <button onClick={openDraft} className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-accent transition-colors hover:text-ink">
-                          <PenLine size={13} /> Draft with Solaspace
+                          <PenLine size={13} /> Draft with Sola
                         </button>
                       )}
                     </div>

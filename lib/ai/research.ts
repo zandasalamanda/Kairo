@@ -9,7 +9,7 @@ const NATIVE = "https://generativelanguage.googleapis.com/v1beta";
 const MODEL = process.env.AI_RESEARCH_MODEL || process.env.AI_MODEL || "gemini-3.1-flash-lite";
 const apiKey = () => process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || "";
 
-const SYSTEM = `You are Solaspace's research assistant. The user is working on ONE step of a goal and needs current, factual, sourced information to do it well. Answer in clean, well-structured markdown: a direct, specific answer with concrete numbers and specifics, organized under short headings or bullets. Include a diagram in a fenced code block tagged mermaid ONLY when a process or comparison genuinely helps. Be practical and honest — no padding, no disclaimers. Do NOT paste raw URLs inline; the sources are shown separately.`;
+const SYSTEM = `You are Sola, doing focused research for the user. The user is working on ONE step of a goal and needs current, factual, sourced information to do it well. Answer in clean, well-structured markdown: a direct, specific answer with concrete numbers and specifics, organized under short headings or bullets. Include a diagram in a fenced code block tagged mermaid ONLY when a process or comparison genuinely helps. Be practical and honest — no padding, no disclaimers. Do NOT paste raw URLs inline; the sources are shown separately.`;
 
 async function runResearch(input: ResearchInput): Promise<ResearchResult> {
   const key = apiKey();

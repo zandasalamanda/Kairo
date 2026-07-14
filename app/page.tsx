@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown, Waypoints, Sunrise, CircleCheck, Search, Bell, ShieldCheck, Activity, Check } from "lucide-react";
 import { Logo } from "@/components/kairo/Logo";
 import { HeroCluster } from "@/components/kairo/HeroCluster";
+import { LiveMapDemo } from "@/components/kairo/LiveMapDemo";
 import { SectionLabel } from "@/components/kairo/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { PLAN_FREE_FEATURES, PLAN_PRO_FEATURES, priceDisplay } from "@/lib/kairo/plans";
@@ -41,6 +42,11 @@ export default function LandingPage() {
         <a href="#how" className="absolute bottom-7 left-1/2 z-20 -translate-x-1/2 text-faint transition-colors hover:text-muted" aria-label="Scroll to learn more">
           <ChevronDown size={22} className="animate-pulse-soft" />
         </a>
+      </section>
+
+      {/* Live proof — a real plan drawing itself, before the visitor lifts a finger */}
+      <section className="mx-auto -mt-4 max-w-3xl px-5 pb-4">
+        <LiveMapDemo />
       </section>
 
       {/* How it works — the loop */}

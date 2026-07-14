@@ -38,9 +38,12 @@ export function useSpeechInput(setValue: (value: string) => void) {
   const recRef = React.useRef<Recognition | null>(null);
   const baseRef = React.useRef("");
   const setValueRef = React.useRef(setValue);
-  setValueRef.current = setValue;
+  React.useEffect(() => { setValueRef.current = setValue; });
 
   React.useEffect(() => {
+    // One-time feature detection, deferred to mount so SSR (no SpeechRecognition)
+    // and the client agree on the first render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSupported(getRecognition() !== null);
     return () => {
       try {

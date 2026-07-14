@@ -592,7 +592,7 @@ export function GalaxyMap({
       return {
         id, goalId, parentId, title: s.title, description: "", status: "not_started", progress: 0,
         priority: 3, estimatedMinutes: s.estimatedMinutes, dueDate: null, positionX: null, positionY: null,
-        aiReason: "Solaspace broke this down", resource: null, createdAt: nowISO(), updatedAt: nowISO(),
+        aiReason: "Sola broke this down", resource: null, createdAt: nowISO(), updatedAt: nowISO(),
       };
     });
     setGoals((prev) => prev.map((x) => (x.id === goalId ? { ...x, nodes: [...x.nodes, ...created] } : x)));
@@ -1783,7 +1783,7 @@ function NodeSheet({
       </div>
       {helpOpen && (
         <div className="mt-2 flex flex-wrap items-center gap-2 border-l border-line pl-3 animate-sheet-up">
-          <Chip tone="accent" icon={<MessageCircle size={14} />} onClick={() => { setAsking((a) => !a); setBreakOpen(false); }}>Ask Solaspace</Chip>
+          <Chip tone="accent" icon={<MessageCircle size={14} />} onClick={() => { setAsking((a) => !a); setBreakOpen(false); }}>Ask Sola</Chip>
           <Chip tone="accent" icon={breaking ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} onClick={breaking ? undefined : () => { setBreakOpen((o) => !o); setAsking(false); }}>
             {breaking ? "Working…" : "Break it down"}
           </Chip>
@@ -1903,7 +1903,7 @@ function NodeSheet({
       {breakOpen && (
         <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3">
           <button onClick={() => { setBreakOpen(false); onBreakDown(); }} className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-accent transition-colors hover:text-ink">
-            <Sparkles size={14} /> Let Solaspace split it
+            <Sparkles size={14} /> Let Sola split it
           </button>
           <button onClick={() => { setBreakOpen(false); onBranch(); }} className="raised-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink">
             <GitBranch size={14} /> Add a step myself

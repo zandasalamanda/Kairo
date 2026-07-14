@@ -35,6 +35,7 @@ export function HeroCluster() {
     let w = 0, h = 0, raf = 0;
     let stars: { x: number; y: number; r: number; ph: number }[] = [];
     let rot = -0.5, vel = 0, dragging = false, lastX = 0, downX = 0, downY = 0;
+    let px = 0, py = 0, ptx = 0, pty = 0; // smoothed + target pointer parallax
     const t0 = performance.now();
 
     const layout = () => {
@@ -60,6 +61,12 @@ export function HeroCluster() {
       const Ry = Rx * (mobile ? 0.52 : 0.4);
       const sizeK = mobile ? 0.66 : 1;
 
+      // Smoothed pointer parallax — the glow drifts a little, the planets more, so the
+      // cluster reads with real depth as you move across it. Disabled for reduced motion.
+      px += (ptx - px) * 0.05; py += (pty - py) * 0.05;
+      const gx = cx + px * 10, gy = cy + py * 7;    // background glow (subtle)
+      const ocx = cx + px * 26, ocy = cy + py * 16; // orbit ring + planets (more)
+
       if (!dragging) { rot += vel; vel *= 0.95; if (!reduce) rot += 0.0015; }
 
       // background canvas: stars, central glow, orbit ring
@@ -70,13 +77,13 @@ export function HeroCluster() {
         ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1;
-      const sun = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.42);
+      const sun = ctx.createRadialGradient(gx, gy, 0, gx, gy, Math.min(w, h) * 0.42);
       sun.addColorStop(0, "rgba(230,184,119,0.13)");
       sun.addColorStop(0.5, "rgba(230,184,119,0.035)");
       sun.addColorStop(1, "transparent");
       ctx.fillStyle = sun; ctx.fillRect(0, 0, w, h);
       ctx.globalAlpha = 0.1 * p; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.ellipse(cx, cy, Rx, Ry, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(ocx, ocy, Rx, Ry, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.globalAlpha = 1;
 
       // position the real DOM planets along the orbit
@@ -86,8 +93,8 @@ export function HeroCluster() {
         if (openIdRef.current) { el.style.opacity = "0"; continue; } // hide behind the open map
         const a = (i / N) * Math.PI * 2 + rot;
         const depth = (Math.sin(a) + 1) / 2;
-        const x = cx + Math.cos(a) * Rx;
-        const y = cy + Math.sin(a) * Ry;
+        const x = ocx + Math.cos(a) * Rx;
+        const y = ocy + Math.sin(a) * Ry;
         const hover = hoverRef.current === i ? 1.08 : 1;
         const scale = (0.62 + 0.38 * depth) * (0.4 + 0.6 * p) * hover * sizeK;
         el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale.toFixed(3)})`;
@@ -106,6 +113,12 @@ export function HeroCluster() {
       try { wrap.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     };
     const onMove = (e: PointerEvent) => {
+      // Track pointer for parallax whenever we're not dragging or showing a map.
+      if (!reduce && !dragging && !openIdRef.current) {
+        const rect = wrap.getBoundingClientRect();
+        ptx = clamp((e.clientX - rect.left) / rect.width - 0.5, -0.5, 0.5) * 2;
+        pty = clamp((e.clientY - rect.top) / rect.height - 0.5, -0.5, 0.5) * 2;
+      }
       if (!dragging) return;
       const dx = e.clientX - lastX; lastX = e.clientX;
       rot += dx * 0.006; vel = dx * 0.006;

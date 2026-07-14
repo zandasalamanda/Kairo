@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { X, ArrowUp, Loader2, Sparkles, Plus, PencilLine, Check, CalendarClock, GitBranch } from "lucide-react";
+import { X, ArrowUp, Loader2, Plus, PencilLine, Check, CalendarClock, GitBranch } from "lucide-react";
+import { SolaMark } from "./SolaMark";
 import type { GoalWithNodes } from "@/types";
 import type { SolaChange, SolaChangeKind, SolaPlanGoal } from "@/lib/ai/types";
 import { askSola } from "@/lib/ai/ask-sola";
@@ -93,7 +94,7 @@ export function AskSola({ goals, remote, onClose }: { goals: GoalWithNodes[]; re
   return (
     <div className="chrome animate-sheet-up fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-[400px] flex-col border-l border-line">
       <div className="flex items-center gap-2 border-b border-line px-4 py-3.5">
-        <Sparkles size={16} className="text-accent" />
+        <SolaMark size={16} />
         <span className="flex-1 font-display text-[15px] font-semibold text-ink">Ask Sola</span>
         <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">Pro preview</span>
         <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={17} /></button>

@@ -96,10 +96,18 @@ export function ShowcaseTree({ map }: { map: ShowcaseMap }) {
       m.subs.slice(0, 2).forEach((s, j) => nodes.push({ id: `m${i}s${j}`, parentId: `m${i}`, title: s, sub: true }));
     });
     const p = layout(nodes);
-    const PAD = 78;
-    const xs = [0, ...p.map((n) => n.x)], ys = [0, ...p.map((n) => n.y)];
-    const minx = Math.min(...xs) - PAD, maxx = Math.max(...xs) + PAD;
-    const miny = Math.min(...ys) - PAD, maxy = Math.max(...ys) + PAD + 26; // extra room for bottom labels
+    // Frame the ACTUAL visual content (orb radii + the labels below each orb), not
+    // the node centers, so the tree sits perfectly centered instead of up-and-left.
+    const CORE_R = 46, MARGIN = 12, LABEL_HALF = 62, LABEL_DROP = 26;
+    let minx = -CORE_R, maxx = CORE_R, miny = -CORE_R, maxy = CORE_R; // the core at (0,0)
+    for (const n of p) {
+      const r = n.spine ? 25 : 19;
+      minx = Math.min(minx, n.x - Math.max(r, LABEL_HALF));
+      maxx = Math.max(maxx, n.x + Math.max(r, LABEL_HALF));
+      miny = Math.min(miny, n.y - r);
+      maxy = Math.max(maxy, n.y + r + LABEL_DROP); // labels hang below each orb
+    }
+    minx -= MARGIN; maxx += MARGIN; miny -= MARGIN; maxy += MARGIN;
     const md = Math.max(1, ...p.map((n) => Math.hypot(n.x, n.y)));
     return { placed: p, minX: minx, minY: miny, W0: maxx - minx, H0: maxy - miny, maxDist: md };
   }, [map]);

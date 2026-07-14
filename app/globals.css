@@ -136,6 +136,11 @@ body::before {
    box on an otherwise premium surface. Interactive states are handled in-app. */
 * { -webkit-tap-highlight-color: transparent; }
 
+/* The single "next move" node breathing on the landing living-map. */
+@keyframes lt-pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 55% { opacity: 0; transform: scale(1.55); } }
+.lt-pulse { animation: lt-pulse 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .lt-pulse { animation: none; } }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: transparent; }

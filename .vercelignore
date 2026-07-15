@@ -1,0 +1,7 @@
+# Local-only build artifacts and unrelated projects — never upload to Vercel.
+.git
+node_modules
+.next
+.next-preview
+everdeck
+.claude

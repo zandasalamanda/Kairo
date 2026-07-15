@@ -10,9 +10,9 @@ import { PLAN_FREE_FEATURES, PLAN_PRO_FEATURES, priceDisplay } from "@/lib/kairo
 
 // The three beats of the real loop — this IS a sequence, so numbering earns its place.
 const BEATS = [
-  { icon: Waypoints, k: "Map the goal", desc: "Tell Solaspace what you want done. It maps the whole path in about a minute, from milestones to your first move." },
-  { icon: Sunrise, k: "Build your day", desc: "Give it the time and energy you actually have. It builds one calm, focused plan for today and keeps the goal moving." },
-  { icon: CircleCheck, k: "Finish & arrive", desc: "Mark steps done and keep moving. Reminders, weekly reports, and your true pace keep you honest all the way to the finish." },
+  { icon: Waypoints, k: "Map the goal", desc: "Say what you want to do. Solaspace maps the whole path in about a minute." },
+  { icon: Sunrise, k: "Build your day", desc: "Give it the time and energy you have. It builds one focused plan for today." },
+  { icon: CircleCheck, k: "Finish & arrive", desc: "Check off steps. Reminders and a weekly report keep you moving to the finish." },
 ];
 
 // The four things Solaspace is built around.
@@ -90,7 +90,7 @@ export default function LandingPage() {
         <div className="mb-10">
           <SectionLabel className="mb-3">How it works</SectionLabel>
           <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">One loop, from a spark to done.</h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted">No setup, no columns to configure. Say the goal. Solaspace handles the mapping, the planning, and the follow-through with you.</p>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted">No setup. Say the goal. Solaspace handles the mapping, the planning, and the follow-through.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {BEATS.map((b, i) => {

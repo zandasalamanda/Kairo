@@ -7,13 +7,14 @@ import { SolaMark } from "./SolaMark";
 import type { GoalWithNodes } from "@/types";
 import type { SolaChange, SolaChangeKind, SolaPlanGoal } from "@/lib/ai/types";
 import { askSola } from "@/lib/ai/ask-sola";
+import { AiError } from "@/lib/ai/provider";
 import { addNode, updateNode, setNodeStatus, setGoalDeadline } from "@/lib/data/actions";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { Markdown } from "./Markdown";
 import { newId, cn } from "@/lib/utils";
 
 type PendingChange = SolaChange & { on: boolean };
-interface Msg { id: string; role: "user" | "sola"; text: string; changes?: PendingChange[]; applied?: boolean }
+interface Msg { id: string; role: "user" | "sola"; text: string; changes?: PendingChange[]; applied?: boolean; upgrade?: boolean }
 
 const META: Record<SolaChangeKind, { label: string; Icon: typeof Plus; tone: string }> = {
   add: { label: "Add", Icon: Plus, tone: "text-sage" },
@@ -23,7 +24,7 @@ const META: Record<SolaChangeKind, { label: string; Icon: typeof Plus; tone: str
   split: { label: "Split", Icon: GitBranch, tone: "text-accent" },
 };
 
-export function AskSola({ goals, remote, onClose }: { goals: GoalWithNodes[]; remote: boolean; onClose: () => void }) {
+export function AskSola({ goals, remote, isPro, onClose }: { goals: GoalWithNodes[]; remote: boolean; isPro: boolean; onClose: () => void }) {
   const router = useRouter();
   const [messages, setMessages] = React.useState<Msg[]>([]);
   const [input, setInput] = React.useState("");
@@ -56,9 +57,20 @@ export function AskSola({ goals, remote, onClose }: { goals: GoalWithNodes[]; re
       id: g.id, title: g.title, targetDate: g.targetDate,
       nodes: g.nodes.map((n) => ({ id: n.id, parentId: n.parentId, title: n.title, status: n.status })),
     }));
-    const res = await askSola({ message: msg, plan });
-    setMessages((m) => [...m, { id: newId(), role: "sola", text: res.reply, changes: res.changes.map((c) => ({ ...c, on: true })) }]);
-    setLoading(false);
+    try {
+      const res = await askSola({ message: msg, plan });
+      setMessages((m) => [...m, { id: newId(), role: "sola", text: res.reply, changes: res.changes.map((c) => ({ ...c, on: true })) }]);
+    } catch (e) {
+      // Free daily used up (or another block) → a calm upgrade nudge, not an error blob.
+      const ai = e instanceof AiError ? e : null;
+      setMessages((m) => [...m, {
+        id: newId(), role: "sola",
+        text: ai?.message ?? "Sola couldn't respond just now — try again in a moment.",
+        upgrade: !!ai?.upgrade,
+      }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const apply = (msgId: string, changes: PendingChange[]) => {
@@ -96,7 +108,7 @@ export function AskSola({ goals, remote, onClose }: { goals: GoalWithNodes[]; re
       <div className="flex items-center gap-2 border-b border-line px-4 py-3.5">
         <SolaMark size={16} />
         <span className="flex-1 font-display text-[15px] font-semibold text-ink">Ask Sola</span>
-        <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">Pro preview</span>
+        <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">{isPro ? "Pro" : "2 free / day"}</span>
         <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={17} /></button>
       </div>
 
@@ -111,6 +123,11 @@ export function AskSola({ goals, remote, onClose }: { goals: GoalWithNodes[]; re
           <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
             <div className={cn("max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[14px] leading-relaxed", m.role === "user" ? "raised-btn text-ink" : "bg-white/[0.03] text-muted")}>
               {m.role === "sola" ? <Markdown>{m.text}</Markdown> : <p className="whitespace-pre-line">{m.text}</p>}
+              {m.upgrade && (
+                <button onClick={() => { onClose(); router.push("/app/billing"); }} className="raised-gold mt-2.5 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-medium">
+                  Upgrade to Pro
+                </button>
+              )}
               {m.changes && m.changes.length > 0 && (
                 <div className="mt-3 space-y-1.5">
                   {m.changes.map((c, i) => {

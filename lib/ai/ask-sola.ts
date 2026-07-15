@@ -1,4 +1,4 @@
-import { generateJson, isObj, isClient, viaRouteResult, aiErrorText } from "./provider";
+import { generateJson, isObj, isClient, viaRouteResult, raiseIfBlocked, aiErrorText } from "./provider";
 import type { AskSolaInput, AskSolaResult, SolaChange, SolaChangeKind, SolaPlanGoal } from "./types";
 import type { NodeStatus } from "@/types";
 
@@ -74,6 +74,7 @@ const FALLBACK: AskSolaResult = { reply: "Sola couldn't read your plan just now 
 export async function askSola(input: AskSolaInput): Promise<AskSolaResult> {
   if (isClient()) {
     const res = await viaRouteResult<AskSolaResult>("/api/ai/ask-sola", input);
+    raiseIfBlocked(res); // 401/402/429 → AiError, so the caller can show an upgrade prompt
     return valid(res.data) ? clean(res.data, input.plan) : { reply: aiErrorText(res), changes: [] };
   }
   const r = await generateJson<AskSolaResult>(SYSTEM, buildUser(input));

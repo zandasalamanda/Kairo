@@ -5,7 +5,9 @@ import { isObj } from "@/lib/ai/provider";
 import type { NodeStatus } from "@/types";
 
 export async function POST(req: Request) {
-  const denied = await guardAi({ weight: 2, pro: true });
+  // Free users get a small daily taste of Sola; Pro is uncapped. The per-feature
+  // meter (2/day) hooks free users on the plan-reshaping magic without inviting churn.
+  const denied = await guardAi({ weight: 2, feature: "ask-sola", featureFreeDaily: 2, featureLabel: "Ask Sola" });
   if (denied) return denied;
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const message = clampText(b.message, 1000);

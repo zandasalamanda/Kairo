@@ -67,7 +67,7 @@ export default function LandingPage() {
           <Logo />
           <div className="flex items-center gap-2">
             <Link href="/sign-in" className="rounded-full px-4 py-2 text-sm text-muted transition-colors hover:text-ink">Sign in</Link>
-            <Link href="/build"><Button variant="primary" size="sm">Get started</Button></Link>
+            <Link href="/onboarding"><Button variant="primary" size="sm">Get started</Button></Link>
           </div>
         </div>
       </header>
@@ -162,7 +162,7 @@ export default function LandingPage() {
                 <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink/90"><Check size={15} className="mt-0.5 shrink-0 text-sage" />{f}</li>
               ))}
             </ul>
-            <Link href="/build" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">Get started <ArrowRight size={15} /></Link>
+            <Link href="/onboarding" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">Get started <ArrowRight size={15} /></Link>
           </div>
           <div className="panel-2 relative overflow-hidden rounded-3xl border border-accent/25 p-8">
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
@@ -178,7 +178,7 @@ export default function LandingPage() {
                 <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink"><Check size={15} className="mt-0.5 shrink-0 text-accent" />{f}</li>
               ))}
             </ul>
-            <Link href="/build" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-ink hover:underline">Start free, upgrade in-app <ArrowRight size={15} /></Link>
+            <Link href="/onboarding" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-ink hover:underline">Start free, upgrade in-app <ArrowRight size={15} /></Link>
           </div>
         </div>
       </section>
@@ -208,7 +208,7 @@ export default function LandingPage() {
           <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[90px]" />
         </div>
         <h2 className="mx-auto max-w-2xl font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">Pick a goal. Watch the path appear.</h2>
-        <Link href="/build" className="mt-8 inline-block">
+        <Link href="/onboarding" className="mt-8 inline-block">
           <Button variant="primary" size="lg">Start your map <ArrowRight size={18} /></Button>
         </Link>
       </section>

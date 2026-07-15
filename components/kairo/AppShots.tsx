@@ -46,7 +46,7 @@ export function AppShots() {
     <>
       <figure className="panel-2 rounded-3xl p-2 md:p-3">
         <Frame shot={FEATURE} rounded="rounded-2xl" onZoom={setZoom} />
-        <figcaption className="px-2 pb-1 pt-4 text-center text-[15px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-ink">
+        <figcaption className="px-2 pb-1 pt-4 text-center text-[15px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-accent [&_b]:[text-shadow:0_0_14px_rgba(230,184,119,0.55)]">
           Your <b>living goal map</b>. Every step placed in order, each with a <b>hand-picked video or cited guide</b> attached.
         </figcaption>
       </figure>
@@ -55,7 +55,7 @@ export function AppShots() {
         {MOBILE.map((s) => (
           <figure key={s.src} className="panel rounded-2xl p-1.5">
             <Frame shot={s} rounded="rounded-xl" onZoom={setZoom} />
-            <figcaption className="px-2.5 pb-1.5 pt-3 text-center text-[13.5px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-ink">
+            <figcaption className="px-2.5 pb-1.5 pt-3 text-center text-[13.5px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-accent [&_b]:[text-shadow:0_0_14px_rgba(230,184,119,0.55)]">
               {s.cap}
             </figcaption>
           </figure>
@@ -64,7 +64,7 @@ export function AppShots() {
 
       <figure className="panel-2 mt-5 rounded-3xl p-2 md:p-3">
         <Frame shot={SOLA} rounded="rounded-2xl" onZoom={setZoom} />
-        <figcaption className="px-2 pb-1 pt-4 text-center text-[15px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-ink">
+        <figcaption className="px-2 pb-1 pt-4 text-center text-[15px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-accent [&_b]:[text-shadow:0_0_14px_rgba(230,184,119,0.55)]">
           <b>Ask Sola</b> to reshape your whole plan. It proposes the changes, you <b>accept or dismiss</b>.
         </figcaption>
       </figure>

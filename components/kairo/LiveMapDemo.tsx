@@ -8,10 +8,10 @@ import { PlanetOrb } from "./PlanetOrb";
 import { ShowcaseTree } from "./ShowcaseTree";
 import { Button } from "@/components/ui/Button";
 
-// The landing's "show, don't tell" moment: a real goal map floating in space (grid +
-// core glow, like the app — not a boxed card) that draws itself, cross-fades between
-// sample goals, drifts with your cursor, and lets you tap any step to see the actual
-// research behind it. The cycle pauses on hover and stops for good once you interact.
+// The landing's "show, don't tell" moment: a real goal map floating in space that draws
+// itself, cross-fades between sample goals, drifts smoothly with your cursor, and lets
+// you tap any step to see the actual research behind it. The cycle pauses on hover and
+// stops for good once you interact.
 export function LiveMapDemo() {
   const [i, setI] = React.useState(0);
   const [visible, setVisible] = React.useState(true);
@@ -20,6 +20,7 @@ export function LiveMapDemo() {
   const [stopped, setStopped] = React.useState(false);
   const areaRef = React.useRef<HTMLDivElement>(null);
   const treeWrapRef = React.useRef<HTMLDivElement>(null);
+  const target = React.useRef({ x: 0, y: 0 });
   const firstFade = React.useRef(true);
 
   const paused = sheetOpen || hovered || stopped;
@@ -38,24 +39,36 @@ export function LiveMapDemo() {
     return () => window.clearTimeout(t);
   }, [i]);
 
-  // Keep the parallax settled while a research sheet is open.
   React.useEffect(() => {
-    if (sheetOpen && treeWrapRef.current) treeWrapRef.current.style.transform = "translate(0px, 0px)";
+    if (sheetOpen) target.current = { x: 0, y: 0 };
   }, [sheetOpen]);
+
+  // A single rAF loop eases the tree toward the pointer target — smooth, never choppy,
+  // regardless of how fast the mouse moves.
+  React.useEffect(() => {
+    let raf = 0;
+    const cur = { x: 0, y: 0 };
+    const tick = () => {
+      cur.x += (target.current.x - cur.x) * 0.08;
+      cur.y += (target.current.y - cur.y) * 0.08;
+      const wrap = treeWrapRef.current;
+      if (wrap) wrap.style.transform = `translate3d(${cur.x.toFixed(2)}px, ${cur.y.toFixed(2)}px, 0)`;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   const onMove = (e: React.MouseEvent) => {
-    const area = areaRef.current, wrap = treeWrapRef.current;
-    if (!area || !wrap || reduce || sheetOpen) return;
+    const area = areaRef.current;
+    if (!area || reduce || sheetOpen) return;
     const r = area.getBoundingClientRect();
     const dx = ((e.clientX - r.left) / r.width - 0.5) * 2;
     const dy = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    wrap.style.transform = `translate(${(dx * 16).toFixed(1)}px, ${(dy * 11).toFixed(1)}px)`;
+    target.current = { x: dx * 18, y: dy * 12 };
   };
-  const onLeave = () => {
-    setHovered(false);
-    if (treeWrapRef.current) treeWrapRef.current.style.transform = "translate(0px, 0px)";
-  };
+  const onLeave = () => { setHovered(false); target.current = { x: 0, y: 0 }; };
 
   const map = SHOWCASE_MAPS[i];
 
@@ -84,7 +97,7 @@ export function LiveMapDemo() {
         onMouseLeave={onLeave}
         onMouseMove={onMove}
       >
-        <div ref={treeWrapRef} style={{ opacity: visible ? 1 : 0, transition: "opacity .24s ease, transform .25s ease" }}>
+        <div ref={treeWrapRef} style={{ opacity: visible ? 1 : 0, transition: "opacity .24s ease", willChange: "transform" }}>
           <ShowcaseTree map={map} interactive onOpenChange={setSheetOpen} onInteract={() => setStopped(true)} />
         </div>
       </div>
@@ -101,7 +114,7 @@ export function LiveMapDemo() {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <Link href="/build">
+        <Link href="/onboarding">
           <Button variant="primary" size="lg">Map your goal <ArrowRight size={16} /></Button>
         </Link>
       </div>

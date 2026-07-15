@@ -7,8 +7,6 @@ import { ArrowRight, RotateCcw, Sparkles, Loader2, Plus } from "lucide-react";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
 import { clarifyGoal } from "@/lib/ai/clarify";
 import { persistGoalFromMap, deleteGoal } from "@/lib/data/actions";
-import { TEMPLATES, templateToMap } from "@/lib/kairo/templates";
-import { PENDING_MAP_KEY, saveGoalColor, type PendingMap } from "@/lib/kairo/guest-map";
 import type { GoalMapResult, Clarifier } from "@/lib/ai/types";
 import { GoalCore } from "./GoalCore";
 import { Logo } from "./Logo";
@@ -143,50 +141,18 @@ export function OnboardingFlow({ remote = false, signedIn = false }: { remote?: 
     void askQuestions(p);
   };
 
-  // Adopt a guest-built starter map (from /build) once the account exists: rebuild it
-  // from its template — no AI — persist it, keep the chosen colour, and open the map.
-  const adoptPendingMap = React.useCallback(async (raw: string) => {
-    let pm: PendingMap | null = null;
-    try { pm = JSON.parse(raw) as PendingMap; } catch { setStep("input"); return; }
-    const t = TEMPLATES.find((x) => x.id === pm!.templateId);
-    if (!t) { setStep("input"); return; }
-    setStep("mapping");
-    try {
-      const saved = await persistGoalFromMap({ result: templateToMap(t, Date.now()) });
-      if (!saved.ok) {
-        if (saved.upgrade) { router.push("/app/billing"); return; }
-        setError(saved.error ?? "Couldn't save your map. Please try again.");
-        setStep("input");
-        return;
-      }
-      if (saved.id) saveGoalColor(saved.id, pm.colorIndex);
-      router.push(saved.id ? `/app/map?goal=${saved.id}` : "/app/map");
-    } catch {
-      setError("Couldn't save your map. Please try again.");
-      setStep("input");
-    }
-  }, [router]);
-
-  // Returning from sign-up (now signed in): a guest-built map takes priority over a
-  // typed goal; either way, account creation feels like one continuous motion.
+  // Returning from sign-up (now signed in): pick up the goal they typed and map it
+  // automatically, so account creation feels like part of the same motion.
   const claimed = React.useRef(false);
   React.useEffect(() => {
     if (claimed.current || !remote || !signedIn) return;
-    let pmRaw: string | null = null;
-    try { pmRaw = window.sessionStorage.getItem(PENDING_MAP_KEY); } catch { /* private mode */ }
-    if (pmRaw) {
-      claimed.current = true;
-      try { window.sessionStorage.removeItem(PENDING_MAP_KEY); } catch { /* ignore */ }
-      void adoptPendingMap(pmRaw);
-      return;
-    }
     let pending: string | null = null;
     try { pending = window.sessionStorage.getItem(PENDING_KEY); } catch { /* private mode */ }
     if (!pending) return;
     claimed.current = true;
     try { window.sessionStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
     void askQuestions(pending);
-  }, [remote, signedIn, askQuestions, adoptPendingMap]);
+  }, [remote, signedIn, askQuestions]);
 
   const reset = () => {
     // "Start over" discards the map we just saved — delete it so it doesn't linger

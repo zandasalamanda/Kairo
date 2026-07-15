@@ -185,7 +185,7 @@ export function HeroCluster() {
           <span className="inline-block animate-fade-up" style={{ animationDelay: "0.46s" }}>Arrive.</span>
         </h1>
         <div className="animate-fade-up relative mt-7 flex flex-col items-center gap-3 md:mt-9" style={{ animationDelay: "0.56s" }}>
-          <Link href="/build" className={buttonVariants({ variant: "primary", size: "lg", className: "pointer-events-auto" })}>Get started</Link>
+          <Link href="/onboarding" className={buttonVariants({ variant: "primary", size: "lg", className: "pointer-events-auto" })}>Get started</Link>
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Drag to explore · tap a goal</span>
         </div>
       </div>
@@ -210,7 +210,7 @@ export function HeroCluster() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-6 py-4">
               <span className="text-[13px] text-muted">A proven starter map. Yours in seconds.</span>
-              <Link href="/build"><Button variant="primary" size="sm">Start your map</Button></Link>
+              <Link href="/onboarding"><Button variant="primary" size="sm">Start your map</Button></Link>
             </div>
           </div>
         </div>

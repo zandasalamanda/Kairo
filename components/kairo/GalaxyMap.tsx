@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid, Share2, Save, Search, Scissors } from "lucide-react";
+import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Minus, Crosshair, Palette, Trash2, Sparkles, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid, Share2, Save, Search, Scissors } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind, ResolvedResource } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
@@ -362,6 +362,23 @@ export function GalaxyMap({
     setAnimating(true);
     setView({ tx: 0, ty: 0, scale: 0.72 });
     setSelectedNodeId(null);
+  };
+
+  // Mouse-friendly navigation: buttons for people who'd rather not drag/scroll to
+  // get around the map. Zoom steps around the centre; focus flies to the next step.
+  const zoomBy = (factor: number) => {
+    setAnimating(true);
+    setView((v) => ({ ...v, scale: clamp(v.scale * factor, 0.35, 2.4) }));
+  };
+  const focusCurrent = () => {
+    if (!expanded) { overview(); return; }
+    const i = goals.findIndex((g) => g.id === expanded.id);
+    const p = positions[expanded.id] ?? defaultPos(i);
+    const baseDir = Math.hypot(p.x, p.y) < 60 ? -Math.PI / 2 : Math.atan2(p.y, p.x);
+    const np = layoutTree(expanded.nodes, baseDir).find((pl) => pl.node.id === nextId(expanded.nodes));
+    const scale = 1.05;
+    setAnimating(true);
+    setView({ tx: -(p.x + (np?.x ?? 0)) * scale, ty: -(p.y + (np?.y ?? 0)) * scale, scale });
   };
 
   // ---- canvas gestures (pan/zoom) ----
@@ -856,15 +873,30 @@ export function GalaxyMap({
 
       </div>
 
-      {/* recenter */}
-      {dirty && !empty && (
-        <button
-          onClick={overview}
-          className="chrome absolute right-4 top-[calc(env(safe-area-inset-top)+56px)] z-10 grid h-10 w-10 place-items-center rounded-full text-muted transition-colors hover:text-ink md:top-20"
-          aria-label="Recenter"
-        >
-          <Locate size={16} />
-        </button>
+      {/* map navigation — discoverable controls so mouse users don't have to
+          drag-and-scroll their way around. */}
+      {!empty && (
+        <div className="pointer-events-none absolute right-4 top-[calc(env(safe-area-inset-top)+56px)] z-10 flex flex-col items-center gap-1.5 md:top-20">
+          <div className="chrome pointer-events-auto flex flex-col overflow-hidden rounded-full">
+            <button onClick={() => zoomBy(1.25)} className="grid h-9 w-9 place-items-center text-muted transition-colors hover:text-ink" aria-label="Zoom in" title="Zoom in">
+              <Plus size={16} />
+            </button>
+            <span className="mx-auto h-px w-4 bg-line" aria-hidden />
+            <button onClick={() => zoomBy(0.8)} className="grid h-9 w-9 place-items-center text-muted transition-colors hover:text-ink" aria-label="Zoom out" title="Zoom out">
+              <Minus size={16} />
+            </button>
+          </div>
+          {expanded && (
+            <button onClick={focusCurrent} className="chrome pointer-events-auto grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Jump to your next step" title="Jump to your next step">
+              <Crosshair size={15} />
+            </button>
+          )}
+          {dirty && (
+            <button onClick={overview} className="chrome pointer-events-auto grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Recenter" title="See all goals">
+              <Locate size={15} />
+            </button>
+          )}
+        </div>
       )}
 
       {/* bottom: contextual bar */}
@@ -1118,6 +1150,11 @@ function GoalCluster({
   const placed = React.useMemo(() => (expanded ? layoutTree(goal.nodes, baseDir) : []), [expanded, goal.nodes, baseDir]);
   const maxDist = React.useMemo(() => Math.max(1, ...placed.map((p) => Math.hypot(p.x, p.y))), [placed]);
   const nId = nextId(goal.nodes);
+  // Core "charge" ring — fills and brightens with overall goal progress.
+  const corePct = Math.max(0, Math.min(100, goal.progress || 0)) / 100;
+  const coreRingR = (expanded ? 92 : 80) / 2 + 6;
+  const coreRingBox = coreRingR * 2 + 6;
+  const coreRingC = 2 * Math.PI * coreRingR;
 
   return (
     <div className="absolute" style={{ left: pos.x, top: pos.y, opacity: dimmed ? 0.32 : 1, transition: "opacity 0.4s ease" }}>
@@ -1142,18 +1179,25 @@ function GoalCluster({
             // build animation: branches sweep out from the core, staggered by depth
             const len = Math.hypot(ex - sx, ey - sy) * 1.15 + 4;
             const delay = (Math.hypot(p.x, p.y) / maxDist) * 0.5;
+            // A lit trail: edges into finished steps glow like a path you've walked;
+            // the edge into your next step flows; still-to-come edges stay dim.
+            const lit = p.node.status === "done";
             return (
               <path
                 key={p.node.id}
                 d={`M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`}
                 fill="none"
                 stroke={hex}
-                strokeWidth={isNext ? 1.9 : p.spine ? 1.6 : 1.0}
+                strokeWidth={isNext ? 2 : lit ? (p.spine ? 2 : 1.5) : p.spine ? 1.5 : 1.0}
                 strokeLinecap="round"
                 strokeDasharray={isNext ? "3 7" : undefined}
                 className={isNext ? "animate-flow" : undefined}
-                style={isNext ? undefined : ({ strokeDasharray: len, animation: `draw-in 0.5s ease ${delay.toFixed(2)}s both`, "--len": String(len) } as React.CSSProperties)}
-                opacity={p.node.status === "done" ? 0.85 : p.node.status === "not_started" ? 0.4 : 0.7}
+                style={
+                  isNext
+                    ? ({ filter: `drop-shadow(0 0 3px ${hex})` } as React.CSSProperties)
+                    : ({ strokeDasharray: len, animation: `draw-in 0.5s ease ${delay.toFixed(2)}s both`, "--len": String(len), ...(lit ? { filter: `drop-shadow(0 0 3px ${hex}aa)` } : null) } as React.CSSProperties)
+                }
+                opacity={isNext ? 0.95 : lit ? 0.95 : p.node.status === "not_started" ? 0.28 : 0.6}
               />
             );
           })}
@@ -1193,6 +1237,11 @@ function GoalCluster({
       >
         <span className="absolute left-1/2 top-1/2 -z-10 h-[130px] w-[130px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
           style={{ background: `${hex}3a` }} />
+        {/* charge ring — fills and glows brighter as the goal nears the finish */}
+        <svg width={coreRingBox} height={coreRingBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
+          <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth={3} />
+          <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke={hex} strokeWidth={3} strokeLinecap="round" strokeDasharray={coreRingC} strokeDashoffset={coreRingC * (1 - corePct)} style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 ${3 + corePct * 7}px ${hex})` }} />
+        </svg>
         <span
           className={cn("relative grid animate-grow-in place-items-center overflow-hidden rounded-full transition-transform", expanded ? "h-[92px] w-[92px]" : "h-20 w-20")}
           style={{
@@ -1253,6 +1302,12 @@ function NodeOrb({
   const done = node.status === "done";
   const dim = node.status === "not_started";
   const size = spine ? 50 : 38;
+  // A charging ring hugs steps that are underway, filled to their progress.
+  const pct = Math.max(0, Math.min(100, node.progress || 0)) / 100;
+  const showRing = !done && !dim;
+  const ringR = size / 2 + 3;
+  const ringBox = ringR * 2 + 4;
+  const ringC = 2 * Math.PI * ringR;
   const glow = done
     ? `0 0 24px ${hex}88, inset 0 0 12px ${hex}55`
     : dim
@@ -1272,6 +1327,21 @@ function NodeOrb({
         className="relative grid place-items-center"
         style={{ width: size, height: size, animation: "breathe 6s ease-in-out infinite" }}
       >
+        {showRing && (
+          <svg width={ringBox} height={ringBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
+            <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={2.5} />
+            <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke={hex} strokeWidth={2.5} strokeLinecap="round" strokeDasharray={ringC} strokeDashoffset={ringC * (1 - pct)} style={{ transition: "stroke-dashoffset .5s ease", filter: `drop-shadow(0 0 3px ${hex}88)` }} />
+          </svg>
+        )}
+        {/* you-are-here beacon: a pinging ring + a "Next" tag on the current step */}
+        {isNext && (
+          <span aria-hidden className="pointer-events-none absolute inset-0 animate-ping rounded-full border" style={{ borderColor: `${hex}99`, margin: -5 }} />
+        )}
+        {isNext && (
+          <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.16em]" style={{ background: `${hex}26`, color: hex, textShadow: "0 1px 6px rgba(8,9,11,0.9)" }}>
+            Next
+          </span>
+        )}
         {(isNext || selected) && (
           <span className="absolute inset-0 animate-pulse-soft rounded-full" style={{ boxShadow: `0 0 0 4px ${hex}22, 0 0 24px ${hex}66`, margin: -4 }} />
         )}

@@ -95,6 +95,15 @@ interface Placed {
   spine: boolean; // a milestone (has children) vs a leaf sub-step
 }
 
+/** A named group of goals — drawn as a soft tinted halo + label behind its
+ *  member planets. Purely a client-side organization layer (localStorage). */
+interface Constellation {
+  id: string;
+  label: string;
+  colorIdx: number;
+  goalIds: string[];
+}
+
 const SPINE_RAD = 252; // distance to the next milestone along the spine
 const LEAF_RAD = 166; // distance to a rib (leaf sub-step)
 const SPINE_ARC = 0.11; // a slight, consistent bend — keeps the spine a clear, readable path
@@ -260,6 +269,9 @@ export function GalaxyMap({
   const [goals, setGoals] = usePersistentState<GoalWithNodes[]>("kairo.goals.v1", initialGoals, !remote);
   const [positions, setPositions] = usePersistentState<Record<string, { x: number; y: number }>>("kairo.galaxy.v1", {});
   const [colorIdx, setColorIdx] = usePersistentState<Record<string, number>>("kairo.colors.v1", {});
+  const [groups, setGroups] = usePersistentState<Constellation[]>("kairo.groups.v1", []);
+  const [groupPickerFor, setGroupPickerFor] = React.useState<string | null>(null); // goalId being filed
+  const [newGroupName, setNewGroupName] = React.useState("");
   const router = useRouter();
   // The moment-of-intent upgrade prompt (goal cap etc.) — string = reason & open flag.
   const [upgradeReason, setUpgradeReason] = React.useState<string | null>(null);
@@ -381,6 +393,77 @@ export function GalaxyMap({
     const scale = 1.05;
     setAnimating(true);
     setView({ tx: -(p.x + (np?.x ?? 0)) * scale, ty: -(p.y + (np?.y ?? 0)) * scale, scale });
+  };
+
+  // ---- constellations (grouping goals into named life-areas) ----
+  const groupOf = React.useCallback((goalId: string) => groups.find((gr) => gr.goalIds.includes(goalId)) ?? null, [groups]);
+
+  // Soft nebula halos behind each constellation's members, sized to enclose them.
+  const constellations = React.useMemo(() => {
+    const out: { id: string; label: string; hex: string; cx: number; cy: number; radius: number }[] = [];
+    for (const gr of groups) {
+      const pts = gr.goalIds
+        .map((id) => { const i = goals.findIndex((g) => g.id === id); return i >= 0 ? posOf(id, i) : null; })
+        .filter((p): p is { x: number; y: number } => p !== null);
+      if (pts.length === 0) continue;
+      const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+      const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+      const radius = Math.max(150, ...pts.map((p) => Math.hypot(p.x - cx, p.y - cy))) + 120;
+      out.push({ id: gr.id, label: gr.label, hex: GOAL_PALETTE[gr.colorIdx % GOAL_PALETTE.length].hex, cx, cy, radius });
+    }
+    return out;
+  }, [groups, goals, posOf]);
+  // Halos are an overview cue only — they fade as you zoom in or open a goal, so a
+  // tree never competes with a ring.
+  const groupOpacity = expandedId ? 0 : clamp(1 - (view.scale - 0.9) / 0.5, 0, 1);
+
+  const fileGoal = (groupId: string, goalId: string) => {
+    setGroups((prev) => {
+      const inIt = prev.find((gr) => gr.id === groupId)?.goalIds.includes(goalId);
+      return prev
+        .map((gr) => ({
+          ...gr,
+          goalIds: gr.id === groupId
+            ? inIt ? gr.goalIds.filter((x) => x !== goalId) : [...gr.goalIds, goalId]
+            : gr.goalIds.filter((x) => x !== goalId), // a goal lives in one constellation
+        }))
+        .filter((gr) => gr.goalIds.length > 0); // drop emptied constellations
+    });
+  };
+  const createConstellation = (label: string, goalId: string) => {
+    const name = label.trim().slice(0, 40);
+    if (!name) return;
+    const used = new Set(groups.map((gr) => gr.colorIdx));
+    const cIdx = Array.from({ length: GOAL_PALETTE.length }, (_, i) => i).find((i) => !used.has(i)) ?? groups.length % GOAL_PALETTE.length;
+    setGroups((prev) => [
+      ...prev.map((gr) => ({ ...gr, goalIds: gr.goalIds.filter((x) => x !== goalId) })).filter((gr) => gr.goalIds.length > 0),
+      { id: newId(), label: name, colorIdx: cIdx, goalIds: [goalId] },
+    ]);
+    setNewGroupName("");
+  };
+
+  // "Tidy": snap planets to a clean arrangement — each constellation's members
+  // cluster tightly around a spiral slot; loose goals fill the rest of the spiral.
+  const tidy = () => {
+    const next: Record<string, { x: number; y: number }> = {};
+    const live = groups
+      .map((gr) => ({ ...gr, goalIds: gr.goalIds.filter((id) => goals.some((g) => g.id === id)) }))
+      .filter((gr) => gr.goalIds.length > 0);
+    let slot = 0;
+    for (const gr of live) {
+      const base = defaultPos(slot++);
+      gr.goalIds.forEach((id, k) => {
+        const a = k * GOLDEN;
+        const r = k === 0 ? 0 : 78 + 14 * k;
+        next[id] = { x: base.x + Math.cos(a) * r, y: base.y + Math.sin(a) * r };
+      });
+    }
+    const grouped = new Set(live.flatMap((gr) => gr.goalIds));
+    for (const g of goals) if (!grouped.has(g.id)) next[g.id] = defaultPos(slot++);
+    setAnimating(true);
+    setPositions(next);
+    setSelectedNodeId(null);
+    showToast("Tidied the galaxy");
   };
 
   // ---- canvas gestures (pan/zoom) ----
@@ -796,6 +879,14 @@ export function GalaxyMap({
           className="absolute left-1/2 top-1/2"
           style={{ transform, transformOrigin: "center", transition: animating ? "transform 0.6s cubic-bezier(0.22,1,0.36,1)" : "none", willChange: "transform" }}
         >
+          {/* constellation halos — soft tinted nebulae behind grouped planets */}
+          {groupOpacity > 0 && constellations.map((c) => (
+            <div key={c.id} className="pointer-events-none absolute" style={{ left: c.cx, top: c.cy, opacity: groupOpacity, transition: "opacity 0.4s ease" }}>
+              <div className="rounded-full" style={{ position: "absolute", left: -c.radius, top: -c.radius, width: c.radius * 2, height: c.radius * 2, background: `radial-gradient(circle, ${c.hex}1f, ${c.hex}0d 46%, transparent 70%)` }} />
+              <span className="absolute left-0 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] font-medium uppercase tracking-[0.24em]" style={{ top: -c.radius - 6, color: c.hex, opacity: 0.85, textShadow: "0 1px 12px rgba(8,9,11,0.95)" }}>{c.label}</span>
+            </div>
+          ))}
+
           {goals.map((g, i) => (
             <GoalCluster
               key={g.id}
@@ -888,6 +979,11 @@ export function GalaxyMap({
               <Minus size={16} />
             </button>
           </div>
+          {(groups.length > 0 || Object.keys(positions).length > 0) && (
+            <button onClick={tidy} className="chrome pointer-events-auto grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Tidy the galaxy" title="Tidy the galaxy">
+              <LayoutGrid size={15} />
+            </button>
+          )}
           {expanded && (
             <button onClick={focusCurrent} className="chrome pointer-events-auto grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Jump to your next step" title="Jump to your next step">
               <Crosshair size={15} />
@@ -1069,6 +1165,7 @@ export function GalaxyMap({
                 { label: "Delete step", danger: true, onClick: () => removeNode(ctx.goalId, ctx.node!.id) },
               ]
             : [
+                { label: groupOf(ctx.goalId) ? "Move to constellation" : "Add to constellation", onClick: () => { setGroupPickerFor(ctx.goalId); setNewGroupName(""); } },
                 { label: "Change colour", onClick: () => cycleColor(ctx.goalId) },
                 { label: "Adapt with Sola", onClick: () => void runReplan(ctx.goalId) },
                 { label: "Share", onClick: () => void shareGoalLink(ctx.goalId) },
@@ -1088,6 +1185,45 @@ export function GalaxyMap({
           ))}
         </div>
       )}
+
+      {groupPickerFor && (() => {
+        const goalId = groupPickerFor;
+        const g = goals.find((x) => x.id === goalId);
+        const current = groupOf(goalId);
+        return (
+          <div className="fixed inset-0 z-[150] grid place-items-center bg-canvas/70 px-6 backdrop-blur-sm" onClick={() => setGroupPickerFor(null)} role="dialog" aria-modal="true" aria-label="Add to constellation">
+            <div className="chrome animate-sheet-up w-72 rounded-2xl p-2" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-2 px-2.5 pb-1 pt-1.5">
+                <span className="min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Constellation · {truncate(g?.title ?? "Goal", 18)}</span>
+                <button onClick={() => setGroupPickerFor(null)} className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={13} /></button>
+              </div>
+              {groups.length > 0 && (
+                <div className="max-h-48 overflow-y-auto py-0.5">
+                  {groups.map((gr) => {
+                    const inIt = gr.goalIds.includes(goalId);
+                    return (
+                      <button key={gr.id} onClick={() => fileGoal(gr.id, goalId)} className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] text-muted transition-colors hover:bg-white/5 hover:text-ink">
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: GOAL_PALETTE[gr.colorIdx % GOAL_PALETTE.length].hex }} />
+                        <span className="min-w-0 flex-1 truncate">{gr.label}</span>
+                        {inIt && <Check size={14} className="shrink-0 text-accent" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <form onSubmit={(e) => { e.preventDefault(); createConstellation(newGroupName, goalId); }} className={cn("flex items-center gap-1.5 px-1.5 pt-2", groups.length > 0 && "mt-0.5 border-t border-line")}>
+                <input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="New constellation…" className="h-8 min-w-0 flex-1 bg-transparent px-1.5 text-[13px] text-ink placeholder:text-faint focus:outline-none" autoFocus />
+                <button type="submit" disabled={!newGroupName.trim()} className="raised-btn inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] text-accent disabled:opacity-40"><Plus size={13} /> Create</button>
+              </form>
+              {current && (
+                <button onClick={() => fileGoal(current.id, goalId)} className="mt-1 flex w-full items-center rounded-lg px-2.5 py-1.5 text-left text-[12px] text-faint transition-colors hover:text-warn">
+                  Remove from {truncate(current.label, 18)}
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <UpgradeModal reason={upgradeReason} onClose={() => setUpgradeReason(null)} />
     </div>

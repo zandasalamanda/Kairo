@@ -3,10 +3,10 @@ import { priceDisplay, upgradeReasonForGoalCap, PLAN_FREE_FEATURES, PLAN_PRO_FEA
 
 describe("priceDisplay", () => {
   it("derives an honest yearly-per-month, savings, and per-day anchor", () => {
-    expect(priceDisplay.monthly).toBe(12);
+    expect(priceDisplay.monthly).toBe(10);
     expect(priceDisplay.yearly).toBe(96);
     expect(priceDisplay.yearlyPerMonth).toBe(8); // 96 / 12
-    expect(priceDisplay.savingsPct).toBe(33); // 1 - 96/144
+    expect(priceDisplay.savingsPct).toBe(20); // 1 - 96/120
     expect(priceDisplay.perDay).toBe("$0.26"); // 96 / 365
   });
 });

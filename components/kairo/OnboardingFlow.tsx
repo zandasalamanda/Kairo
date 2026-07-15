@@ -12,7 +12,7 @@ import { PENDING_MAP_KEY, saveGoalColor, type PendingMap } from "@/lib/kairo/gue
 import type { GoalMapResult, Clarifier } from "@/lib/ai/types";
 import { GoalCore } from "./GoalCore";
 import { Logo } from "./Logo";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { MicButton } from "@/components/ui/MicButton";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -364,10 +364,8 @@ export function OnboardingFlow({ remote = false, signedIn = false }: { remote?: 
           </div>
 
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-            <Link href={goalId ? `/app/map?goal=${goalId}` : "/app/map"} className="flex-1">
-              <Button variant="primary" size="lg" className="w-full">
-                Open my map <ArrowRight size={16} />
-              </Button>
+            <Link href={goalId ? `/app/map?goal=${goalId}` : "/app/map"} className={buttonVariants({ variant: "primary", size: "lg", className: "flex-1" })}>
+              Open my map <ArrowRight size={16} />
             </Link>
             <Button variant="glass" size="lg" onClick={reset}>
               <RotateCcw size={15} /> Start over

@@ -57,7 +57,7 @@ export function UpgradeModal({ reason, onClose }: { reason: string | null; onClo
           ))}
         </ul>
         <p className="mt-4 text-center text-[12px] text-faint">
-          Pro is <span className="text-muted">${priceDisplay.yearlyPerMonth}/mo</span> billed yearly — about {priceDisplay.perDay} a day.
+          Pro is <span className="text-muted">${priceDisplay.monthly}/mo</span>, or ${priceDisplay.yearly}/year.
         </p>
         <button onClick={() => void upgrade()} disabled={loading} className="raised-gold mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-[14px] font-medium disabled:opacity-50">
           {loading ? "Starting…" : "Upgrade to Pro"}

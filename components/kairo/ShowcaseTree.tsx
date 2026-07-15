@@ -4,7 +4,7 @@ import * as React from "react";
 import { Play, BookOpen, X, ArrowUpRight } from "lucide-react";
 import type { ShowcaseMap, ShowcaseResource } from "@/lib/kairo/showcase-maps";
 import { PlanetOrb } from "./PlanetOrb";
-import { cn, truncate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 // A static rendering of the real in-app goal map, drawn EXACTLY as the live map draws
 // it: the same fishbone layout + collision relaxation, DOM node orbs and an SVG
@@ -81,7 +81,7 @@ function relax(placed: Placed[]): Placed[] {
 
 interface Frame { minX: number; minY: number; w: number; h: number }
 
-export function ShowcaseTree({ map, interactive = false, onOpenChange }: { map: ShowcaseMap; interactive?: boolean; onOpenChange?: (open: boolean) => void }) {
+export function ShowcaseTree({ map, interactive = false, onOpenChange, onInteract }: { map: ShowcaseMap; interactive?: boolean; onOpenChange?: (open: boolean) => void; onInteract?: () => void }) {
   const hex = map.color;
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const treeRef = React.useRef<HTMLDivElement>(null);
@@ -125,7 +125,7 @@ export function ShowcaseTree({ map, interactive = false, onOpenChange }: { map: 
     return () => { clearTimeout(show); clearTimeout(hide); };
   }, [interactive]);
   const dismissHint = React.useCallback(() => { interacted.current = true; setShowHint(false); }, []);
-  const open = (id: string) => { dismissHint(); setSelectedId(id); };
+  const open = (id: string) => { dismissHint(); onInteract?.(); setSelectedId(id); };
 
   // Let a parent pause its auto-cycle while a sheet is open or a hint is showing, so
   // exploring a step is never yanked out from under the reader.
@@ -250,9 +250,9 @@ export function ShowcaseTree({ map, interactive = false, onOpenChange }: { map: 
                   >
                     <span className="rounded-full" style={{ width: p.spine ? 9 : 7, height: p.spine ? 9 : 7, background: hex, boxShadow: `0 0 8px ${hex}` }} />
                   </span>
-                  <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 max-w-[110px] -translate-x-1/2 text-center leading-tight">
-                    <span data-vis className={cn("block truncate", p.spine ? "text-[13px] font-semibold text-ink" : "text-[11px] text-muted")} style={{ textShadow: "0 1px 10px rgba(8,9,11,0.96), 0 0 4px rgba(8,9,11,0.9)" }}>
-                      {truncate(p.node.title, p.spine ? 22 : 26)}
+                  <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 w-[120px] -translate-x-1/2 text-center leading-tight">
+                    <span data-vis className={cn("block", p.spine ? "text-[13px] font-semibold text-ink" : "text-[11px] text-muted")} style={{ textShadow: "0 1px 10px rgba(8,9,11,0.96), 0 0 4px rgba(8,9,11,0.9)" }}>
+                      {p.node.title}
                     </span>
                   </span>
                 </div>
@@ -303,7 +303,9 @@ export function ShowcaseTree({ map, interactive = false, onOpenChange }: { map: 
             </div>
 
             {selected.res ? (
-              selected.res.kind === "watch" ? (
+              <>
+                <p className="mt-2.5 text-[13px] leading-relaxed text-muted">{selected.res.summary}</p>
+                {selected.res.kind === "watch" ? (
                 <a href={`https://www.youtube.com/watch?v=${selected.res.videoId}`} target="_blank" rel="noopener noreferrer" className="raised-btn mt-3 block overflow-hidden rounded-xl">
                   <span className="relative block aspect-video w-full bg-cover bg-center" style={{ backgroundImage: `url(https://img.youtube.com/vi/${selected.res.videoId}/mqdefault.jpg)` }}>
                     <span className="absolute inset-0 grid place-items-center">
@@ -328,10 +330,11 @@ export function ShowcaseTree({ map, interactive = false, onOpenChange }: { map: 
                   </span>
                   <ArrowUpRight size={15} className="shrink-0 text-faint" />
                 </a>
-              )
+                )}
+              </>
             ) : (
               <div className="mt-3 rounded-xl bg-white/[0.03] px-3.5 py-3 text-[12px] leading-relaxed text-muted">
-                Part of your plan. In the app, Sola attaches a hand-checked video or cited guide to every step.
+                Part of your plan. In the app, Sola researches every step for you — a hand-checked video or cited guide.
               </div>
             )}
 

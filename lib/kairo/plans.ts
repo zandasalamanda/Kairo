@@ -7,8 +7,8 @@ import { pricing, planLimits } from "@/lib/config";
 export const PLAN_FREE_FEATURES = [
   "Up to 2 active goals",
   "AI goal maps & a daily focus plan",
-  "Guidance and video picks for each step",
-  "Proof of progress on completed steps",
+  "Hand-picked videos and guides for each step",
+  "Progress tracked automatically",
   "Weekly progress review",
 ];
 

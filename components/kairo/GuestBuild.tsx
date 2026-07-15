@@ -44,9 +44,9 @@ export function GuestBuild({ remote }: { remote: boolean }) {
       </div>
 
       <div className="mt-8 text-center">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Pick a goal. It&apos;s already mapped.</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Start with a plan that works.</h1>
         <p className="mx-auto mt-3 max-w-md text-[15px] text-muted">
-          Choose a proven starter map and make it yours. No account needed to build — save it when you&apos;re ready.
+          Preview a proven starter map, then create your free account to make it yours and start moving.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export function GuestBuild({ remote }: { remote: boolean }) {
 
       {/* save */}
       <div className="mt-7 flex flex-col items-center gap-3 pb-4">
-        <Button variant="primary" size="lg" onClick={save} className="w-full max-w-xs">Save my map <ArrowRight size={16} /></Button>
+        <Button variant="primary" size="lg" onClick={save} className="w-full max-w-xs">Create my free account <ArrowRight size={16} /></Button>
         <Link href="/onboarding" className="text-[13px] text-faint transition-colors hover:text-muted">Prefer to describe your own goal?</Link>
       </div>
     </div>

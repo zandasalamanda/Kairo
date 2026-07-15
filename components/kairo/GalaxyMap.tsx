@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid, Share2, Save, Search, Lock, Scissors } from "lucide-react";
+import { ArrowUp, Check, Timer, X, ChevronDown, Locate, GitBranch, Plus, Palette, Trash2, Sparkles, MessageCircle, Loader2, PlayCircle, Dumbbell, BookOpen, ExternalLink, NotebookPen, Wand2, ArrowDownToLine, HelpCircle, LayoutGrid, Share2, Save, Search, Scissors } from "lucide-react";
 import type { GoalWithNodes, GoalNode, NodeStatus, NodeResource, ResourceKind, ResolvedResource } from "@/types";
 import { parseDeadline } from "@/lib/kairo/deadline";
 import { generateGoalMap } from "@/lib/ai/generate-goal-map";
@@ -37,7 +37,6 @@ import {
   setNodeResolvedResource,
   shareGoal,
   deleteGoal,
-  addNodeEvidence,
 } from "@/lib/data/actions";
 import { MicButton } from "@/components/ui/MicButton";
 import { Chip } from "@/components/ui/Chip";
@@ -1174,7 +1173,6 @@ function NodeOrb({
 }) {
   const done = node.status === "done";
   const dim = node.status === "not_started";
-  const proven = done && (node.evidence?.length ?? 0) > 0; // done WITH real proof attached
   const size = spine ? 50 : 38;
   const glow = done
     ? `0 0 24px ${hex}88, inset 0 0 12px ${hex}55`
@@ -1196,9 +1194,6 @@ function NodeOrb({
       >
         {(isNext || selected) && (
           <span className="absolute inset-0 animate-pulse-soft rounded-full" style={{ boxShadow: `0 0 0 4px ${hex}22, 0 0 24px ${hex}66`, margin: -4 }} />
-        )}
-        {proven && (
-          <span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 2px rgba(255,240,210,0.85), 0 0 18px ${hex}cc`, margin: -3 }} />
         )}
         {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
         <span
@@ -1612,11 +1607,7 @@ function NodeSheet({
   const [researchResult, setResearchResult] = React.useState<ResearchResult | null>(null);
   const [researchLoading, setResearchLoading] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
-  const [provingDone, setProvingDone] = React.useState(false);
-  const [evKind, setEvKind] = React.useState<"link" | "note" | "metric">("link");
-  const [evValue, setEvValue] = React.useState("");
-  const [savingEv, setSavingEv] = React.useState(false);
-  const [congrats, setCongrats] = React.useState<{ title: string; sub: string; proof: boolean } | null>(null);
+  const [congrats, setCongrats] = React.useState<{ title: string; sub: string } | null>(null);
 
   const router = useRouter();
   // Blocking AI responses (upgrade / rate-limit / sign-in) surface as a toast —
@@ -1630,19 +1621,11 @@ function NodeSheet({
     return false;
   };
 
-  const markDone = async (withProof: boolean) => {
-    let proofKind: "link" | "note" | "metric" | null = null;
-    if (withProof && evValue.trim()) {
-      setSavingEv(true);
-      await addNodeEvidence({ nodeId: node.id, kind: evKind, value: evValue.trim() });
-      setSavingEv(false);
-      proofKind = evKind;
-    }
-    setProvingDone(false);
-    setEvValue("");
+  const markDone = () => {
     onDone();            // mark the step done (optimistic) — the sheet stays open…
-    router.refresh();    // …reload so proof + the verified halo appear on the map
-    setCongrats(pickCelebration(node.id, proofKind)); // …and land on a congratulation
+    router.refresh();    // …reload so the map updates…
+    const { title, sub } = pickCelebration(node.id, null);
+    setCongrats({ title, sub }); // …and land on a quiet celebration
   };
 
   const runResearch = async () => {
@@ -1725,11 +1708,6 @@ function NodeSheet({
         </div>
         <h2 className="mt-4 font-display text-xl font-semibold text-ink">{congrats.title}</h2>
         <p className="mx-auto mt-1.5 max-w-[16rem] text-[13px] leading-relaxed text-muted">{congrats.sub}</p>
-        {congrats.proof && (
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-3 py-1 text-[11px] text-faint">
-            <Lock size={11} /> Private to you
-          </div>
-        )}
         <button onClick={onClose} className="raised-gold mx-auto mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-[13px] font-medium">
           Continue
         </button>
@@ -1755,28 +1733,11 @@ function NodeSheet({
         <NodeResourceBlock node={node} onResolve={(r) => onResolveResource(node.id, r)} />
       )}
 
-      {node.evidence && node.evidence.length > 0 && (
-        <div className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
-          <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">Proof</div>
-          {node.evidence.map((ev) =>
-            ev.kind === "link" ? (
-              <a key={ev.id} href={ev.value.startsWith("http") ? ev.value : `https://${ev.value}`} target="_blank" rel="noopener noreferrer" className="truncate rounded-lg bg-white/[0.03] px-3 py-1.5 text-[13px] text-accent underline decoration-accent/30 underline-offset-2 hover:decoration-accent">
-                {ev.value}
-              </a>
-            ) : (
-              <div key={ev.id} className="rounded-lg bg-white/[0.03] px-3 py-1.5 text-[13px] text-ink/90">
-                <span className="mr-1.5 font-mono text-[10px] uppercase text-faint">{ev.kind === "metric" ? "metric" : "note"}</span>{ev.value}
-              </div>
-            )
-          )}
-        </div>
-      )}
-
       {/* Lead with the two verbs that matter; the four AI helpers live behind one
           reveal so the sheet reads as a calm command surface, not a 6-button toolbar. */}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Chip tone="accent" icon={<Timer size={14} />} onClick={onFocus}>Focus</Chip>
-        <Chip tone="sage" icon={<Check size={14} />} onClick={() => setProvingDone((p) => !p)}>Done</Chip>
+        <Chip tone="sage" icon={<Check size={14} />} onClick={markDone}>Done</Chip>
         <Chip tone="accent" active={helpOpen} icon={<Sparkles size={14} />} onClick={() => setHelpOpen((o) => !o)}>
           Sola can help <ChevronDown size={13} className={cn("transition-transform", helpOpen && "rotate-180")} />
         </Chip>
@@ -1793,35 +1754,6 @@ function NodeSheet({
         </div>
       )}
 
-      {provingDone && (
-        <div className="mt-3 border-t border-line pt-3">
-          <div className="mb-1.5 flex items-center justify-between">
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">Proof of progress</span>
-            <button onClick={() => setProvingDone(false)} className="text-faint transition-colors hover:text-ink" aria-label="Close"><X size={14} /></button>
-          </div>
-          <p className="mb-2 text-[12px] text-muted">Attach what you produced (optional). Private to you.</p>
-          <div className="inset-well mb-2 flex gap-1 rounded-xl p-1">
-            {(["link", "note", "metric"] as const).map((k) => (
-              <button key={k} onClick={() => setEvKind(k)} className={cn("flex-1 rounded-lg px-2 py-1 text-[12px] capitalize transition-colors", evKind === k ? "raised-btn text-ink" : "text-muted hover:text-ink")}>
-                {k === "metric" ? "Number" : k}
-              </button>
-            ))}
-          </div>
-          <input
-            autoFocus
-            value={evValue}
-            onChange={(e) => setEvValue(e.target.value)}
-            placeholder={evKind === "link" ? "Paste a link: a doc, PR, or post…" : evKind === "metric" ? "e.g. 1,400 words · 3 miles · 12 reps" : "A quick note on what you did"}
-            className="inset-well w-full rounded-xl px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint focus-visible:outline-none"
-          />
-          <div className="mt-2.5 flex items-center gap-3">
-            <button onClick={() => void markDone(true)} disabled={savingEv} className="raised-gold inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-medium disabled:opacity-50">
-              {savingEv ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Mark done
-            </button>
-            <button onClick={() => void markDone(false)} disabled={savingEv} className="text-[12px] text-faint transition-colors hover:text-muted">Just mark done</button>
-          </div>
-        </div>
-      )}
 
       {researching && (
         <div className="mt-3 border-t border-line pt-3">

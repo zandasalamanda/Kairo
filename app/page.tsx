@@ -11,14 +11,14 @@ import { PLAN_FREE_FEATURES, PLAN_PRO_FEATURES, priceDisplay } from "@/lib/kairo
 const BEATS = [
   { icon: Waypoints, k: "Map the goal", desc: "Tell Solaspace what you want done. It maps the whole path in about a minute, from milestones to your first move." },
   { icon: Sunrise, k: "Build your day", desc: "Give it the time and energy you actually have. It builds one calm, focused plan for today and keeps the goal moving." },
-  { icon: CircleCheck, k: "Prove & arrive", desc: "Mark steps done with real proof. Reminders, weekly reports, and your true pace keep you honest all the way to the finish." },
+  { icon: CircleCheck, k: "Finish & arrive", desc: "Mark steps done and keep moving. Reminders, weekly reports, and your true pace keep you honest all the way to the finish." },
 ];
 
 // The four things Solaspace is built around.
 const PILLARS = [
   { icon: Search, title: "Research, done for you", desc: "Each step pulls hand-checked videos and cited answers. Real links you can act on, never a dead or made-up one." },
   { icon: Bell, title: "Reminders that keep you moving", desc: "Calm nudges for what's due and what's next. Never noisy, never guilt. One thing to do today." },
-  { icon: ShieldCheck, title: "Real accountability", desc: "Attach real proof to finished steps and share your progress. The map becomes a record of actual work, not just checkboxes." },
+  { icon: ShieldCheck, title: "Real accountability", desc: "Share your progress and keep an honest record of what you actually finished, not just checkboxes." },
   { icon: Activity, title: "Progress you can see", desc: "A weekly report of what you produced and your true pace to every deadline. A clear picture, every week." },
 ];
 
@@ -120,12 +120,11 @@ export default function LandingPage() {
           <div className="panel-2 relative overflow-hidden rounded-3xl border border-accent/25 p-8">
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
             <div className="flex items-center gap-2"><div className="text-sm font-semibold text-accent">Pro</div><span className="rounded-full bg-accent/12 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">Most popular</span></div>
-            <div className="mt-2 flex items-end gap-2">
-              <span className="font-display text-4xl font-semibold text-ink">${priceDisplay.yearlyPerMonth}</span>
+            <div className="mt-2 flex items-end gap-1.5">
+              <span className="font-display text-4xl font-semibold text-ink">${priceDisplay.monthly}</span>
               <span className="mb-1.5 text-sm text-muted">/mo</span>
-              <span className="mb-2 text-sm text-faint line-through">${priceDisplay.monthly}</span>
             </div>
-            <p className="mt-1 text-[13px] text-faint">Billed yearly (${priceDisplay.yearly}) · about {priceDisplay.perDay} a day · save {priceDisplay.savingsPct}%</p>
+            <p className="mt-1 text-[13px] text-faint">or ${priceDisplay.yearly}/year · save {priceDisplay.savingsPct}%</p>
             <p className="mt-2 text-sm text-muted">Everything in Free, plus the AI that does the work with you.</p>
             <ul className="mt-6 space-y-2.5">
               {PLAN_PRO_FEATURES.map((f) => (
@@ -153,16 +152,18 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 pt-8 sm:flex-row">
           <Logo size={22} />
-          <p className="font-mono text-[12px] text-faint">Chart it. Focus. Arrive.</p>
-          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted">
-            <Link href="/sign-in" className="hover:text-ink">Sign in</Link>
-            <a href="#features" className="hover:text-ink">Features</a>
-            <a href="#pricing" className="hover:text-ink">Pricing</a>
-            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
-            <Link href="/terms" className="hover:text-ink">Terms</Link>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted">
+            <Link href="/sign-in" className="inline-block py-1.5 hover:text-ink">Sign in</Link>
+            <a href="#features" className="inline-block py-1.5 hover:text-ink">Features</a>
+            <a href="#pricing" className="inline-block py-1.5 hover:text-ink">Pricing</a>
+            <Link href="/privacy" className="inline-block py-1.5 hover:text-ink">Privacy</Link>
+            <Link href="/terms" className="inline-block py-1.5 hover:text-ink">Terms</Link>
           </div>
+        </div>
+        <div className="mx-auto max-w-6xl px-5 pb-8 pt-3 text-center sm:text-left">
+          <p className="font-mono text-[12px] text-faint">© 2026 Solaspace · Chart it. Focus. Arrive.</p>
         </div>
       </footer>
     </div>

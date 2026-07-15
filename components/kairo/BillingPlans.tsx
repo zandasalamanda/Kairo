@@ -14,12 +14,9 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<string | null>(null);
 
-  // What's actually charged (for the renewal line) vs the anchored headline: when
-  // billed yearly we show the effective per-month cost struck against the monthly price.
   const price = interval === "monthly" ? monthly : yearly;
   const per = interval === "monthly" ? "mo" : "yr";
   const isYearly = interval === "yearly";
-  const headline = isYearly ? priceDisplay.yearlyPerMonth : monthly;
 
   const post = async (url: string, body?: unknown) => {
     setLoading(true);
@@ -87,13 +84,12 @@ export function BillingPlans({ plan, monthly, yearly }: { plan: Plan; monthly: n
           <div className="flex items-center gap-2 text-sm font-semibold text-accent">
             <Zap size={15} /> Pro
           </div>
-          <div className="mt-2 flex items-end gap-1.5">
-            <span className="font-display text-3xl font-semibold text-ink">${headline}</span>
-            <span className="mb-1 text-[13px] text-muted">/mo</span>
-            {isYearly && <span className="mb-1 text-[13px] text-faint line-through">${monthly}</span>}
+          <div className="mt-2 flex items-end gap-1">
+            <span className="font-display text-3xl font-semibold text-ink">${price}</span>
+            <span className="mb-1 text-[13px] text-muted">/{per}</span>
           </div>
           <p className="mt-0.5 font-mono text-[11px] text-faint">
-            {isYearly ? `Billed yearly ($${yearly}) · about ${priceDisplay.perDay} a day` : `About ${priceDisplay.perDay} a day, billed yearly`}
+            {isYearly ? `Save ${priceDisplay.savingsPct}% vs paying monthly` : `or $${yearly}/year`}
           </p>
           <p className="mt-1.5 text-[13px] text-muted">Everything in Free, plus the AI that does the work with you.</p>
           <ul className="mt-5 space-y-2.5">

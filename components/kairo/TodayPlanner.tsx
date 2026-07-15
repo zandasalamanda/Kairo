@@ -344,10 +344,10 @@ export function TodayPlanner({
             <span>The shape of today</span>
             <span className="text-muted">{doneCount} / {liveCount} done</span>
           </div>
-          <div className="flex h-2.5 items-stretch gap-[3px]">
+          <div className="inset-well flex h-4 items-stretch gap-[3px] overflow-hidden rounded-full p-[3px]">
             {active.blocks.map((b) => {
               const w = `${(b.durationMinutes / totalDur) * 100}%`;
-              if (b.kind === "break") return <span key={b.id} className="rounded-full bg-white/[0.06]" style={{ width: w }} title={`Break · ${b.durationMinutes}m`} />;
+              if (b.kind === "break") return <span key={b.id} className="rounded-full bg-white/[0.05]" style={{ width: w }} title={`Break · ${b.durationMinutes}m`} />;
               const hex = b.goalId ? color(b.goalId) : "#e6b877";
               const done = b.status === "completed";
               const pushed = b.status === "pushed";
@@ -355,7 +355,7 @@ export function TodayPlanner({
                 <span
                   key={b.id}
                   className="rounded-full transition-opacity"
-                  style={{ width: w, background: pushed ? "rgba(255,255,255,0.10)" : hex, opacity: done ? 1 : 0.38, boxShadow: done ? `0 0 8px ${hex}66` : undefined }}
+                  style={{ width: w, background: pushed ? "rgba(255,255,255,0.10)" : hex, opacity: done ? 1 : 0.32 }}
                   title={`${b.title} · ${b.durationMinutes}m`}
                 />
               );
@@ -402,7 +402,7 @@ export function TodayPlanner({
             <li key={b.id} className="relative py-1.5 pl-11">
               {/* bead on the spine — number, or a check when done */}
               <span
-                className={cn("absolute left-[3px] top-[18px] z-[1] grid h-6 w-6 place-items-center rounded-full font-mono text-[11px] font-semibold", isNext && "animate-pulse-soft")}
+                className="absolute left-[3px] top-[18px] z-[1] grid h-6 w-6 place-items-center rounded-full font-mono text-[11px] font-semibold"
                 style={
                   completed
                     ? { background: hex, color: "#0a0b0d" }

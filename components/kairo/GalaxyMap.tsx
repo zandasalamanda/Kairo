@@ -75,12 +75,14 @@ function defaultPos(i: number): { x: number; y: number } {
 }
 
 function nextId(nodes: GoalNode[]): string | null {
-  return (
-    nodes.find((n) => n.status === "in_motion")?.id ??
-    nodes.find((n) => n.status === "at_risk")?.id ??
-    nodes.find((n) => n.status === "not_started")?.id ??
-    null
-  );
+  const rank: Record<string, number> = { in_motion: 0, at_risk: 1, not_started: 2 };
+  const parents = new Set(nodes.map((n) => n.parentId).filter(Boolean) as string[]);
+  const actionable = nodes.filter((n) => n.status !== "done" && n.status !== "blocked");
+  const byStatus = (a: GoalNode, b: GoalNode) => (rank[a.status] ?? 3) - (rank[b.status] ?? 3) || a.priority - b.priority;
+  // A milestone with sub-steps isn't itself the thing you do — prefer a real
+  // leaf sub-step. Only fall back to a top-level node when nothing branches.
+  const leaves = actionable.filter((n) => !parents.has(n.id)).sort(byStatus);
+  return (leaves[0] ?? [...actionable].sort(byStatus)[0])?.id ?? null;
 }
 
 interface Placed {
@@ -1333,17 +1335,14 @@ function NodeOrb({
             <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke={hex} strokeWidth={2.5} strokeLinecap="round" strokeDasharray={ringC} strokeDashoffset={ringC * (1 - pct)} style={{ transition: "stroke-dashoffset .5s ease", filter: `drop-shadow(0 0 3px ${hex}88)` }} />
           </svg>
         )}
-        {/* you-are-here beacon: a pinging ring + a "Next" tag on the current step */}
-        {isNext && (
-          <span aria-hidden className="pointer-events-none absolute inset-0 animate-ping rounded-full border" style={{ borderColor: `${hex}99`, margin: -5 }} />
-        )}
+        {/* you-are-here beacon: a calm "Next" tag + a static ring — no pulsing. */}
         {isNext && (
           <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.16em]" style={{ background: `${hex}26`, color: hex, textShadow: "0 1px 6px rgba(8,9,11,0.9)" }}>
             Next
           </span>
         )}
         {(isNext || selected) && (
-          <span className="absolute inset-0 animate-pulse-soft rounded-full" style={{ boxShadow: `0 0 0 4px ${hex}22, 0 0 24px ${hex}66`, margin: -4 }} />
+          <span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${hex}44`, margin: -4 }} />
         )}
         {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
         <span

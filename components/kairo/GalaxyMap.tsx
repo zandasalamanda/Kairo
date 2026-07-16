@@ -487,45 +487,67 @@ export function GalaxyMap({
     setView({ tx: 0, ty: 0, scale: 0.72 }); // frame the whole grid
     setPositions(next);
     setSelectedNodeId(null);
-    showToast("Tidied the galaxy");
+    showToast("Tidied up");
   };
 
-  // "Organise": auto-sort goals into life-area constellations by their icon
-  // (Health, Work, Travel, Digital, …) and lay each group out as its own cluster.
+  // "Organise": auto-sort goals into groups by icon (Health, Work, Travel, Digital,
+  // …). It respects the groups you've already made — only the goals that aren't in a
+  // group get sorted; existing groups keep their members and labels.
   const organize = () => {
     if (goals.length === 0) return;
+    const alive = (id: string) => goals.some((g) => g.id === id);
+    const existing = groups
+      .map((gr) => ({ ...gr, goalIds: gr.goalIds.filter(alive) }))
+      .filter((gr) => gr.goalIds.length > 0);
+    const grouped = new Set(existing.flatMap((gr) => gr.goalIds));
+    const loose = goals.filter((g) => !grouped.has(g.id));
+
+    // Bucket only the loose goals by life area.
     const buckets = new Map<string, string[]>();
-    for (const g of goals) {
+    for (const g of loose) {
       const cat = categoryOf(g.icon);
       (buckets.get(cat) ?? buckets.set(cat, []).get(cat)!).push(g.id);
     }
-    const cats = [...buckets.entries()];
-    // A halo is only worth drawing for a real cluster — label groups of 2+.
-    const newGroups: Constellation[] = cats
+    // New groups only for areas with 2+ loose goals (no lonely halos); pick colours
+    // that don't clash with the groups you already have.
+    const used = new Set(existing.map((gr) => gr.colorIdx));
+    const nextColor = () => {
+      const i = Array.from({ length: GOAL_PALETTE.length }, (_, k) => k).find((k) => !used.has(k)) ?? used.size % GOAL_PALETTE.length;
+      used.add(i);
+      return i;
+    };
+    const newGroups: Constellation[] = [...buckets.entries()]
       .filter(([, ids]) => ids.length >= 2)
-      .map(([label, goalIds], i) => ({ id: newId(), label, colorIdx: i % GOAL_PALETTE.length, goalIds }));
-    const cols = Math.max(1, Math.ceil(Math.sqrt(cats.length)));
-    const rows = Math.ceil(cats.length / cols);
+      .map(([label, goalIds]) => ({ id: newId(), label, colorIdx: nextColor(), goalIds }));
+
+    const allGroups = [...existing, ...newGroups];
+    // Lay out every group as its own cluster, then each still-loose goal on its own.
+    const inAGroup = new Set(allGroups.flatMap((gr) => gr.goalIds));
+    const singles = goals.filter((g) => !inAGroup.has(g.id)).map((g) => [g.id]);
+    const clusters: string[][] = [...allGroups.map((gr) => gr.goalIds), ...singles];
+
+    const cols = Math.max(1, Math.ceil(Math.sqrt(clusters.length)));
+    const rows = Math.ceil(clusters.length / cols);
     const CX = 560, CY = 500;
     const next: Record<string, { x: number; y: number }> = {};
-    cats.forEach(([, goalIds], ci) => {
+    clusters.forEach((ids, ci) => {
       const col = ci % cols, row = Math.floor(ci / cols);
       const cx = (col - (cols - 1) / 2) * CX;
       const cy = (row - (rows - 1) / 2) * CY;
-      goalIds.forEach((id, k) => {
-        if (goalIds.length === 1) { next[id] = { x: cx, y: cy }; return; }
+      ids.forEach((id, k) => {
+        if (ids.length === 1) { next[id] = { x: cx, y: cy }; return; }
         const a = k * GOLDEN;
         const r = 96 + 20 * Math.sqrt(k);
         next[id] = { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r };
       });
     });
-    setGroups(newGroups);
+    setGroups(allGroups);
     setAnimating(true);
     setView({ tx: 0, ty: 60, scale: 0.66 }); // frame the clusters, nudged down so top labels clear the chrome
     setPositions(next);
     setSelectedNodeId(null);
     setExpandedId(null);
-    showToast(`Organised into ${cats.length} area${cats.length === 1 ? "" : "s"}`);
+    showToast(allGroups.length ? `Organised into ${allGroups.length} group${allGroups.length === 1 ? "" : "s"}` : "Organised your goals");
   };
 
   // Screen point → map coordinates (invert the centered translate + scale transform).
@@ -1116,12 +1138,12 @@ export function GalaxyMap({
           <div className="chrome pointer-events-auto flex flex-col items-center gap-0.5 rounded-full p-1">
             <button onClick={() => setBrowsingTemplates(true)} className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Starter templates" title="Starter templates"><LayoutTemplate size={16} /></button>
             <button onClick={() => { setSearchOpen((s) => !s); setQuery(""); }} aria-pressed={searchOpen} className={cn("grid h-9 w-9 place-items-center rounded-full transition-colors", searchOpen ? "text-accent" : "text-muted hover:text-ink")} aria-label="Find on the map" title="Find on the map"><Search size={16} /></button>
-            <button onClick={() => setFocusLens((f) => !f)} aria-pressed={focusLens} className={cn("grid h-9 w-9 place-items-center rounded-full transition-colors", focusLens ? "text-accent" : "text-muted hover:text-ink")} aria-label="Focus lens — dim to your live path" title="Focus lens — dim to your live path"><Focus size={16} /></button>
+            <button onClick={() => setFocusLens((f) => !f)} aria-pressed={focusLens} className={cn("grid h-9 w-9 place-items-center rounded-full transition-colors", focusLens ? "text-accent" : "text-muted hover:text-ink")} aria-label="Focus mode" title="Focus mode — dim all but your next steps"><Focus size={16} /></button>
             {goals.length > 1 && (
-              <button onClick={organize} className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Organise into life areas" title="Organise into life areas (Health, Work, Travel…)"><Boxes size={16} /></button>
+              <button onClick={organize} className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Sort into groups" title="Sort into groups (Health, Work, Travel…)"><Boxes size={16} /></button>
             )}
             {goals.length > 1 && (
-              <button onClick={tidy} className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Tidy the galaxy" title="Tidy into a clean grid"><LayoutGrid size={15} /></button>
+              <button onClick={tidy} className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-ink" aria-label="Tidy up" title="Tidy into a clean grid"><LayoutGrid size={15} /></button>
             )}
           </div>
           {searchOpen && (
@@ -1339,7 +1361,7 @@ export function GalaxyMap({
                 { label: "Delete step", danger: true, onClick: () => removeNode(ctx.goalId, ctx.node!.id) },
               ]
             : [
-                { label: groupOf(ctx.goalId) ? "Move to constellation" : "Add to constellation", onClick: () => { setGroupPickerFor(ctx.goalId); setNewGroupName(""); } },
+                { label: groupOf(ctx.goalId) ? "Move to a group" : "Add to a group", onClick: () => { setGroupPickerFor(ctx.goalId); setNewGroupName(""); } },
                 { label: "Change colour", onClick: () => cycleColor(ctx.goalId) },
                 { label: "Adapt with Sola", onClick: () => void runReplan(ctx.goalId) },
                 { label: "Share", onClick: () => void shareGoalLink(ctx.goalId) },
@@ -1365,10 +1387,10 @@ export function GalaxyMap({
         const g = goals.find((x) => x.id === goalId);
         const current = groupOf(goalId);
         return (
-          <div className="fixed inset-0 z-[150] grid place-items-center bg-canvas/70 px-6 backdrop-blur-sm" onClick={() => setGroupPickerFor(null)} role="dialog" aria-modal="true" aria-label="Add to constellation">
+          <div className="fixed inset-0 z-[150] grid place-items-center bg-canvas/70 px-6 backdrop-blur-sm" onClick={() => setGroupPickerFor(null)} role="dialog" aria-modal="true" aria-label="Add to a group">
             <div className="chrome animate-sheet-up w-72 rounded-2xl p-2" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center gap-2 px-2.5 pb-1 pt-1.5">
-                <span className="min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Constellation · {truncate(g?.title ?? "Goal", 18)}</span>
+                <span className="min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Groups · {truncate(g?.title ?? "Goal", 18)}</span>
                 <button onClick={() => setGroupPickerFor(null)} className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-faint hover:text-ink" aria-label="Close"><X size={13} /></button>
               </div>
               {groups.length > 0 && (
@@ -1386,7 +1408,7 @@ export function GalaxyMap({
                 </div>
               )}
               <form onSubmit={(e) => { e.preventDefault(); createConstellation(newGroupName, goalId); }} className={cn("flex items-center gap-1.5 px-1.5 pt-2", groups.length > 0 && "mt-0.5 border-t border-line")}>
-                <input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="New constellation…" className="h-8 min-w-0 flex-1 bg-transparent px-1.5 text-[13px] text-ink placeholder:text-faint focus:outline-none" autoFocus />
+                <input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="New group…" className="h-8 min-w-0 flex-1 bg-transparent px-1.5 text-[13px] text-ink placeholder:text-faint focus:outline-none" autoFocus />
                 <button type="submit" disabled={!newGroupName.trim()} className="raised-btn inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] text-accent disabled:opacity-40"><Plus size={13} /> Create</button>
               </form>
               {current && (

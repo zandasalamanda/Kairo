@@ -116,7 +116,7 @@ export function InboxBoard({ initialItems, remote = false }: { initialItems: Inb
 function ItemRow({ item, dot, onRemove }: { item: LiteItem; dot: string; onRemove: (id: string, msg: string) => void }) {
   const [open, setOpen] = React.useState(false);
   return (
-    <div className={cn("rounded-xl transition-colors", open && "bg-white/[0.02]")}>
+    <div className={cn("rounded-xl transition-colors", open && "bg-[color-mix(in_srgb,var(--color-ink)_3%,transparent)]")}>
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-3 px-3 py-3 text-left">
         <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dot)} />
         <span className="min-w-0 flex-1 truncate text-[15px] text-ink/90">{item.content}</span>

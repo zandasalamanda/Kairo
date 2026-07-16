@@ -23,11 +23,11 @@ function Row({ label, desc, on, disabled, onChange }: { label: string; desc: str
         onClick={() => onChange(!on)}
         className={cn("relative h-6 w-11 shrink-0 rounded-full border transition-all", disabled && "cursor-not-allowed")}
         style={{
-          borderColor: on ? "rgba(230,184,119,0.5)" : "rgba(255,255,255,0.08)",
-          background: on ? "linear-gradient(180deg,#eabf7e,#c9975a)" : "rgba(0,0,0,0.35)",
+          borderColor: on ? "rgba(230,184,119,0.5)" : "var(--well-border)",
+          background: on ? "linear-gradient(180deg,#eabf7e,#c9975a)" : "var(--well-bg)",
           boxShadow: on
             ? "0 0 10px rgba(230,184,119,0.4), inset 0 1px 0 rgba(255,255,255,0.35)"
-            : "inset 0 1px 3px rgba(0,0,0,0.6)",
+            : "var(--well-shadow)",
         }}
       >
         <span

@@ -51,7 +51,7 @@ export function ReviewMirror({ insights, goals }: { insights: ReviewInsights; go
                     {p.state !== "done" && (
                       <span
                         className="absolute top-[-2px] h-3 w-[2px] rounded-full"
-                        style={{ left: `calc(${Math.round(p.timeFraction * 100)}% - 1px)`, background: p.state === "behind" || p.state === "overdue" ? "var(--color-warn, #d98b6a)" : "rgba(255,255,255,0.5)" }}
+                        style={{ left: `calc(${Math.round(p.timeFraction * 100)}% - 1px)`, background: p.state === "behind" || p.state === "overdue" ? "var(--color-warn, #d98b6a)" : "color-mix(in srgb, var(--color-ink) 55%, transparent)" }}
                         title="Time elapsed"
                       />
                     )}

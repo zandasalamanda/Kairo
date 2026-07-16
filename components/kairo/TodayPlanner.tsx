@@ -49,7 +49,7 @@ function DiffMeter({ difficulty }: { difficulty: Difficulty }) {
   return (
     <span className="inline-flex items-end gap-[2px]" title={`${d.label} focus`} aria-label={`${d.label} focus`}>
       {[0, 1, 2].map((i) => (
-        <span key={i} className="w-[3px] rounded-full" style={{ height: 5 + i * 3, background: i < d.bars ? d.hex : "rgba(255,255,255,0.14)" }} />
+        <span key={i} className="w-[3px] rounded-full" style={{ height: 5 + i * 3, background: i < d.bars ? d.hex : "var(--color-line-strong)" }} />
       ))}
     </span>
   );
@@ -347,7 +347,7 @@ export function TodayPlanner({
           <div className="inset-well flex h-4 items-stretch gap-[3px] overflow-hidden rounded-full p-[3px]">
             {active.blocks.map((b) => {
               const w = `${(b.durationMinutes / totalDur) * 100}%`;
-              if (b.kind === "break") return <span key={b.id} className="rounded-full bg-white/[0.05]" style={{ width: w }} title={`Break · ${b.durationMinutes}m`} />;
+              if (b.kind === "break") return <span key={b.id} className="rounded-full" style={{ width: w, background: "color-mix(in srgb, var(--color-ink) 6%, transparent)" }} title={`Break · ${b.durationMinutes}m`} />;
               const hex = b.goalId ? color(b.goalId) : "#e6b877";
               const done = b.status === "completed";
               const pushed = b.status === "pushed";
@@ -355,7 +355,7 @@ export function TodayPlanner({
                 <span
                   key={b.id}
                   className="rounded-full transition-opacity"
-                  style={{ width: w, background: pushed ? "rgba(255,255,255,0.10)" : hex, opacity: done ? 1 : 0.32 }}
+                  style={{ width: w, background: pushed ? "color-mix(in srgb, var(--color-ink) 12%, transparent)" : hex, opacity: done ? 1 : 0.32 }}
                   title={`${b.title} · ${b.durationMinutes}m`}
                 />
               );
@@ -427,14 +427,14 @@ export function TodayPlanner({
                     <span className="truncate">{g?.title ?? "Step"}</span>
                   </span>
                   {pushed ? (
-                    <span className="shrink-0 rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-medium text-faint">Pushed</span>
+                    <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium text-faint" style={{ background: "color-mix(in srgb, var(--color-ink) 7%, transparent)" }}>Pushed</span>
                   ) : !completed ? (
                     <span className="inline-flex shrink-0 items-center gap-1.5" style={{ color: diff.hex }}>
                       <DiffMeter difficulty={b.difficulty} />
                       <span className="font-mono text-[10px] uppercase tracking-wide">{diff.label}</span>
                     </span>
                   ) : null}
-                  <span className="shrink-0 rounded-md bg-white/[0.05] px-1.5 py-0.5 font-mono text-[11px] tabular-nums text-muted">{formatDuration(b.durationMinutes)}</span>
+                  <span className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums text-muted" style={{ background: "color-mix(in srgb, var(--color-ink) 6%, transparent)" }}>{formatDuration(b.durationMinutes)}</span>
                 </div>
 
                 <h3 className={cn("mt-2 font-display text-lg font-semibold leading-snug", completed ? "text-muted line-through" : "text-ink")}>{b.title}</h3>

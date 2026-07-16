@@ -7,6 +7,7 @@ import { clerkPublic } from "@/lib/config";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/kairo/PageHeader";
 import { SettingsForm } from "@/components/kairo/SettingsForm";
+import { ThemeToggle } from "@/components/kairo/ThemeToggle";
 import { NotificationSettings } from "@/components/kairo/NotificationSettings";
 import { UsageMeter } from "@/components/kairo/UsageMeter";
 
@@ -23,6 +24,7 @@ export default async function SettingsPage() {
       <PageHeader eyebrow="You & Solaspace" title="Settings" description="Tune how Solaspace plans and speaks." />
       <div className="space-y-5">
         <SettingsForm user={user} />
+        <ThemeToggle />
         {usage && <UsageMeter {...usage} />}
         {profile && (
           <NotificationSettings

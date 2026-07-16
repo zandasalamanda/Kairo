@@ -9,7 +9,7 @@ import { buildSeed } from "@/lib/mock/seed";
 export function AuthShell({ children }: { children: React.ReactNode }) {
   const goal = buildSeed().goals[0];
   return (
-    <div className="relative min-h-[100dvh] md:grid md:grid-cols-[1.05fr_1fr]">
+    <div data-theme="dark" className="cockpit relative min-h-[100dvh] md:grid md:grid-cols-[1.05fr_1fr]">
       <OrbBackground />
 
       {/* brand panel — desktop */}

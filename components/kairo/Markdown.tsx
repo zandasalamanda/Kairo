@@ -26,7 +26,7 @@ type Pattern = { re: RegExp; make: (m: RegExpExecArray, key: string) => React.Re
 // Inline patterns, tried by earliest match position. Order breaks ties so that
 // `**` (bold) is preferred over a single `*` (italic) at the same index.
 const INLINE: Pattern[] = [
-  { re: /`([^`]+)`/, make: (m, key) => <code key={key} className="rounded bg-white/[0.07] px-1 py-0.5 font-mono text-[0.85em] text-ink">{m[1]}</code> },
+  { re: /`([^`]+)`/, make: (m, key) => <code key={key} className="rounded px-1 py-0.5 font-mono text-[0.85em] text-ink" style={{ background: "color-mix(in srgb, var(--color-ink) 7%, transparent)" }}>{m[1]}</code> },
   { re: /\*\*([^*]+?)\*\*/, make: (m, key) => <strong key={key} className="font-semibold text-ink">{renderInline(m[1], key)}</strong> },
   { re: /__([^_]+?)__/, make: (m, key) => <strong key={key} className="font-semibold text-ink">{renderInline(m[1], key)}</strong> },
   { re: /~~([^~]+?)~~/, make: (m, key) => <span key={key} className="line-through opacity-70">{renderInline(m[1], key)}</span> },

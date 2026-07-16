@@ -134,7 +134,7 @@ export function FocusOverlay({
   const C = 2 * Math.PI * R;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-canvas/95 backdrop-blur-xl">
+    <div data-theme="dark" className="fixed inset-0 z-50 overflow-y-auto bg-canvas/95 backdrop-blur-xl">
       <button
         onClick={onClose}
         className="fixed right-5 top-[calc(env(safe-area-inset-top)+16px)] z-10 grid h-10 w-10 place-items-center rounded-full text-faint transition-colors hover:text-ink"

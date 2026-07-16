@@ -44,9 +44,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${sora.variable} ${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        {/* Set the theme before paint so there's no flash. Dark is the default;
+            light is opt-in (kairo.theme.v1). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('kairo.theme.v1');var d=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',d);var m=document.querySelector('meta[name=\"theme-color\"]');if(m)m.setAttribute('content',d==='light'?'#f6f6f3':'#0a0b0d');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();",
+          }}
+        />
         {/* ClerkProvider only when Clerk is configured; demo mode runs bare. */}
         {features.clerk ? (
           <ClerkProvider><ToastProvider>{children}</ToastProvider></ClerkProvider>

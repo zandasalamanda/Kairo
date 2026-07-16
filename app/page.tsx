@@ -35,7 +35,7 @@ const FAQS = [
 
 export default function LandingPage() {
   return (
-    <div className="relative overflow-hidden">
+    <div data-theme="dark" className="cockpit relative overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -16,7 +16,7 @@ export default async function OnboardingPage() {
     signedIn = !!(await auth()).userId;
   }
   return (
-    <div className="relative">
+    <div data-theme="dark" className="cockpit relative min-h-[100dvh]">
       <OrbBackground />
       <OnboardingFlow remote={isRemote} signedIn={signedIn} />
     </div>

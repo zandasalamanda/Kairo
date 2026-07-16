@@ -31,7 +31,7 @@ export function UsageMeter({ plan, dayUsed, dayLimit, monthUsed, monthLimit, pro
       </div>
 
       {/* glossy meter */}
-      <div className="mt-1.5 h-2.5 overflow-hidden rounded-full border border-black/40 bg-black/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+      <div className="inset-well mt-1.5 h-2.5 overflow-hidden rounded-full">
         <div
           className="h-full rounded-full transition-all"
           style={{

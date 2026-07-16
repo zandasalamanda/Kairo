@@ -97,6 +97,102 @@
   100% { transform: scale(2.4); opacity: 0; }
 }
 
+/* ============================================================
+   Theme token sets. Dark is the default (values match @theme exactly, so the
+   dark look is byte-identical after tokenizing). Light is opt-in. Every surface
+   recipe is stored as a full-value token so a subtree can be forced back to dark
+   (the "cockpit": map, orbs, hero) simply by setting data-theme="dark" on it —
+   custom properties from the nearest data-theme win.
+   ============================================================ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: #0a0b0d;
+  --color-canvas-2: #0d0e11;
+  --color-surface: #121317;
+  --color-surface-2: #16181d;
+  --color-surface-3: #1c1f26;
+  --color-line: rgba(255, 255, 255, 0.07);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-ink: #f2f3f5;
+  --color-muted: #9a9ea8;
+  --color-faint: #7c8290;
+  --color-accent: #e6b877;
+  --color-accent-dim: #b28e5c;
+  --color-warn: #d5896f;
+  --color-sage: #8fae9f;
+
+  --wash: radial-gradient(70% 50% at 50% -10%, rgba(255, 255, 255, 0.045), transparent 70%);
+  --selection-bg: rgba(230, 184, 119, 0.25);
+  --selection-fg: #fff;
+  --scroll-thumb: rgba(255, 255, 255, 0.08);
+  --scroll-thumb-hover: rgba(255, 255, 255, 0.14);
+  --grid-line: rgba(255, 255, 255, 0.02);
+
+  --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.008) 60%), rgba(20, 22, 27, 0.55);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 1px rgba(0, 0, 0, 0.3), 0 10px 26px -16px rgba(0, 0, 0, 0.75);
+  --panel2-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.012) 52%, rgba(0, 0, 0, 0.05)), rgba(24, 26, 32, 0.72);
+  --panel2-border: rgba(255, 255, 255, 0.1);
+  --panel2-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.35), 0 16px 40px -18px rgba(0, 0, 0, 0.8);
+  --chrome-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01) 55%), color-mix(in srgb, var(--color-canvas) 74%, transparent);
+  --chrome-border: rgba(255, 255, 255, 0.1);
+  --chrome-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 30px -12px rgba(0, 0, 0, 0.8);
+  --btn-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 55%, rgba(0, 0, 0, 0.06)), rgba(26, 28, 34, 0.9);
+  --btn-bg-hover: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 55%, rgba(0, 0, 0, 0.05)), rgba(32, 34, 41, 0.95);
+  --btn-border: rgba(255, 255, 255, 0.1);
+  --btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1.5px 1px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.35), 0 6px 14px -8px rgba(0, 0, 0, 0.6);
+  --btn-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1.5px 1px rgba(0, 0, 0, 0.4), 0 2px 3px rgba(0, 0, 0, 0.35), 0 10px 22px -8px rgba(0, 0, 0, 0.6);
+  --btn-shadow-active: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --well-bg: rgba(0, 0, 0, 0.26);
+  --well-border: rgba(255, 255, 255, 0.06);
+  --well-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-canvas: #f6f6f3;
+  --color-canvas-2: #efefeb;
+  --color-surface: #ffffff;
+  --color-surface-2: #f7f7f4;
+  --color-surface-3: #eeeeea;
+  --color-line: rgba(24, 26, 30, 0.10);
+  --color-line-strong: rgba(24, 26, 30, 0.18);
+  --color-ink: #1b1d23;
+  --color-muted: #51555e;   /* a touch darker for comfortable reading on cream */
+  --color-faint: #696d76;   /* the smallest labels still need to clear ~5:1 on light */
+  --color-accent: #9a6a1c;   /* deeper gold so accent TEXT is readable on light */
+  --color-accent-dim: #b28e5c;
+  --color-warn: #b8543a;
+  --color-sage: #497a60;
+
+  --wash: radial-gradient(70% 50% at 50% -10%, rgba(30, 32, 55, 0.028), transparent 70%);
+  --selection-bg: rgba(230, 184, 119, 0.3);
+  --selection-fg: #1b1d23;
+  --scroll-thumb: rgba(24, 26, 30, 0.18);
+  --scroll-thumb-hover: rgba(24, 26, 30, 0.3);
+  --grid-line: rgba(24, 26, 30, 0.04);
+
+  --panel-bg: #ffffff;
+  --panel-border: rgba(24, 26, 30, 0.09);
+  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(20, 22, 30, 0.05), 0 10px 26px -16px rgba(20, 22, 30, 0.18);
+  --panel2-bg: #ffffff;
+  --panel2-border: rgba(24, 26, 30, 0.11);
+  --panel2-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 2px 4px rgba(20, 22, 30, 0.06), 0 16px 40px -18px rgba(20, 22, 30, 0.22);
+  --chrome-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72) 55%), color-mix(in srgb, #ffffff 80%, transparent);
+  --chrome-border: rgba(24, 26, 30, 0.1);
+  --chrome-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px -12px rgba(20, 22, 30, 0.2);
+  --btn-bg: linear-gradient(180deg, #ffffff, #f2f2ef 90%);
+  --btn-bg-hover: linear-gradient(180deg, #ffffff, #eaeae6 90%);
+  --btn-border: rgba(24, 26, 30, 0.12);
+  --btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 1px 1px rgba(20, 22, 30, 0.06), 0 4px 10px -6px rgba(20, 22, 30, 0.16);
+  --btn-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 1), 0 2px 3px rgba(20, 22, 30, 0.08), 0 8px 18px -6px rgba(20, 22, 30, 0.2);
+  --btn-shadow-active: inset 0 2px 4px rgba(20, 22, 30, 0.12);
+  --well-bg: rgba(24, 26, 30, 0.05);
+  --well-border: rgba(24, 26, 30, 0.08);
+  --well-shadow: inset 0 1px 3px rgba(20, 22, 30, 0.1), inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+}
+
 /* ---------- Base ---------- */
 html { color-scheme: dark; }
 
@@ -115,13 +211,19 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(70% 50% at 50% -10%, rgba(255, 255, 255, 0.045), transparent 70%),
-    #0a0b0d;
+  background: var(--wash), var(--color-canvas);
   pointer-events: none;
 }
 
-::selection { background: rgba(230, 184, 119, 0.25); color: #fff; }
+/* The "cockpit": screens that stay dark even when the app is in light mode
+   (the living map, onboarding, focus mode, and the marketing hero). Pair with
+   data-theme="dark" on the same element so the tokens resolve dark; this paints
+   the same backdrop the body uses so nothing light shows through. */
+.cockpit {
+  background: var(--wash), var(--color-canvas);
+}
+
+::selection { background: var(--selection-bg); color: var(--selection-fg); }
 
 /* A soft gold focus ring. A box-shadow (not outline) follows each element's own
    border-radius, so round orbs get round rings and pills get pill rings, with no
@@ -145,12 +247,12 @@ body::before {
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--scroll-thumb);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); background-clip: content-box; }
 
 /* ============================================================
    Raised / glossy language — surfaces and controls feel physical:
@@ -160,67 +262,40 @@ body::before {
 
 /* Default card/panel — a gently raised surface. ~90% of containers. */
 .panel {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.008) 60%),
-    rgba(20, 22, 27, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 1px 1px rgba(0, 0, 0, 0.3),
-    0 10px 26px -16px rgba(0, 0, 0, 0.75);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
 }
 /* A more prominent, clearly-lifted card. */
 .panel-2 {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.012) 52%, rgba(0, 0, 0, 0.05)),
-    rgba(24, 26, 32, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-    0 2px 3px rgba(0, 0, 0, 0.35),
-    0 16px 40px -18px rgba(0, 0, 0, 0.8);
+  background: var(--panel2-bg);
+  border: 1px solid var(--panel2-border);
+  box-shadow: var(--panel2-shadow);
 }
 
 /* Frosted chrome — floating navigation/sheets over content. */
 .chrome {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01) 55%),
-    color-mix(in srgb, var(--color-canvas) 74%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 10px 30px -12px rgba(0, 0, 0, 0.8);
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  box-shadow: var(--chrome-shadow);
   backdrop-filter: blur(18px) saturate(120%);
   -webkit-backdrop-filter: blur(18px) saturate(120%);
 }
 
 /* Interactive raised control — buttons, chips, nav, icon buttons. */
 .raised-btn {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 55%, rgba(0, 0, 0, 0.06)),
-    rgba(26, 28, 34, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -1.5px 1px rgba(0, 0, 0, 0.4),
-    0 1px 1px rgba(0, 0, 0, 0.35),
-    0 6px 14px -8px rgba(0, 0, 0, 0.6);
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--btn-shadow);
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease, color 0.15s ease;
 }
 .raised-btn:hover {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 55%, rgba(0, 0, 0, 0.05)),
-    rgba(32, 34, 41, 0.95);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1.5px 1px rgba(0, 0, 0, 0.4),
-    0 2px 3px rgba(0, 0, 0, 0.35),
-    0 10px 22px -8px rgba(0, 0, 0, 0.6);
+  background: var(--btn-bg-hover);
+  box-shadow: var(--btn-shadow-hover);
 }
 .raised-btn:active {
   transform: translateY(1px);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: var(--btn-shadow-active);
 }
 
 /* The gold primary — glossy, lit, the single hero CTA per view. */
@@ -247,9 +322,9 @@ body::before {
 
 /* Recessed well — segmented tracks, input fields (pressed-in look). */
 .inset-well {
-  background: rgba(0, 0, 0, 0.26);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+  background: var(--well-bg);
+  border: 1px solid var(--well-border);
+  box-shadow: var(--well-shadow);
 }
 
 /* The one focal treatment — a soft, restrained accent lift. Use sparingly. */
@@ -264,8 +339,8 @@ body::before {
 /* Faint structural grid, used once (the map) for a sense of space */
 .grid-veil {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 52px 52px;
 }
 

@@ -31,6 +31,9 @@ export interface ShowcaseMap {
   id: string;
   title: string;
   short: string;
+  /** The plain, first-person sentence a person would actually type — drives the
+   *  hero's "say it, see it" typing demo. */
+  prompt: string;
   icon: string;
   color: string;
   milestones: ShowcaseMilestone[];
@@ -53,6 +56,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     id: "financial",
     title: "Build financial freedom",
     short: "Money",
+    prompt: "Get my finances under control",
     icon: "money",
     color: "#e6b877",
     milestones: [
@@ -95,6 +99,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     id: "fitness",
     title: "Get into the best shape of your life",
     short: "Fitness",
+    prompt: "Get into the best shape of my life",
     icon: "fitness",
     color: "#d5896f",
     milestones: [
@@ -135,6 +140,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     id: "language",
     title: "Become conversational in a new language",
     short: "Language",
+    prompt: "Become conversational in Spanish",
     icon: "language",
     color: "#8fae9f",
     milestones: [
@@ -173,6 +179,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     id: "startup",
     title: "Launch your side project",
     short: "Startup",
+    prompt: "Launch my side project",
     icon: "rocket",
     color: "#9aa6d4",
     milestones: [
@@ -213,6 +220,7 @@ export const SHOWCASE_MAPS: ShowcaseMap[] = [
     id: "travel",
     title: "Plan the trip of a lifetime",
     short: "Travel",
+    prompt: "Plan the trip of a lifetime",
     icon: "travel",
     color: "#7fb0ad",
     milestones: [

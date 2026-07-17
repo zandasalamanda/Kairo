@@ -2,8 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown, Waypoints, Sunrise, CircleCheck, Search, Bell, ShieldCheck, Activity, Check } from "lucide-react";
 import { Logo } from "@/components/kairo/Logo";
 import { AppShots } from "@/components/kairo/AppShots";
-import { HeroCluster } from "@/components/kairo/HeroCluster";
-import { LiveMapDemo } from "@/components/kairo/LiveMapDemo";
+import { HeroSayItSeeIt } from "@/components/kairo/HeroSayItSeeIt";
 import { Reveal } from "@/components/kairo/Reveal";
 import { SectionLabel } from "@/components/kairo/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -73,17 +72,13 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero — the grand first screen: catchphrase + button over the planet cluster */}
-      <section className="relative h-[100svh] min-h-[620px] overflow-hidden">
-        <HeroCluster />
-        <a href="#how" className="absolute bottom-7 left-1/2 z-20 -translate-x-1/2 text-faint transition-colors hover:text-muted" aria-label="Scroll to learn more">
+      {/* Hero — say it, see it: a real goal types itself, then its whole plan draws itself.
+          Fully canned (no AI, no tokens); the CTA hands off to onboarding which gates sign-up. */}
+      <section className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden pb-16 pt-24">
+        <HeroSayItSeeIt />
+        <a href="#how" className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-faint transition-colors hover:text-muted" aria-label="Scroll to learn more">
           <ChevronDown size={22} className="animate-pulse-soft" />
         </a>
-      </section>
-
-      {/* Live proof — a real plan drawing itself in space, before the visitor lifts a finger */}
-      <section className="mx-auto -mt-4 max-w-5xl px-5 pb-4">
-        <LiveMapDemo />
       </section>
 
       {/* How it works — the loop */}
@@ -110,7 +105,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* The four pillars */}
+      {/* The real app — the legible proof, right after the plain-words setup */}
+      <section id="app" className="mx-auto max-w-6xl px-5 py-20">
+        <Reveal className="mb-10 text-center">
+          <SectionLabel className="mb-3 flex justify-center">A look inside</SectionLabel>
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">See exactly what you get.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted">Every screen below explains itself. Follow the cursor.</p>
+        </Reveal>
+
+        <Reveal><AppShots /></Reveal>
+      </section>
+
+      {/* The four pillars — the trust close-out after the proof */}
       <section id="features" className="mx-auto max-w-6xl px-5 py-20">
         <Reveal className="mb-10">
           <SectionLabel className="mb-3">Built to get you there</SectionLabel>
@@ -133,17 +139,6 @@ export default function LandingPage() {
             );
           })}
         </div>
-      </section>
-
-      {/* The real app — actual screenshots, not a mockup */}
-      <section id="app" className="mx-auto max-w-6xl px-5 py-20">
-        <Reveal className="mb-10 text-center">
-          <SectionLabel className="mb-3 flex justify-center">A look inside</SectionLabel>
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">See exactly what you get.</h2>
-          <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted">Every screen below explains itself. Follow the cursor.</p>
-        </Reveal>
-
-        <Reveal><AppShots /></Reveal>
       </section>
 
       {/* Pricing */}

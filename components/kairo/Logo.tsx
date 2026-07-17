@@ -9,25 +9,30 @@ export function KairoMark({ size = 30, className }: { size?: number; className?:
       fill="none"
       className={cn("shrink-0", className)}
       aria-hidden
+      // Soft contact shadow so the orb is seated on cream; near-invisible on dark.
+      style={{ filter: "drop-shadow(var(--mark-drop))" }}
     >
       <defs>
-        <radialGradient id="km-core" cx="50%" cy="40%" r="62%">
-          <stop offset="0%" stopColor="#fbeccf" />
-          <stop offset="48%" stopColor="#e6b877" />
-          <stop offset="100%" stopColor="#8a6a3c" />
+        <radialGradient id="km-core" cx="50%" cy="38%" r="65%">
+          <stop offset="0%" stopColor="#fdf3e0" />
+          <stop offset="46%" stopColor="#e6b877" />
+          <stop offset="100%" stopColor="#7c5c30" />
         </radialGradient>
       </defs>
-      {/* orbit */}
+      {/* orbit — theme-aware (white on dark, warm-dark arc on cream) */}
       <path
         d="M16 3.5a12.5 12.5 0 1 1 -9.4 20.7"
-        stroke="rgba(255,255,255,0.28)"
+        style={{ stroke: "var(--mark-orbit)" }}
         strokeWidth="1.5"
         strokeLinecap="round"
+        fill="none"
       />
-      {/* node on orbit */}
-      <circle cx="6.6" cy="24.2" r="2" fill="#e6b877" />
-      {/* glowing core */}
-      <circle cx="16" cy="15" r="6.2" fill="url(#km-core)" />
+      {/* node on orbit — theme-aware */}
+      <circle cx="6.6" cy="24.2" r="2" style={{ fill: "var(--mark-node)" }} />
+      {/* glowing core + hairline rim so it never dissolves into white */}
+      <circle cx="16" cy="15" r="6.2" fill="url(#km-core)" style={{ stroke: "var(--mark-rim)" }} strokeWidth="0.75" />
+      {/* specular highlight keeps the glossy-orb read on light */}
+      <ellipse cx="13.8" cy="12.6" rx="1.8" ry="1.2" fill="#ffffff" opacity="0.5" />
     </svg>
   );
 }

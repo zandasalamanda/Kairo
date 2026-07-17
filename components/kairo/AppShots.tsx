@@ -44,6 +44,8 @@ export function AppShots() {
 
   return (
     <>
+      {/* Held a touch narrower than the section so the shots feel composed, not overwhelming. */}
+      <div className="mx-auto max-w-5xl">
       <figure className="panel-2 rounded-3xl p-2 md:p-3">
         <Frame shot={FEATURE} rounded="rounded-2xl" onZoom={setZoom} />
         <figcaption className="px-2 pb-1 pt-4 text-center text-[15px] leading-relaxed text-muted [&_b]:font-semibold [&_b]:text-accent [&_b]:[text-shadow:0_0_14px_rgba(230,184,119,0.55)]">
@@ -68,6 +70,7 @@ export function AppShots() {
           <b>Ask Sola</b> to reshape your whole plan. It proposes the changes, you <b>accept or dismiss</b>.
         </figcaption>
       </figure>
+      </div>
 
       {zoom && (
         <div className="fixed inset-0 z-[200] grid place-items-center bg-black/90 p-4 backdrop-blur-md" onClick={() => setZoom(null)} role="dialog" aria-modal="true" aria-label={zoom.alt}>

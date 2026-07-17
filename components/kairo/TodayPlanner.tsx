@@ -12,7 +12,7 @@ import { goalIcon } from "@/lib/kairo/goal-icon";
 import { pickCelebration, fireHaptic } from "@/lib/kairo/celebrate";
 import { usePersistentState } from "@/lib/store/persist";
 import { track } from "@/lib/analytics";
-import { TIME_OPTIONS, ENERGY_OPTIONS, DEFAULT_BUDGET_MINUTES, DEFAULT_ENERGY, budgetLabel } from "@/lib/kairo/day-budget";
+import { TIME_OPTIONS, ENERGY_OPTIONS, DEFAULT_BUDGET_MINUTES, DEFAULT_ENERGY } from "@/lib/kairo/day-budget";
 import { GoalCore } from "./GoalCore";
 import { SolaMark } from "./SolaMark";
 import { FocusOverlay } from "./FocusOverlay";
@@ -245,20 +245,20 @@ export function TodayPlanner({
     return (
       <>
         {overlays}
-        <div className="mx-auto flex max-w-lg flex-col items-center py-4 text-center">
-          <GoalCore size={104} className="mb-6" />
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Plan today with Sola</h1>
-          <p className="mt-2.5 max-w-sm text-[15px] leading-relaxed text-muted">
-            Tell Sola the time and energy you&apos;ve got. It builds a focused day around your goals, with breaks so it holds.
+        <div className="mx-auto flex max-w-lg flex-col items-center pb-4 pt-1 text-center">
+          <GoalCore size={72} className="mb-4" />
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">Plan today with Sola</h1>
+          <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-muted">
+            Two quick answers and Sola builds a focused day around your goals.
           </p>
 
           {!hasWork && (
-            <p className="mt-5 rounded-xl border border-line bg-white/[0.02] px-4 py-3 text-[13px] text-muted">
+            <p className="mt-5 rounded-xl border border-line px-4 py-3 text-[13px] text-muted" style={{ background: "color-mix(in srgb, var(--color-ink) 2.5%, transparent)" }}>
               Every step is done or blocked right now. Add a step on the map, then build your day.
             </p>
           )}
 
-          <div className="mt-9 w-full text-left">
+          <div className="mt-8 w-full text-left">
             <div className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">How much time do you have?</div>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {TIME_OPTIONS.map((t) => (
@@ -277,7 +277,7 @@ export function TodayPlanner({
             </div>
           </div>
 
-          <div className="mt-6 w-full text-left">
+          <div className="mt-4 w-full text-left">
             <div className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">How&apos;s your energy?</div>
             <div className="grid grid-cols-3 gap-2">
               {ENERGY_OPTIONS.map((e) => (
@@ -300,11 +300,10 @@ export function TodayPlanner({
           <button
             onClick={build}
             disabled={!hasWork}
-            className="raised-gold mt-9 inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-[15px] font-semibold disabled:opacity-40"
+            className="raised-gold mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-[15px] font-semibold disabled:opacity-40"
           >
             <Sparkles size={17} /> Build my day
           </button>
-          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">{budgetLabel(minutes)} · {energy} energy</p>
         </div>
       </>
     );

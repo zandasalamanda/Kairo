@@ -21,8 +21,10 @@ export function SolaMark({
       style={{
         width: size,
         height: size,
-        background: "radial-gradient(circle at 34% 30%, #fdf3e0 0%, #e6b877 52%, #8a6a3c 100%)",
-        boxShadow: `0 0 ${Math.max(4, Math.round(size * 0.5))}px rgba(230,184,119,0.6)`,
+        background: "radial-gradient(circle at 34% 30%, #fdf3e0 0%, #e6b877 52%, #7c5c30 100%)",
+        // Glow on dark (token = gold), transparent on light; plus a hairline rim +
+        // soft contact shadow so the bead reads crisply on cream instead of smudging.
+        boxShadow: `0 0 ${Math.max(4, Math.round(size * 0.5))}px var(--sola-glow), 0 0 0 0.5px var(--sola-rim), var(--mark-drop)`,
       }}
       aria-hidden
     />

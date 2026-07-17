@@ -147,6 +147,17 @@
   --well-bg: rgba(0, 0, 0, 0.26);
   --well-border: rgba(255, 255, 255, 0.06);
   --well-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+
+  /* Living-map + logo mark tokens. Dark = glow-on-black (the original look). */
+  --mark-orbit: rgba(255, 255, 255, 0.30);
+  --mark-node: #e6b877;
+  --mark-rim: rgba(255, 255, 255, 0.10);
+  --mark-drop: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --sola-glow: rgba(230, 184, 119, 0.60);
+  --sola-rim: rgba(255, 255, 255, 0.12);
+  --map-label-shadow: 0 1px 12px rgba(8, 9, 11, 0.96), 0 0 4px rgba(8, 9, 11, 0.92);
+  --orb-core-deep: #1a130a;      /* dark core bottom-stop for gold orbs */
+  --orb-ring-track: rgba(255, 255, 255, 0.10);
 }
 
 [data-theme="light"] {
@@ -191,6 +202,17 @@
   --well-bg: rgba(24, 26, 30, 0.05);
   --well-border: rgba(24, 26, 30, 0.08);
   --well-shadow: inset 0 1px 3px rgba(20, 22, 30, 0.1), inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+
+  /* Living-map + logo mark tokens. Light = rings darken, glows become soft lifts. */
+  --mark-orbit: rgba(26, 20, 10, 0.26);
+  --mark-node: #9a6a1c;
+  --mark-rim: rgba(120, 84, 30, 0.55);
+  --mark-drop: 0 1px 2px rgba(60, 44, 16, 0.28);
+  --sola-glow: transparent;
+  --sola-rim: rgba(120, 84, 30, 0.50);
+  --map-label-shadow: 0 1px 2px rgba(246, 246, 243, 0.9);
+  --orb-core-deep: color-mix(in srgb, #e6b877 58%, #2a2f3a);
+  --orb-ring-track: rgba(24, 26, 30, 0.14);
 }
 
 /* ---------- Base ---------- */
@@ -223,6 +245,13 @@ body::before {
   background: var(--wash), var(--color-canvas);
 }
 
+/* The living map: same full-bleed backdrop as the cockpit, but theme-AWARE — it
+   follows the current theme (dark starfield or light daylight) instead of forcing
+   dark. The orbs/lines redraw themselves for light via the useTheme() hook. */
+.map-canvas {
+  background: var(--wash), var(--color-canvas);
+}
+
 ::selection { background: var(--selection-bg); color: var(--selection-fg); }
 
 /* A soft gold focus ring. A box-shadow (not outline) follows each element's own
@@ -242,6 +271,43 @@ body::before {
 @keyframes lt-pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 55% { opacity: 0; transform: scale(1.55); } }
 .lt-pulse { animation: lt-pulse 2.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .lt-pulse { animation: none; } }
+
+/* First-run tour demo: a cursor glides in, presses a goal, then the tree unfolds.
+   Slow and calm — a ~4.6s loop with a long rest between reps. */
+@keyframes demo-tap {
+  0%   { transform: translate(44px, 30px) scale(1);   opacity: 0; }
+  16%  { opacity: 1; }
+  46%  { transform: translate(0, 0) scale(1);         opacity: 1; }
+  53%  { transform: translate(0, 0) scale(0.8);       opacity: 1; }
+  61%  { transform: translate(0, 0) scale(1);         opacity: 1; }
+  86%  { transform: translate(0, 0) scale(1);         opacity: 1; }
+  100% { transform: translate(6px, 4px) scale(1);     opacity: 0; }
+}
+.demo-cursor { animation: demo-tap 4.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+/* The tap ripple + child orbs only appear after the press; hold hidden, then fire. */
+@keyframes demo-ripple {
+  0%, 48%  { transform: scale(0.4); opacity: 0; }
+  54%      { opacity: 0.6; }
+  74%      { transform: scale(2.3); opacity: 0; }
+  100%     { transform: scale(2.3); opacity: 0; }
+}
+.demo-ripple { animation: demo-ripple 4.6s ease-out infinite; }
+@keyframes demo-branch {
+  0%, 55%  { stroke-dashoffset: var(--len, 90); }
+  78%, 100% { stroke-dashoffset: 0; }
+}
+.demo-branch { animation: demo-branch 4.6s ease infinite; }
+@keyframes demo-bloom {
+  0%, 62%  { transform: scale(0); opacity: 0; }
+  82%, 100% { transform: scale(1); opacity: 1; }
+}
+.demo-bloom { animation: demo-bloom 4.6s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .demo-cursor { animation: none; opacity: 0; }
+  .demo-ripple { animation: none; opacity: 0; }
+  .demo-branch { animation: none; stroke-dashoffset: 0; }
+  .demo-bloom  { animation: none; transform: scale(1); opacity: 1; }
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 9px; height: 9px; }

@@ -26,6 +26,7 @@ import { goalIcon } from "@/lib/kairo/goal-icon";
 import { pickCelebration, pickGoalCelebration, fireHaptic } from "@/lib/kairo/celebrate";
 import { upgradeReasonForGoalCap } from "@/lib/kairo/plans";
 import { usePersistentState } from "@/lib/store/persist";
+import { useTheme } from "@/lib/store/useTheme";
 import { useSpeechInput } from "@/lib/hooks/use-speech-input";
 import {
   persistGoalFromMap,
@@ -280,6 +281,7 @@ export function GalaxyMap({
   /** Fires when a node detail sheet opens/closes, so the parent can hide overlapping UI. */
   onSheetChange?: (open: boolean) => void;
 }) {
+  const light = useTheme() === "light";
   const [goals, setGoals] = usePersistentState<GoalWithNodes[]>("kairo.goals.v1", initialGoals, !remote);
   const [positions, setPositions] = usePersistentState<Record<string, { x: number; y: number }>>("kairo.galaxy.v1", {});
   const [colorIdx, setColorIdx] = usePersistentState<Record<string, number>>("kairo.colors.v1", {});
@@ -1035,8 +1037,8 @@ export function GalaxyMap({
             const active = dragOverGroup === c.id;
             return (
               <div key={c.id} className="pointer-events-none absolute" style={{ left: c.cx, top: c.cy, opacity: active ? 1 : groupOpacity, transition: "opacity 0.3s ease" }}>
-                <div className="rounded-full" style={{ position: "absolute", left: -c.radius, top: -c.radius, width: c.radius * 2, height: c.radius * 2, background: `radial-gradient(circle, ${c.hex}${active ? "3a" : "1f"}, ${c.hex}${active ? "16" : "0d"} 46%, transparent 70%)` }} />
-                <span className="absolute left-0 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] font-medium uppercase tracking-[0.24em]" style={{ top: -c.radius - 6, color: c.hex, opacity: active ? 1 : 0.85, textShadow: "0 1px 12px rgba(8,9,11,0.95)" }}>{c.label}</span>
+                <div className="rounded-full" style={{ position: "absolute", left: -c.radius, top: -c.radius, width: c.radius * 2, height: c.radius * 2, background: light ? `radial-gradient(circle, ${c.hex}${active ? "40" : "24"}, ${c.hex}${active ? "1c" : "12"} 46%, transparent 70%)` : `radial-gradient(circle, ${c.hex}${active ? "3a" : "1f"}, ${c.hex}${active ? "16" : "0d"} 46%, transparent 70%)` }} />
+                <span className="absolute left-0 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] font-medium uppercase tracking-[0.24em]" style={{ top: -c.radius - 6, color: light ? `color-mix(in srgb, ${c.hex} 70%, #2a2f3a)` : c.hex, opacity: active ? 1 : 0.85, textShadow: "var(--map-label-shadow)" }}>{c.label}</span>
               </div>
             );
           })}
@@ -1045,6 +1047,7 @@ export function GalaxyMap({
             <GoalCluster
               key={g.id}
               goal={g}
+              light={light}
               pos={posOf(g.id, i)}
               hex={hexOf(g.id)}
               expanded={expandedId === g.id}
@@ -1068,7 +1071,7 @@ export function GalaxyMap({
             <div className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2" style={{ left: formingPos.x, top: formingPos.y }}>
               <span className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full border border-accent/40" />
               <span className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 animate-pulse-soft rounded-full" style={{ background: "radial-gradient(circle, rgba(230,184,119,0.4), transparent 70%)" }} />
-              <span className="block h-14 w-14 animate-pulse-soft rounded-full" style={{ background: "radial-gradient(circle at 34% 26%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: "0 0 44px rgba(230,184,119,0.55)" }} />
+              <span className="block h-14 w-14 animate-pulse-soft rounded-full" style={{ background: light ? "radial-gradient(circle at 34% 26%, #ffffff 0%, #e6b877 52%, var(--orb-core-deep) 100%)" : "radial-gradient(circle at 34% 26%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: light ? "0 8px 20px -6px rgba(120,84,30,0.4)" : "0 0 44px rgba(230,184,119,0.55)" }} />
             </div>
           )}
         </div>
@@ -1083,7 +1086,7 @@ export function GalaxyMap({
         {empty && !mapping && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center pb-44">
             <div className="grid max-w-xs place-items-center px-6 text-center">
-              <span className="rounded-full" style={{ width: 96, height: 96, background: "radial-gradient(circle at 36% 28%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: "0 0 60px rgba(230,184,119,0.28)", animation: "breathe 6s ease-in-out infinite" }} />
+              <span className="rounded-full" style={{ width: 96, height: 96, background: light ? "radial-gradient(circle at 36% 28%, #ffffff 0%, #e6b877 52%, var(--orb-core-deep) 100%)" : "radial-gradient(circle at 36% 28%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: light ? "0 10px 26px -8px rgba(120,84,30,0.35)" : "0 0 60px rgba(230,184,119,0.28)", animation: "breathe 6s ease-in-out infinite" }} />
               <p className="mt-7 font-display text-xl font-semibold text-ink">What do you want to do?</p>
               <p className="mt-2 text-[15px] leading-relaxed text-muted">Type a goal below and Solaspace maps every step for you.</p>
             </div>
@@ -1424,7 +1427,7 @@ export function GalaxyMap({
       {/* ghost goal-orb that follows the cursor while dragging "New goal" out */}
       {toolDrag && Math.hypot(toolDrag.sx - toolDrag.ox, toolDrag.sy - toolDrag.oy) > 6 && (
         <div className="pointer-events-none fixed z-[200] -translate-x-1/2 -translate-y-1/2" style={{ left: toolDrag.sx, top: toolDrag.sy }}>
-          <span className="grid h-12 w-12 place-items-center rounded-full" style={{ background: "radial-gradient(circle at 34% 26%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: "0 0 30px rgba(230,184,119,0.5)" }}>
+          <span className="grid h-12 w-12 place-items-center rounded-full" style={{ background: light ? "radial-gradient(circle at 34% 26%, #ffffff 0%, #e6b877 52%, var(--orb-core-deep) 100%)" : "radial-gradient(circle at 34% 26%, #fdf3e0 0%, #e6b877 46%, #1a130a 100%)", boxShadow: light ? "0 6px 16px -4px rgba(120,84,30,0.4)" : "0 0 30px rgba(230,184,119,0.5)" }}>
             <Plus size={18} className="text-[#241809]" />
           </span>
         </div>
@@ -1462,10 +1465,11 @@ function PlanetSurface({ hex, seed }: { hex: string; seed: string }) {
 }
 
 function GoalCluster({
-  goal, pos, hex, expanded, dimmed, focusLens, hovered, selectedNodeId, poppedId,
+  goal, light, pos, hex, expanded, dimmed, focusLens, hovered, selectedNodeId, poppedId,
   onPlanetDown, onPlanetUp, onEnter, onLeave, onSelectNode, onNodeContext, onCoreContext,
 }: {
   goal: GoalWithNodes;
+  light: boolean;
   pos: { x: number; y: number };
   hex: string;
   expanded: boolean;
@@ -1538,10 +1542,10 @@ function GoalCluster({
                 className={isNext ? "animate-flow" : undefined}
                 style={
                   isNext
-                    ? ({ filter: `drop-shadow(0 0 3px ${hex})` } as React.CSSProperties)
-                    : ({ strokeDasharray: len, animation: `draw-in 0.5s ease ${delay.toFixed(2)}s both`, "--len": String(len), ...(lit ? { filter: `drop-shadow(0 0 3px ${hex}aa)` } : null) } as React.CSSProperties)
+                    ? ((light ? {} : { filter: `drop-shadow(0 0 3px ${hex})` }) as React.CSSProperties)
+                    : ({ strokeDasharray: len, animation: `draw-in 0.5s ease ${delay.toFixed(2)}s both`, "--len": String(len), ...(lit && !light ? { filter: `drop-shadow(0 0 3px ${hex}aa)` } : null) } as React.CSSProperties)
                 }
-                opacity={isNext ? 0.95 : lit ? 0.95 : p.node.status === "not_started" ? 0.28 : 0.6}
+                opacity={isNext ? (light ? 1 : 0.95) : lit ? (light ? 0.9 : 0.95) : p.node.status === "not_started" ? (light ? 0.5 : 0.28) : (light ? 0.72 : 0.6)}
               />
             );
           })}
@@ -1554,6 +1558,7 @@ function GoalCluster({
           <NodeOrb
             key={p.node.id}
             node={p.node}
+            light={light}
             x={p.x}
             y={p.y}
             hex={hex}
@@ -1581,17 +1586,21 @@ function GoalCluster({
         aria-label={goal.title}
       >
         <span className="absolute left-1/2 top-1/2 -z-10 h-[130px] w-[130px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
-          style={{ background: `${hex}3a` }} />
+          style={{ background: light ? `${hex}14` : `${hex}3a` }} />
         {/* charge ring — fills and glows brighter as the goal nears the finish */}
         <svg width={coreRingBox} height={coreRingBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
-          <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth={3} />
-          <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke={hex} strokeWidth={3} strokeLinecap="round" strokeDasharray={coreRingC} strokeDashoffset={coreRingC * (1 - corePct)} style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 ${3 + corePct * 7}px ${hex})` }} />
+          <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke="var(--orb-ring-track)" strokeWidth={3} />
+          <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke={hex} strokeWidth={3} strokeLinecap="round" strokeDasharray={coreRingC} strokeDashoffset={coreRingC * (1 - corePct)} style={{ transition: "stroke-dashoffset 0.6s ease", filter: light ? "drop-shadow(0 1px 1px rgba(20,22,30,0.2))" : `drop-shadow(0 0 ${3 + corePct * 7}px ${hex})` }} />
         </svg>
         <span
           className={cn("relative grid animate-grow-in place-items-center overflow-hidden rounded-full transition-transform", expanded ? "h-[92px] w-[92px]" : "h-20 w-20")}
           style={{
-            background: `radial-gradient(circle at 34% 26%, #fdf3e0 0%, ${hex} 46%, #1a130a 100%)`,
-            boxShadow: `inset 0 -8px 22px rgba(0,0,0,0.5), inset 0 3px 9px rgba(255,255,255,0.35)`,
+            background: light
+              ? `radial-gradient(circle at 34% 26%, #ffffff 0%, color-mix(in srgb, ${hex} 82%, #fff) 26%, ${hex} 60%, color-mix(in srgb, ${hex} 60%, #2a2f3a) 100%)`
+              : `radial-gradient(circle at 34% 26%, #fdf3e0 0%, ${hex} 46%, #1a130a 100%)`,
+            boxShadow: light
+              ? `inset 0 2px 6px rgba(255,255,255,0.6), inset 0 -8px 16px color-mix(in srgb, ${hex} 35%, transparent), 0 12px 26px -8px rgba(20,22,30,0.32)`
+              : `inset 0 -8px 22px rgba(0,0,0,0.5), inset 0 3px 9px rgba(255,255,255,0.35)`,
           }}
         >
           <PlanetSurface hex={hex} seed={goal.id} />
@@ -1600,13 +1609,13 @@ function GoalCluster({
             size: expanded ? 50 : 42,
             strokeWidth: 1.5,
             className: "relative",
-            style: { color: "#ffffff", opacity: 0.72, filter: "drop-shadow(0 1px 2px rgba(50,34,8,0.4))" },
+            style: { color: "#ffffff", opacity: light ? 0.6 : 0.72, filter: "drop-shadow(0 1px 2px rgba(50,34,8,0.4))" },
           })}
         </span>
 
         {/* beneath the planet: percentage (significant, always shown) + name */}
         <span className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap text-center">
-          <span className="block text-[19px] font-bold leading-none text-ink" style={{ textShadow: "0 1px 12px rgba(8,9,11,0.96), 0 0 4px rgba(8,9,11,0.92)" }}>
+          <span className="block text-[19px] font-bold leading-none text-ink" style={{ textShadow: "var(--map-label-shadow)" }}>
             {Math.round(goal.progress)}%
           </span>
           <span
@@ -1615,10 +1624,10 @@ function GoalCluster({
               expanded || hovered ? "opacity-100" : "opacity-100 [@media(hover:hover)]:opacity-0"
             )}
           >
-            <span className="mx-auto block max-w-[170px] truncate text-[13px] font-semibold text-ink" style={{ textShadow: "0 1px 12px rgba(8,9,11,0.96), 0 0 5px rgba(8,9,11,0.9)" }}>
+            <span className="mx-auto block max-w-[170px] truncate text-[13px] font-semibold text-ink" style={{ textShadow: "var(--map-label-shadow)" }}>
               {truncate(goal.title, 30)}
             </span>
-            <span className="mt-0.5 block font-mono text-[10px] text-faint" style={{ textShadow: "0 1px 12px rgba(8,9,11,0.96)" }}>
+            <span className="mt-0.5 block font-mono text-[10px] text-faint" style={{ textShadow: "var(--map-label-shadow)" }}>
               {goal.nodes.length} step{goal.nodes.length === 1 ? "" : "s"}
               {goal.targetDate ? ` · due ${relativeDays(goal.targetDate)}` : ""}
             </span>
@@ -1630,9 +1639,10 @@ function GoalCluster({
 }
 
 function NodeOrb({
-  node, x, y, hex, isNext, selected, popping, spine, faded, delay, onSelect, onContext,
+  node, light, x, y, hex, isNext, selected, popping, spine, faded, delay, onSelect, onContext,
 }: {
   node: GoalNode;
+  light: boolean;
   x: number;
   y: number;
   hex: string;
@@ -1654,16 +1664,30 @@ function NodeOrb({
   const ringR = size / 2 + 3;
   const ringBox = ringR * 2 + 4;
   const ringC = 2 * Math.PI * ringR;
-  const glow = done
-    ? `0 0 24px ${hex}88, inset 0 0 12px ${hex}55`
-    : dim
-      ? `0 0 10px ${hex}30`
-      : isNext
-        ? `0 0 26px ${hex}80`
-        : `0 0 16px ${hex}4d`;
-  const bg = done
-    ? `radial-gradient(circle at 38% 30%, #f6faf5 0%, ${hex} 55%, #14231a 100%)`
-    : `radial-gradient(circle at 40% 34%, ${hex}33, rgba(12,14,18,0.94) 72%)`;
+  // Dark: colored glows lift the orb off the starfield. Light: glows read as
+  // nothing, so state is carried by color + a soft neutral drop shadow instead.
+  const glow = light
+    ? done
+      ? `inset 0 1px 3px rgba(255,255,255,0.5), 0 4px 12px -4px color-mix(in srgb, ${hex} 55%, rgba(20,22,30,0.5))`
+      : dim
+        ? `inset 0 1px 3px rgba(255,255,255,0.5), 0 2px 6px -3px rgba(20,22,30,0.22)`
+        : isNext
+          ? `inset 0 1px 3px rgba(255,255,255,0.55), 0 5px 14px -4px color-mix(in srgb, ${hex} 45%, rgba(20,22,30,0.4))`
+          : `inset 0 1px 3px rgba(255,255,255,0.5), 0 3px 10px -4px rgba(20,22,30,0.28)`
+    : done
+      ? `0 0 24px ${hex}88, inset 0 0 12px ${hex}55`
+      : dim
+        ? `0 0 10px ${hex}30`
+        : isNext
+          ? `0 0 26px ${hex}80`
+          : `0 0 16px ${hex}4d`;
+  const bg = light
+    ? done
+      ? `radial-gradient(circle at 38% 30%, #ffffff 0%, ${hex} 55%, color-mix(in srgb, ${hex} 62%, #3a4038) 100%)`
+      : `radial-gradient(circle at 40% 34%, color-mix(in srgb, ${hex} 78%, #fff) 0%, ${hex} 55%, color-mix(in srgb, ${hex} 62%, #2a2f3a) 100%)`
+    : done
+      ? `radial-gradient(circle at 38% 30%, #f6faf5 0%, ${hex} 55%, #14231a 100%)`
+      : `radial-gradient(circle at 40% 34%, ${hex}33, rgba(12,14,18,0.94) 72%)`;
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 animate-grow-in" style={{ left: x, top: y, animationDelay: `${delay.toFixed(2)}s`, opacity: faded ? 0.22 : 1, transition: "opacity 0.35s ease" }}>
       <button
@@ -1675,28 +1699,28 @@ function NodeOrb({
       >
         {showRing && (
           <svg width={ringBox} height={ringBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
-            <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={2.5} />
-            <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke={hex} strokeWidth={2.5} strokeLinecap="round" strokeDasharray={ringC} strokeDashoffset={ringC * (1 - pct)} style={{ transition: "stroke-dashoffset .5s ease", filter: `drop-shadow(0 0 3px ${hex}88)` }} />
+            <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke="var(--orb-ring-track)" strokeWidth={2.5} />
+            <circle cx={ringBox / 2} cy={ringBox / 2} r={ringR} fill="none" stroke={hex} strokeWidth={2.5} strokeLinecap="round" strokeDasharray={ringC} strokeDashoffset={ringC * (1 - pct)} style={{ transition: "stroke-dashoffset .5s ease", filter: light ? "none" : `drop-shadow(0 0 3px ${hex}88)` }} />
           </svg>
         )}
         {/* you-are-here beacon: a calm "Next" tag + a static ring — no pulsing. */}
         {isNext && (
-          <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.16em]" style={{ background: `${hex}26`, color: hex, textShadow: "0 1px 6px rgba(8,9,11,0.9)" }}>
+          <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.16em]" style={{ background: light ? `${hex}2e` : `${hex}26`, color: light ? `color-mix(in srgb, ${hex} 72%, #2a2f3a)` : hex, textShadow: "var(--map-label-shadow)" }}>
             Next
           </span>
         )}
         {(isNext || selected) && (
-          <span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${hex}44`, margin: -4 }} />
+          <span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${light ? `${hex}66` : `${hex}44`}`, margin: -4 }} />
         )}
         {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
         <span
           className={cn("grid place-items-center rounded-full border", popping && "animate-pop")}
-          style={{ width: size, height: size, borderColor: dim ? `${hex}88` : hex, background: bg, boxShadow: glow, opacity: dim ? 0.92 : 1, transition: "background .4s ease, box-shadow .4s ease" }}
+          style={{ width: size, height: size, borderColor: dim ? (light ? `color-mix(in srgb, ${hex} 70%, #2a2f3a)` : `${hex}88`) : hex, background: bg, boxShadow: glow, opacity: dim ? 0.92 : 1, transition: "background .4s ease, box-shadow .4s ease" }}
         >
           {done ? (
             <Check size={spine ? 18 : 15} className="text-[#0d1a14]" strokeWidth={2.5} />
           ) : (
-            <span className="rounded-full" style={{ width: spine ? 9 : 7, height: spine ? 9 : 7, background: hex, boxShadow: `0 0 8px ${hex}` }} />
+            <span className="rounded-full" style={{ width: spine ? 9 : 7, height: spine ? 9 : 7, background: hex, boxShadow: light ? "none" : `0 0 8px ${hex}` }} />
           )}
         </span>
         {/* Label floats below the orb (absolute) so the ORB stays centred on the node
@@ -1704,7 +1728,7 @@ function NodeOrb({
         <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 max-w-[110px] -translate-x-1/2 text-center leading-tight">
           <span
             className={cn("block truncate text-[11px]", selected ? "font-semibold text-ink" : "text-ink/85")}
-            style={{ textShadow: "0 1px 8px rgba(8,9,11,0.96), 0 0 3px rgba(8,9,11,0.95)" }}
+            style={{ textShadow: "var(--map-label-shadow)" }}
           >
             {node.title}
           </span>

@@ -185,7 +185,7 @@ export function HeroCluster() {
           <span className="inline-block animate-fade-up" style={{ animationDelay: "0.46s" }}>Arrive.</span>
         </h1>
         <p className="animate-fade-up relative mt-4 max-w-[19rem] text-balance text-[15px] leading-snug text-muted sm:mt-5 sm:max-w-md sm:text-lg" style={{ animationDelay: "0.58s", textShadow: "0 1px 12px rgba(8,9,11,0.92)" }}>
-          Tell Solaspace a goal. It maps the path and builds your day.
+          Name your goal. Solaspace maps every step, lays out the resources, and walks you to the finish.
         </p>
         <div className="animate-fade-up relative mt-6 flex flex-col items-center gap-3 md:mt-8" style={{ animationDelay: "0.72s" }}>
           <Link href="/onboarding" className={buttonVariants({ variant: "primary", size: "lg", className: "pointer-events-auto" })}>Get started</Link>

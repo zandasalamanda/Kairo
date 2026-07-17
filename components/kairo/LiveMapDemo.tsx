@@ -87,7 +87,7 @@ export function LiveMapDemo() {
           <PlanetOrb hex={map.color} size={26} icon={map.icon} seed={map.id} />
           <h3 className="font-display text-xl font-semibold text-ink transition-colors md:text-2xl">{map.title}</h3>
         </div>
-        <p className="mx-auto mt-2 max-w-sm text-[13px] text-muted">Tap any step to see the research picked for it — real videos and cited guides.</p>
+        <p className="mx-auto mt-2 max-w-sm text-[13px] text-muted">Tap any step to see the research picked for it: real videos and cited guides.</p>
       </div>
 
       <div

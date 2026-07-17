@@ -33,10 +33,10 @@ const MAP: Shot = {
   img: mapPng,
   alt: "The living goal map with a step open, showing the video picked for it",
   beats: [
-    { x: 47, y: 41, label: <>Every goal becomes a <b>living map</b>, with real progress on its face.</> },
-    { x: 61, y: 46, label: <>Each step <b>in order</b>. The ones you finished <b>light the trail</b>.</> },
-    { x: 94, y: 84, label: <>One clear <b>next move</b>, always marked.</> },
-    { x: 50, y: 90, label: <>The <b>exact video you need</b>, already found and attached.</> },
+    { x: 47, y: 41, label: <>This is one goal. The number is <b>how far you have got</b>.</> },
+    { x: 61, y: 46, label: <>Every step, <b>in the right order</b>. A tick means <b>done</b>.</> },
+    { x: 94, y: 84, label: <>This is <b>what to do next</b>.</> },
+    { x: 50, y: 90, label: <>The <b>video you need</b> is already here.</> },
   ],
 };
 
@@ -47,9 +47,9 @@ const SIDE: Shot[] = [
     alt: "The Ask Sola panel proposing plan changes to accept or dismiss",
     beats: [
       // Sit beside the text, not on top of it — the cursor points, it shouldn't cover.
-      { x: 20, y: 17, label: <><b>Ask in plain words</b>.</> },
-      { x: 13, y: 49, label: <>It proposes the <b>exact changes</b>.</> },
-      { x: 24, y: 91, label: <><b>Nothing moves</b> until you say so.</> },
+      { x: 20, y: 17, label: <><b>Just ask</b>, in your own words.</> },
+      { x: 13, y: 49, label: <>It shows you <b>what it would change</b>.</> },
+      { x: 24, y: 91, label: <><b>Nothing changes</b> unless you agree.</> },
     ],
   },
   {
@@ -57,9 +57,9 @@ const SIDE: Shot[] = [
     img: listPng,
     alt: "List view of goals with steps checked off and research attached",
     beats: [
-      { x: 85, y: 8, label: <><b>Every goal and step</b>, listed.</> },
-      { x: 78, y: 38, label: <>Your <b>next step</b>, marked.</> },
-      { x: 50, y: 61, label: <>The <b>research sits on the step</b>.</> },
+      { x: 85, y: 8, label: <><b>All your goals</b>, in a simple list.</> },
+      { x: 78, y: 38, label: <><b>Start here.</b></> },
+      { x: 50, y: 61, label: <>The <b>video</b> sits right on the step.</> },
     ],
   },
   {
@@ -67,9 +67,9 @@ const SIDE: Shot[] = [
     img: reviewPng,
     alt: "Weekly review showing true pace to each deadline",
     beats: [
-      { x: 74, y: 23, label: <><b>Ahead or behind</b>, told straight.</> },
-      { x: 50, y: 57, label: <><b>Done</b> against <b>time gone</b>.</> },
-      { x: 18, y: 83, label: <><b>Proof you showed up</b>.</> },
+      { x: 74, y: 23, label: <>It tells you if you are <b>ahead or behind</b>.</> },
+      { x: 50, y: 57, label: <><b>How much is done</b>, next to <b>how much time has passed</b>.</> },
+      { x: 18, y: 83, label: <><b>How many days</b> you have kept going.</> },
     ],
   },
   {
@@ -77,9 +77,9 @@ const SIDE: Shot[] = [
     img: focusPng,
     alt: "A focus session with a timer and a first-move checklist",
     beats: [
-      { x: 67, y: 27, label: <><b>One step, one timer</b>.</> },
-      { x: 52, y: 68, label: <>It hands you <b>the first move</b>.</> },
-      { x: 45, y: 81, label: <>Tick them off and <b>just start</b>.</> },
+      { x: 67, y: 27, label: <><b>One thing</b>, and a timer.</> },
+      { x: 52, y: 68, label: <>It tells you <b>exactly how to start</b>.</> },
+      { x: 45, y: 81, label: <><b>Tick them off</b> as you go.</> },
     ],
   },
 ];
@@ -90,8 +90,10 @@ const ORDER = [MAP.id, ...SIDE.map((s) => s.id)];
 // Gold, faintly glowing key words — the same treatment the old captions used.
 const MARK = "[&_b]:font-semibold [&_b]:text-accent [&_b]:[text-shadow:0_0_14px_rgba(230,184,119,0.55)]";
 
-const GLIDE_MS = 900;
-const HOLD_MS = 3200;
+// Slow on purpose: the cursor takes its time getting there, and each note sits
+// long enough to be read twice without hurrying.
+const GLIDE_MS = 1400;
+const HOLD_MS = 5600;
 const GLIDE = `left ${GLIDE_MS}ms cubic-bezier(0.22,1,0.36,1), top ${GLIDE_MS}ms cubic-bezier(0.22,1,0.36,1)`;
 
 function useReducedMotion() {
@@ -146,9 +148,14 @@ function ShotTour({
 
   // Walk this shot's beats while it holds the turn, then pass it along.
   React.useEffect(() => {
-    if (!active || reduced) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setI(0);
+    if (!active || reduced) {
+      // Park back at the first beat the moment the turn ends. Otherwise the next
+      // turn mounts the cursor at the LAST beat's coordinates and it snaps across
+      // the shot to the start — the teleport.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setI(0);
+      return;
+    }
     let n = 0;
     const id = window.setInterval(() => {
       n += 1;
@@ -185,10 +192,11 @@ function ShotTour({
                 background: "radial-gradient(circle, rgba(230,184,119,0.42), rgba(230,184,119,0.13) 45%, transparent 70%)",
               }}
             />
-            {/* the cursor — its tip lands on the point */}
+            {/* the cursor — its tip lands on the point. It fades in when this shot
+                takes its turn rather than popping into existence. */}
             <MousePointer2
               size={18}
-              className="pointer-events-none absolute z-10 text-white"
+              className="animate-fade-in pointer-events-none absolute z-10 text-white"
               style={{
                 left: `${at.x}%`,
                 top: `${at.y}%`,
@@ -241,6 +249,10 @@ export function AppShots() {
   const [inView, setInView] = React.useState<Record<string, boolean>>({});
   const [active, setActive] = React.useState<string | null>(null);
 
+  // True only during the short breath between one shot finishing and the next
+  // starting, so the auto-pick below doesn't cut the pause short.
+  const handingRef = React.useRef(false);
+
   const onInView = React.useCallback((id: string, v: boolean) => {
     setInView((prev) => (prev[id] === v ? prev : { ...prev, [id]: v }));
   }, []);
@@ -248,19 +260,24 @@ export function AppShots() {
   // Only one shot animates on the whole page: whichever is on screen. If the one
   // holding the turn scrolls away, the turn moves to the first visible shot.
   React.useEffect(() => {
+    if (handingRef.current) return;
     const visible = ORDER.filter((id) => inView[id]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActive((cur) => (cur && inView[cur] ? cur : (visible[0] ?? null)));
   }, [inView]);
 
   // Finished its beats — hand the turn to the next visible shot, left to right.
+  // The cursor leaves first and the next one arrives after a beat of nothing, so
+  // it reads as moving on rather than teleporting across the page.
   const onDone = React.useCallback((id: string) => {
-    setActive((cur) => {
-      if (cur !== id) return cur;
-      const visible = ORDER.filter((v) => inView[v]);
-      if (visible.length <= 1) return cur;
-      return visible[(visible.indexOf(id) + 1) % visible.length];
-    });
+    const visible = ORDER.filter((v) => inView[v]);
+    if (!visible.length) return;
+    const next = visible.length <= 1 ? id : visible[(visible.indexOf(id) + 1) % visible.length];
+    handingRef.current = true;
+    setActive(null);
+    window.setTimeout(() => {
+      handingRef.current = false;
+      setActive(next);
+    }, 700);
   }, [inView]);
 
   React.useEffect(() => {

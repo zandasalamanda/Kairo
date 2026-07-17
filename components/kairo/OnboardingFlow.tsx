@@ -22,7 +22,9 @@ const CHIPS = ["Launch a project", "Study better", "Get organized", "Save money"
 
 // Where the typed goal waits while the visitor creates their account. Kept in
 // sessionStorage (never a URL) so the goal text stays private and same-origin.
-const PENDING_KEY = "solaspace:pending-goal";
+// Exported so the landing hero can hand a goal off the exact same way: stash it,
+// send them to sign up, and this flow claims + maps it the moment they're back.
+export const PENDING_KEY = "solaspace:pending-goal";
 
 type Step = "input" | "questions" | "mapping" | "result";
 

@@ -3,6 +3,7 @@ import { ArrowRight, ChevronDown, Waypoints, Sunrise, CircleCheck, Search, Bell,
 import { Logo } from "@/components/kairo/Logo";
 import { AppShots } from "@/components/kairo/AppShots";
 import { HeroSayItSeeIt } from "@/components/kairo/HeroSayItSeeIt";
+import { Starfield } from "@/components/kairo/Starfield";
 import { Reveal } from "@/components/kairo/Reveal";
 import { SectionLabel } from "@/components/kairo/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -36,6 +37,8 @@ const FAQS = [
 export default function LandingPage() {
   return (
     <div data-theme="dark" className="cockpit relative overflow-hidden">
+      {/* A subtle field of stars behind the whole page — the "space" feel, kept quiet. */}
+      <Starfield className="pointer-events-none fixed inset-0 -z-10 opacity-80" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -72,13 +75,11 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero — say it, see it: a real goal types itself, then its whole plan draws itself.
-          Fully canned (no AI, no tokens); the CTA hands off to onboarding which gates sign-up. */}
-      <section className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden pb-16 pt-24">
+      {/* Hero — type a real goal here; it hands off to sign-up the same way onboarding
+          does (no AI, no tokens, until there's an account). The example plan below the
+          fold draws itself and cross-fades between goals. */}
+      <section className="relative overflow-hidden">
         <HeroSayItSeeIt />
-        <a href="#how" className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-faint transition-colors hover:text-muted" aria-label="Scroll to learn more">
-          <ChevronDown size={22} className="animate-pulse-soft" />
-        </a>
       </section>
 
       {/* How it works — the loop */}
@@ -148,8 +149,10 @@ export default function LandingPage() {
           <h2 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Start free. Upgrade when it&apos;s moving.</h2>
           <p className="mt-3 text-[14px] text-muted">Free to start · no credit card · cancel anytime.</p>
         </Reveal>
-        <div className="mx-auto grid max-w-3xl items-start gap-4 md:grid-cols-2">
-          <div className="panel rounded-3xl p-8">
+        {/* items-stretch + flex-col + mt-auto CTAs → both cards are exactly the same
+            height with their buttons aligned, whatever the feature counts. */}
+        <div className="mx-auto grid max-w-3xl items-stretch gap-4 md:grid-cols-2">
+          <div className="panel flex flex-col rounded-3xl p-8">
             <div className="text-sm font-semibold text-muted">Free</div>
             <div className="mt-2 font-display text-4xl font-semibold text-ink">$0</div>
             <p className="mt-2 text-sm text-muted">Everything you need to map a goal and start moving.</p>
@@ -158,9 +161,9 @@ export default function LandingPage() {
                 <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink/90"><Check size={15} className="mt-0.5 shrink-0 text-sage" />{f}</li>
               ))}
             </ul>
-            <Link href="/onboarding" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">Get started <ArrowRight size={15} /></Link>
+            <Link href="/onboarding" className="mt-auto inline-flex items-center gap-2 pt-7 text-sm font-medium text-accent hover:underline">Get started <ArrowRight size={15} /></Link>
           </div>
-          <div className="panel-2 relative overflow-hidden rounded-3xl border border-accent/25 p-8">
+          <div className="panel-2 relative flex flex-col overflow-hidden rounded-3xl border border-accent/25 p-8">
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 animate-pulse-soft rounded-full bg-accent/20 blur-3xl" />
             <div className="flex items-center gap-2"><div className="text-sm font-semibold text-accent">Pro</div><span className="rounded-full bg-accent/12 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">Most popular</span></div>
             <div className="mt-2 flex items-end gap-1.5">
@@ -174,7 +177,7 @@ export default function LandingPage() {
                 <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink"><Check size={15} className="mt-0.5 shrink-0 text-accent" />{f}</li>
               ))}
             </ul>
-            <Link href="/onboarding" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-ink hover:underline">Start free, upgrade in-app <ArrowRight size={15} /></Link>
+            <Link href="/onboarding" className="mt-auto inline-flex items-center gap-2 pt-7 text-sm font-medium text-ink hover:underline">Start free, upgrade in-app <ArrowRight size={15} /></Link>
           </div>
         </div>
       </section>

@@ -91,13 +91,40 @@ function defaultPos(i: number): { x: number; y: number } {
 
 function nextId(nodes: GoalNode[]): string | null {
   const rank: Record<string, number> = { in_motion: 0, at_risk: 1, not_started: 2 };
-  const parents = new Set(nodes.map((n) => n.parentId).filter(Boolean) as string[]);
-  const actionable = nodes.filter((n) => n.status !== "done" && n.status !== "blocked");
-  const byStatus = (a: GoalNode, b: GoalNode) => (rank[a.status] ?? 3) - (rank[b.status] ?? 3) || a.priority - b.priority;
-  // A milestone with sub-steps isn't itself the thing you do — prefer a real
-  // leaf sub-step. Only fall back to a top-level node when nothing branches.
-  const leaves = actionable.filter((n) => !parents.has(n.id)).sort(byStatus);
-  return (leaves[0] ?? [...actionable].sort(byStatus)[0])?.id ?? null;
+  const open = (n: GoalNode) => n.status !== "done" && n.status !== "blocked";
+  const ids = new Set(nodes.map((n) => n.id));
+  const kids = new Map<string | null, GoalNode[]>();
+  for (const n of nodes) {
+    const parent = n.parentId && ids.has(n.parentId) ? n.parentId : null;
+    kids.set(parent, [...(kids.get(parent) ?? []), n]);
+  }
+
+  // Anything already underway is the next move, wherever it sits in the tree.
+  const live = nodes
+    .filter((n) => n.status === "in_motion" || n.status === "at_risk")
+    .sort((a, b) => (rank[a.status] ?? 3) - (rank[b.status] ?? 3) || a.priority - b.priority)[0];
+  if (live) return live.id;
+
+  // Otherwise walk the tree in its OWN order and take the first open step. We
+  // descend into a milestone's sub-steps (the milestone isn't the thing you do)
+  // but never skip ahead to a different branch's leaf — which is what ranking
+  // every leaf globally by priority used to do, so the beacon appeared to only
+  // ever point at sub-branches. A milestone whose sub-steps are all done can
+  // itself be the next move.
+  const walk = (list: GoalNode[]): string | null => {
+    for (const n of list) {
+      const children = kids.get(n.id) ?? [];
+      if (children.length) {
+        const hit = walk(children);
+        if (hit) return hit;
+        if (open(n)) return n.id;
+      } else if (open(n)) {
+        return n.id;
+      }
+    }
+    return null;
+  };
+  return walk(kids.get(null) ?? []);
 }
 
 interface Placed {
@@ -1029,7 +1056,11 @@ export function GalaxyMap({
         {/* the galaxy */}
         <div
           className="absolute left-1/2 top-1/2"
-          style={{ transform, transformOrigin: "center", transition: animating ? "transform 0.6s cubic-bezier(0.22,1,0.36,1)" : "none", willChange: "transform" }}
+          // will-change only WHILE flying to a goal. Left on permanently it pins a
+          // composited layer around a scaled subtree, and Chrome then rasterizes
+          // children into clipped textures — which showed up as hard boxes cutting
+          // off orb glows and progress rings.
+          style={{ transform, transformOrigin: "center", transition: animating ? "transform 0.6s cubic-bezier(0.22,1,0.36,1)" : "none", willChange: animating ? "transform" : "auto" }}
         >
           {/* constellation halos — soft tinted nebulae behind grouped planets. The
               one a dragged planet hovers over brightens to signal it'll be filed there. */}
@@ -1573,6 +1604,13 @@ function GoalCluster({
           />
         ))}
 
+      {/* Core halo. A plain sibling painted BEFORE the core (so it sits behind it
+          without a negative z-index), and drawn as a radial-gradient rather than
+          filter:blur. Both matter: a -z-10 child of the transformed button, and a
+          blurred child of a composited layer, each got clipped to a hard box. */}
+      <span className="pointer-events-none absolute left-0 top-0 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{ background: light ? `radial-gradient(circle, ${hex}1c, ${hex}0e 40%, transparent 70%)` : `radial-gradient(circle, ${hex}4a, ${hex}22 40%, transparent 70%)` }} />
+
       {/* core planet */}
       <button
         onPointerDown={onPlanetDown}
@@ -1585,11 +1623,6 @@ function GoalCluster({
         style={{ left: 0, top: 0 }}
         aria-label={goal.title}
       >
-        {/* Core halo. Painted as a radial-gradient, NOT filter:blur — the galaxy
-            layer sets will-change:transform, and Chrome clips a blurred child to
-            its layer bounds on repaint, which flashed a hard box around the orb. */}
-        <span className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{ background: light ? `radial-gradient(circle, ${hex}1c, ${hex}0e 40%, transparent 70%)` : `radial-gradient(circle, ${hex}4a, ${hex}22 40%, transparent 70%)` }} />
         {/* charge ring — fills and glows brighter as the goal nears the finish */}
         <svg width={coreRingBox} height={coreRingBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
           <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke="var(--orb-ring-track)" strokeWidth={3} />
@@ -1698,7 +1731,7 @@ function NodeOrb({
         onPointerDown={(e) => e.stopPropagation()}
         onContextMenu={onContext}
         className="relative grid place-items-center"
-        style={{ width: size, height: size, animation: "breathe 6s ease-in-out infinite" }}
+        style={{ width: size, height: size }}
       >
         {showRing && (
           <svg width={ringBox} height={ringBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
@@ -1718,7 +1751,11 @@ function NodeOrb({
         {popping && <span className="absolute inset-0 animate-burst rounded-full" style={{ border: `2px solid ${hex}` }} />}
         <span
           className={cn("grid place-items-center rounded-full border", popping && "animate-pop")}
-          style={{ width: size, height: size, borderColor: dim ? (light ? `color-mix(in srgb, ${hex} 70%, #2a2f3a)` : `${hex}88`) : hex, background: bg, boxShadow: glow, opacity: dim ? 0.92 : 1, transition: "background .4s ease, box-shadow .4s ease" }}
+          // The breathe lives HERE, on the sphere, not on the parent button. An
+          // infinitely-animating element keeps a composited layer sized to its own
+          // box; the button's ring, halo, "Next" tag and label all overflow it, so
+          // animating the button clipped them. The sphere's own shadow is counted.
+          style={{ width: size, height: size, borderColor: dim ? (light ? `color-mix(in srgb, ${hex} 70%, #2a2f3a)` : `${hex}88`) : hex, background: bg, boxShadow: glow, opacity: dim ? 0.92 : 1, transition: "background .4s ease, box-shadow .4s ease", animation: popping ? undefined : "breathe 6s ease-in-out infinite" }}
         >
           {done ? (
             <Check size={spine ? 18 : 15} className="text-[#0d1a14]" strokeWidth={2.5} />

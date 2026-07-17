@@ -14,8 +14,12 @@ const norm = (kind: ResourceKind, q: string) => `${kind}:${q.trim().toLowerCase(
 
 export async function resolveResource(kind: ResourceKind, query: string): Promise<ResolvedResource | null> {
   const k = norm(kind, query);
-  if (cache.has(k)) return cache.get(k) ?? null;
+  const hit = cache.get(k);
+  if (hit) return hit;
   const r = kind === "read" ? await resolveArticle(query) : await searchYouTube(query);
-  cache.set(k, r);
+  // Only cache SUCCESS. Caching null meant one transient failure (a 429, a
+  // timeout, a missing key) poisoned that query for the life of the instance, so
+  // the step kept showing a search link long after the cause was fixed.
+  if (r) cache.set(k, r);
   return r;
 }

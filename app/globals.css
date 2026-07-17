@@ -267,6 +267,11 @@ body::before {
    box on an otherwise premium surface. Interactive states are handled in-app. */
 * { -webkit-tap-highlight-color: transparent; }
 
+/* A node orbiting the hero's goal orb — slow, ambient. */
+@keyframes orbit { to { transform: rotate(360deg); } }
+.animate-orbit-slow { animation: orbit 34s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-orbit-slow { animation: none; } }
+
 /* The single "next move" node breathing on the landing living-map. */
 @keyframes lt-pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 55% { opacity: 0; transform: scale(1.55); } }
 .lt-pulse { animation: lt-pulse 2.8s ease-in-out infinite; }

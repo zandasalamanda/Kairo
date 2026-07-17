@@ -3,6 +3,7 @@ import { ArrowRight, ChevronDown, Waypoints, Sunrise, CircleCheck, Search, Bell,
 import { Logo } from "@/components/kairo/Logo";
 import { AppShots } from "@/components/kairo/AppShots";
 import { HeroSayItSeeIt } from "@/components/kairo/HeroSayItSeeIt";
+import { ExamplePlanDemo } from "@/components/kairo/ExamplePlanDemo";
 import { Starfield } from "@/components/kairo/Starfield";
 import { Reveal } from "@/components/kairo/Reveal";
 import { SectionLabel } from "@/components/kairo/PageHeader";
@@ -36,8 +37,9 @@ const FAQS = [
 
 export default function LandingPage() {
   return (
-    <div data-theme="dark" className="cockpit relative overflow-hidden">
-      {/* A subtle field of stars behind the whole page — the "space" feel, kept quiet. */}
+    <div data-theme="dark" className="cockpit relative isolate overflow-hidden">
+      {/* isolate on the root = its own stacking context, so the -z-10 starfield and
+          hero orb paint ABOVE the cockpit background instead of being buried under it. */}
       <Starfield className="pointer-events-none fixed inset-0 -z-10 opacity-80" />
       <script
         type="application/ld+json"
@@ -104,6 +106,16 @@ export default function LandingPage() {
             );
           })}
         </div>
+      </section>
+
+      {/* Now the cool part again: a real example plan drawing itself. Words first
+          (above), examples after — the bridge from cool to plain to cool. */}
+      <section id="see" className="mx-auto max-w-3xl px-5 pb-8 pt-4">
+        <Reveal className="text-center">
+          <SectionLabel className="mb-3 flex justify-center">See it work</SectionLabel>
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Watch it map a real goal.</h2>
+        </Reveal>
+        <ExamplePlanDemo />
       </section>
 
       {/* The real app — the legible proof, right after the plain-words setup */}

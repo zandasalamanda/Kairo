@@ -176,7 +176,7 @@ function ShotTour({
   const show = active && !reduced;
   const n = shot.beats.length;
   const idx = active ? i : 0; // an idle shot rests on its first note
-  const counter = (unit: string) => <span className={cn("mr-1.5 font-mono font-semibold text-accent/80", unit)}>{idx + 1}/{n}</span>;
+  const counter = (unit: string) => <span className={cn("ml-1.5 font-mono font-semibold text-accent/70", unit)}>{idx + 1}/{n}</span>;
 
   return (
     <figure ref={ref} className="panel-2 rounded-3xl p-2 md:p-3">
@@ -224,7 +224,7 @@ function ShotTour({
                 animation: `fade-in 0.45s ease ${GLIDE_MS}ms both`,
               }}
             >
-              {counter("text-[10px]")}{at.label}
+              {at.label}{counter("text-[10px]")}
             </span>
           </>
         )}
@@ -255,8 +255,8 @@ function ShotTour({
       ) : (
         // Mobile reads the current note here, under the image, where nothing clips.
         <p aria-hidden className={cn("px-2 pb-1 pt-3 text-center text-[13.5px] leading-relaxed text-muted sm:hidden", MARK)}>
-          {counter("text-[11px]")}
           <span key={idx} className="animate-fade-in">{shot.beats[idx].label}</span>
+          {counter("text-[11px]")}
         </p>
       )}
     </figure>

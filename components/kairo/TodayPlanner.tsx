@@ -55,6 +55,77 @@ function DiffMeter({ difficulty }: { difficulty: Difficulty }) {
   );
 }
 
+// A premium stepped slider: drag the glossy gold fill, click a tick, or use the
+// arrow keys. The two Today inputs use it, so they no longer read as two identical
+// rows of pills. Every stop's label is also a tap target, so nobody has to drag.
+function StepSlider({ ariaLabel, labels, index, onIndex }: { ariaLabel: string; labels: string[]; index: number; onIndex: (i: number) => void }) {
+  const trackRef = React.useRef<HTMLDivElement>(null);
+  const drag = React.useRef(false);
+  const count = labels.length;
+  const pct = count > 1 ? (index / (count - 1)) * 100 : 0;
+
+  const fromClientX = (clientX: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    onIndex(Math.round(frac * (count - 1)));
+  };
+
+  return (
+    <div>
+      <div
+        ref={trackRef}
+        role="slider"
+        tabIndex={0}
+        aria-label={ariaLabel}
+        aria-valuemin={0}
+        aria-valuemax={count - 1}
+        aria-valuenow={index}
+        aria-valuetext={labels[index]}
+        onPointerDown={(e) => { drag.current = true; try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* ignore */ } fromClientX(e.clientX); }}
+        onPointerMove={(e) => { if (drag.current) fromClientX(e.clientX); }}
+        onPointerUp={() => { drag.current = false; }}
+        onPointerCancel={() => { drag.current = false; }}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft" || e.key === "ArrowDown") { e.preventDefault(); onIndex(Math.max(0, index - 1)); }
+          else if (e.key === "ArrowRight" || e.key === "ArrowUp") { e.preventDefault(); onIndex(Math.min(count - 1, index + 1)); }
+          else if (e.key === "Home") { e.preventDefault(); onIndex(0); }
+          else if (e.key === "End") { e.preventDefault(); onIndex(count - 1); }
+        }}
+        className="relative h-11 cursor-pointer touch-none select-none rounded-full"
+      >
+        <div className="inset-well absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full" />
+        <div className="raised-gold absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full" style={{ width: `${pct}%`, minWidth: 12 }} />
+        {labels.map((_, k) => (
+          <span
+            key={k}
+            className="absolute top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ left: `${(k / (count - 1)) * 100}%`, background: k <= index ? "rgba(20,15,3,0.35)" : "var(--color-line-strong)" }}
+          />
+        ))}
+        <span
+          className="absolute top-1/2 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
+          style={{ left: `${pct}%`, background: "radial-gradient(circle at 35% 30%, #fff8ea, #f0d09a 60%, #d9a94f)", boxShadow: "0 1px 2px rgba(0,0,0,0.35), 0 3px 8px -2px rgba(120,84,30,0.5), inset 0 1px 0 rgba(255,255,255,0.7)" }}
+        >
+          <span className="h-2 w-2 rounded-full" style={{ background: "rgba(120,84,30,0.55)" }} />
+        </span>
+      </div>
+      <div className="mt-1.5 flex justify-between">
+        {labels.map((l, k) => (
+          <button
+            key={k}
+            onClick={() => onIndex(k)}
+            className={cn("rounded px-1 font-mono text-[11px] tabular-nums transition-colors", k === index ? "font-semibold text-accent" : "text-faint hover:text-muted")}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const round5 = (n: number) => Math.round(n / 5) * 5;
 
 /**
@@ -242,14 +313,28 @@ export function TodayPlanner({
         </>
       );
     }
+    const timeIdx = Math.max(0, TIME_OPTIONS.findIndex((t) => t.minutes === minutes));
+    const energyIdx = Math.max(0, ENERGY_OPTIONS.findIndex((e) => e.value === energy));
+    const spokenTime = (() => {
+      const m = TIME_OPTIONS[timeIdx].minutes;
+      if (m < 60) return `${m} minutes`;
+      if (m >= 360) return "6-plus hours";
+      const h = m / 60;
+      return h === 1 ? "1 hour" : `${h} hours`;
+    })();
+    const shapeByEnergy: Record<EnergyLevel, string> = {
+      low: "short, gentle steps with plenty of breaks",
+      normal: "a balanced set of focused steps",
+      high: "your hardest steps first, while you are fresh",
+    };
     return (
       <>
         {overlays}
-        <div className="mx-auto flex max-w-lg flex-col items-center pb-4 pt-1 text-center">
+        <div className="mx-auto flex max-w-md flex-col items-center pb-8 pt-1 text-center">
           <GoalCore size={72} className="mb-4" />
           <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">Plan today with Sola</h1>
           <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-muted">
-            Two quick answers and Sola builds a focused day around your goals.
+            Set your time and energy. Sola turns your goals into today&apos;s plan.
           </p>
 
           {!hasWork && (
@@ -258,51 +343,39 @@ export function TodayPlanner({
             </p>
           )}
 
-          <div className="mt-8 w-full text-left">
-            <div className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">How much time do you have?</div>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-              {TIME_OPTIONS.map((t) => (
-                <button
-                  key={t.minutes}
-                  onClick={() => setMinutes(t.minutes)}
-                  aria-pressed={minutes === t.minutes}
-                  className={cn(
-                    "rounded-xl py-3 text-[15px] font-semibold tabular-nums transition-all",
-                    minutes === t.minutes ? "raised-gold" : "panel text-muted hover:text-ink"
-                  )}
-                >
-                  {t.label}
-                </button>
-              ))}
+          {/* Time — a slider, not a row of pills, so it reads as one clear question. */}
+          <div className="mt-10 w-full text-left">
+            <div className="flex items-baseline justify-between">
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Time today</span>
+              <span className="font-display text-[26px] font-semibold tabular-nums leading-none text-ink">{TIME_OPTIONS[timeIdx].label}</span>
+            </div>
+            <div className="mt-3.5">
+              <StepSlider ariaLabel="How much time do you have today" labels={TIME_OPTIONS.map((t) => t.label)} index={timeIdx} onIndex={(i) => setMinutes(TIME_OPTIONS[i].minutes)} />
             </div>
           </div>
 
-          <div className="mt-4 w-full text-left">
-            <div className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">How&apos;s your energy?</div>
-            <div className="grid grid-cols-3 gap-2">
-              {ENERGY_OPTIONS.map((e) => (
-                <button
-                  key={e.value}
-                  onClick={() => setEnergy(e.value)}
-                  aria-pressed={energy === e.value}
-                  className={cn(
-                    "rounded-xl px-2 py-3 text-center transition-all",
-                    energy === e.value ? "raised-gold" : "panel hover:border-line-strong"
-                  )}
-                >
-                  <div className={cn("text-[15px] font-semibold", energy === e.value ? "text-[#241809]" : "text-muted")}>{e.label}</div>
-                  <div className={cn("mt-0.5 text-[11px] leading-tight", energy === e.value ? "text-[#5a4420]" : "text-faint")}>{e.hint}</div>
-                </button>
-              ))}
+          {/* Energy — a three-stop slider with a word, distinctly different from Time. */}
+          <div className="mt-9 w-full text-left">
+            <div className="flex items-baseline justify-between">
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Energy</span>
+              <span className="font-display text-[26px] font-semibold leading-none text-ink">{ENERGY_OPTIONS[energyIdx].label}</span>
+            </div>
+            <div className="mt-3.5">
+              <StepSlider ariaLabel="How is your energy today" labels={ENERGY_OPTIONS.map((e) => e.label)} index={energyIdx} onIndex={(i) => setEnergy(ENERGY_OPTIONS[i].value)} />
             </div>
           </div>
+
+          {/* Says plainly what the button will do, and updates as you slide. */}
+          <p className="mt-9 w-full rounded-2xl border border-accent/15 px-4 py-3.5 text-left text-[13.5px] leading-relaxed text-muted" style={{ background: "color-mix(in srgb, var(--color-accent) 6%, transparent)" }}>
+            Sola will map the next <span className="font-semibold text-ink">{spokenTime}</span> into {shapeByEnergy[energy]}.
+          </p>
 
           <button
             onClick={build}
             disabled={!hasWork}
-            className="raised-gold mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-[15px] font-semibold disabled:opacity-40"
+            className="raised-gold mt-7 inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-[16px] font-semibold disabled:opacity-40"
           >
-            <Sparkles size={17} /> Build my day
+            <Sparkles size={18} /> Build my day
           </button>
         </div>
       </>

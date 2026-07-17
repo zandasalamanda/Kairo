@@ -1585,8 +1585,11 @@ function GoalCluster({
         style={{ left: 0, top: 0 }}
         aria-label={goal.title}
       >
-        <span className="absolute left-1/2 top-1/2 -z-10 h-[130px] w-[130px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
-          style={{ background: light ? `${hex}14` : `${hex}3a` }} />
+        {/* Core halo. Painted as a radial-gradient, NOT filter:blur — the galaxy
+            layer sets will-change:transform, and Chrome clips a blurred child to
+            its layer bounds on repaint, which flashed a hard box around the orb. */}
+        <span className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{ background: light ? `radial-gradient(circle, ${hex}1c, ${hex}0e 40%, transparent 70%)` : `radial-gradient(circle, ${hex}4a, ${hex}22 40%, transparent 70%)` }} />
         {/* charge ring — fills and glows brighter as the goal nears the finish */}
         <svg width={coreRingBox} height={coreRingBox} className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%) rotate(-90deg)" }} aria-hidden>
           <circle cx={coreRingBox / 2} cy={coreRingBox / 2} r={coreRingR} fill="none" stroke="var(--orb-ring-track)" strokeWidth={3} />

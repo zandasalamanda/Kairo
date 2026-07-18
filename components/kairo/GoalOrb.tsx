@@ -73,23 +73,31 @@ export function GoalOrb({ className }: { className?: string }) {
           </div>
         </div>
 
-        {/* the central goal orb — faces you at z 0, so it hides the comet on the back pass */}
+        {/* the central goal orb — faces you at z 0, so it hides the comet on the back pass.
+            Shaded like a real sphere: bright specular near the top-left, gold body, dark
+            edge, with an inner shadow on the far side and an inner highlight on the lit side. */}
         <div style={{ ...cell, transformStyle: "preserve-3d" }}>
           <div
-            className="grid place-items-center rounded-full"
+            className="relative grid place-items-center rounded-full"
             style={{
-              width: 68, height: 68,
-              background: "radial-gradient(circle at 36% 30%, #fdf3e0 0%, #e6b877 46%, #7c5c30 100%)",
-              boxShadow: "inset 0 2px 8px rgba(255,255,255,0.5), 0 0 30px rgba(230,184,119,0.26)",
+              width: 72, height: 72,
+              background: "radial-gradient(circle at 33% 27%, #fff7e8 0%, #f2d79f 20%, #e6b877 50%, #bb8949 76%, #6d4e27 100%)",
+              boxShadow:
+                "inset -7px -9px 18px rgba(74,50,18,0.6), inset 5px 6px 12px rgba(255,255,255,0.55), 0 7px 20px -4px rgba(70,46,16,0.5), 0 0 34px rgba(230,184,119,0.26)",
               animation: reduce ? undefined : "breathe 7s ease-in-out infinite",
             }}
           >
+            {/* specular highlight */}
+            <span
+              className="pointer-events-none absolute rounded-full"
+              style={{ width: 22, height: 15, left: "22%", top: "18%", background: "radial-gradient(circle, rgba(255,255,255,0.85), rgba(255,255,255,0) 68%)" }}
+            />
             {React.createElement(goalIcon(ICON_KEYS[ic]), {
               key: ic,
-              size: 28,
+              size: 27,
               strokeWidth: 1.7,
-              className: "animate-fade-in",
-              style: { color: "#ffffff", opacity: 0.85, filter: "drop-shadow(0 1px 2px rgba(50,34,8,0.5))" },
+              className: "animate-fade-in relative",
+              style: { color: "#ffffff", opacity: 0.82, filter: "drop-shadow(0 1px 2px rgba(50,34,8,0.55))" },
             })}
           </div>
         </div>
